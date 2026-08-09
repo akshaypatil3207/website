@@ -474,7 +474,7 @@
 
     let allVideos = [];
 
-    // Safe Base64-encoded SVG fallback image (prevents HTML string quote breaking)
+    // Fallback SVG if no thumbnail is available
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>');
 
 
@@ -534,19 +534,19 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. CSV TEXT PARSER (FLEXIBLE HEADER MATCHING)
+       4. ACCURATE CSV PARSER (PRESERVES BLANK CELLS)
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
+      const lines = csvText.trim().split(/\r?\n/);
       if (lines.length < 2) return [];
 
-      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      const rawHeaders = parseCSVLine(lines[0]);
       const results = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$)/g) || [];
-        if (values.length === 0) continue;
+        if (!lines[i].trim()) continue;
+        const values = parseCSVLine(lines[i]);
 
         const row = {};
         rawHeaders.forEach((header, index) => {
@@ -568,6 +568,26 @@
       }
 
       return results;
+    }
+
+    // Line parser that preserves empty comma slots (,,)
+    function parseCSVLine(text) {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+          result.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      result.push(cur);
+      return result;
     }
 
 
@@ -622,7 +642,7 @@
         const youtubeId = extractYouTubeID(video.VideoURL);
         let thumbUrl = formatCustomThumbnail(video.ThumbnailURL);
 
-        // Auto-generate thumbnail if missing
+        // Auto-generate YouTube thumbnail if ThumbnailURL is empty
         if (!thumbUrl && youtubeId) {
           thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
         } else if (!thumbUrl) {
@@ -661,7 +681,6 @@
       if (!url) return '';
       let clean = url.trim();
 
-      // Convert Google Drive share link to direct image link
       if (clean.includes('drive.google.com')) {
         const match = clean.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
@@ -763,6 +782,5 @@
     */
     window.addEventListener('DOMContentLoaded', loadVideos);
 
-  </script>
-</body>
+  </script></body>
 </html>
