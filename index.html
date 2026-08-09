@@ -398,8 +398,8 @@
   <!-- ==========================================================================
        JAVASCRIPT: LOGIC & GOOGLE SHEET FETCHING
        ========================================================================== -->
-  <script>
-    // 1. REPLACE THIS URL WITH YOUR PUBLISHED GOOGLE SHEET CSV LINK
+<script>
+    // 1. YOUR PUBLISHED GOOGLE SHEET CSV LINK
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTluqmzTR4sguXw7Wyr3x6lEFmrLvmJ2zcRDLTXxtFal4p1M1BfoDAxXFb3dZU5uZVDp7F9W4AIIk44/pub?output=csv';
 
     let allVideos = []; // Stores all video data parsed from Google Sheets
@@ -424,7 +424,8 @@
     async function loadVideos() {
       const grid = document.getElementById('video-grid');
 
-      if (GOOGLE_SHEET_CSV_URL === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTluqmzTR4sguXw7Wyr3x6lEFmrLvmJ2zcRDLTXxtFal4p1M1BfoDAxXFb3dZU5uZVDp7F9W4AIIk44/pub?output=csv') {
+      // Check if URL is missing or still using default placeholder
+      if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
         grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> in the HTML code with your published Google Sheet CSV link.</div>`;
         return;
       }
@@ -437,7 +438,7 @@
         allVideos = parseCSV(csvData);
 
         if (allVideos.length === 0) {
-          grid.innerHTML = `<div class="status-msg">No videos found in your spreadsheet.</div>`;
+          grid.innerHTML = `<div class="status-msg">No videos found in your spreadsheet. Make sure Row 1 has headers: Title, VideoURL, Category, ThumbnailURL, Description</div>`;
           return;
         }
 
