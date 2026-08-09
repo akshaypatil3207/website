@@ -474,6 +474,9 @@
 
     let allVideos = [];
 
+    // Safe Base64-encoded SVG fallback image (prevents HTML string quote breaking)
+    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>');
+
 
 
 
@@ -531,14 +534,13 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. CSV TEXT PARSER (CASE-INSENSITIVE & CLEAN TRIMMING)
+       4. CSV TEXT PARSER (FLEXIBLE HEADER MATCHING)
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
       const lines = csvText.trim().split('\n');
       if (lines.length < 2) return [];
 
-      // Extract and clean headers from Row 1
       const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
       const results = [];
 
@@ -551,13 +553,13 @@
           let val = values[index] ? values[index].trim() : '';
           val = val.replace(/^"|"$/g, '').replace(/""/g, '"').trim();
           
-          // Case-insensitive key mapping
-          const lowerHeader = header.toLowerCase().replace(/\s+/g, '');
-          if (lowerHeader === 'title') row.Title = val;
-          if (lowerHeader === 'videourl') row.VideoURL = val;
-          if (lowerHeader === 'category') row.Category = val;
-          if (lowerHeader === 'thumbnailurl') row.ThumbnailURL = val;
-          if (lowerHeader === 'description') row.Description = val;
+          const cleanHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
+          
+          if (['title'].includes(cleanHeader)) row.Title = val;
+          if (['videourl', 'video', 'link', 'url'].includes(cleanHeader)) row.VideoURL = val;
+          if (['category', 'cat'].includes(cleanHeader)) row.Category = val;
+          if (['thumbnailurl', 'thumbnail', 'thumb', 'image', 'img'].includes(cleanHeader)) row.ThumbnailURL = val;
+          if (['description', 'desc'].includes(cleanHeader)) row.Description = val;
         });
 
         if (row.Title && row.VideoURL) {
@@ -616,17 +618,15 @@
         return;
       }
 
-      // Built-in inline SVG placeholder if no image exists
-      const fallbackSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="%23141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2300f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>';
-
       videos.forEach(video => {
         const youtubeId = extractYouTubeID(video.VideoURL);
+        let thumbUrl = formatCustomThumbnail(video.ThumbnailURL);
 
-        let thumbUrl = video.ThumbnailURL ? video.ThumbnailURL.trim() : '';
+        // Auto-generate thumbnail if missing
         if (!thumbUrl && youtubeId) {
-          thumbUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+          thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
         } else if (!thumbUrl) {
-          thumbUrl = fallbackSVG;
+          thumbUrl = FALLBACK_SVG;
         }
 
         const card = document.createElement('div');
@@ -635,7 +635,7 @@
 
         card.innerHTML = `
           <div class="thumbnail-wrapper">
-            <img src="${thumbUrl}" alt="${video.Title}" loading="lazy" onerror="this.src='${fallbackSVG}'">
+            <img src="${thumbUrl}" alt="${video.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
             <div class="play-icon"></div>
           </div>
           <div class="video-info">
@@ -654,7 +654,29 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. CATEGORY FILTERING LOGIC
+       7. HELPER: FORMAT CUSTOM THUMBNAIL URLS
+       --------------------------------------------------------------------------
+    */
+    function formatCustomThumbnail(url) {
+      if (!url) return '';
+      let clean = url.trim();
+
+      // Convert Google Drive share link to direct image link
+      if (clean.includes('drive.google.com')) {
+        const match = clean.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+          return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+      }
+      return clean;
+    }
+
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       8. CATEGORY FILTERING LOGIC
        --------------------------------------------------------------------------
     */
     function filterCategory(category, btnElement) {
@@ -676,7 +698,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. POPUP LIGHTBOX PLAYER MODAL (AUTO-HANDLES ONEDRIVE LINKS)
+       9. POPUP LIGHTBOX PLAYER MODAL
        --------------------------------------------------------------------------
     */
     function openModal(videoUrl, youtubeId) {
@@ -686,7 +708,6 @@
       let finalUrl = videoUrl.trim();
 
       if (youtubeId) {
-        // Embed YouTube
         container.innerHTML = `
           <iframe 
             src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
@@ -694,12 +715,10 @@
             allowfullscreen>
           </iframe>`;
       } else {
-        // Auto-convert OneDrive Embed link to Download link if necessary
         if (finalUrl.includes('onedrive.live.com/embed')) {
           finalUrl = finalUrl.replace('/embed', '/download');
         }
 
-        // Embed HTML5 Video for MP4 / OneDrive streams
         container.innerHTML = `
           <video controls autoplay style="width:100%; height:100%;">
             <source src="${finalUrl}" type="video/mp4">
@@ -715,7 +734,7 @@
       const container = document.getElementById('player-container');
 
       modal.classList.remove('active');
-      container.innerHTML = ''; // Stop video playback
+      container.innerHTML = '';
     }
 
 
@@ -723,7 +742,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       9. IMPROVED YOUTUBE LINK PARSER (SUPPORTS SHORTS & MOBILE LINKS)
+       10. YOUTUBE LINK PARSER
        --------------------------------------------------------------------------
     */
     function extractYouTubeID(url) {
@@ -739,10 +758,11 @@
 
     /* 
        --------------------------------------------------------------------------
-       10. INITIALIZATION
+       11. INITIALIZATION
        --------------------------------------------------------------------------
     */
     window.addEventListener('DOMContentLoaded', loadVideos);
 
-  </script></body>
+  </script>
+</body>
 </html>
