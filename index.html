@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Personal Showcase</title>
+  <title>My Personal Website</title>
 
   <style>
+
     /* ==========================================================================
-       1. COLOR PALETTE & GLOBAL VARIABLES
+       SECTION 1: COLOR PALETTE & GLOBAL STYLES
        ========================================================================== */
+
     :root {
-      --bg-main: #0a0a12;       /* 95% Dark background */
-      --card-bg: #141322;       /* Dark purplish container surface */
-      --card-hover: #1f1d36;    /* Lighter purplish for hover states */
-      --accent-cyan: #00f3ff;   /* Neon fluorescent cyan */
+      /* Background colors */
+      --bg-main: #0a0a12;          /* 95% Dark background */
+      --card-bg: #141322;          /* Dark purplish container surface */
+      --card-hover: #1f1d36;       /* Elevated purple for hover states */
+
+      /* Text & Accent colors */
+      --accent-cyan: #00f3ff;      /* Bright fluorescent cyan */
       --accent-glow: rgba(0, 243, 255, 0.35); /* Neon glow effect */
-      --text-white: #ffffff;    /* Primary font color */
-      --text-muted: #a0a0c0;    /* Secondary font color */
-      --border-color: #272545; /* Subtle card borders */
+      --text-white: #ffffff;       /* Pure white heading text */
+      --text-muted: #a0a0c0;       /* Muted ice blue secondary text */
+      --border-color: #272545;    /* Subtle dark border */
     }
 
     * {
@@ -35,22 +40,27 @@
       flex-direction: column;
     }
 
+
+
+
     /* ==========================================================================
-       2. TOP NAVIGATION BAR (SPA Sections: Videos, Photos, Status)
+       SECTION 2: HEADER & NAVIGATION TABS (SPA NAVBAR)
        ========================================================================== */
+
     header {
-      background: rgba(20, 19, 34, 0.85);
-      backdrop-filter: blur(10px); /* Blur effect when scrolling */
+      background: rgba(20, 19, 34, 0.9);
+      backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
       z-index: 100;
       border-bottom: 1px solid var(--border-color);
-      padding: 15px 30px;
+      padding: 18px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
+    /* Site Title / Logo */
     .brand-title {
       font-size: 1.5rem;
       font-weight: 700;
@@ -59,10 +69,10 @@
     }
 
     .brand-title span {
-      color: var(--accent-cyan);
+      color: var(--accent-cyan); /* Highlight word in neon cyan */
     }
 
-    /* Main Section Tabs */
+    /* Main Section Buttons (Videos, Photos, Status) */
     .nav-tabs {
       display: flex;
       gap: 15px;
@@ -73,7 +83,7 @@
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-muted);
-      padding: 8px 18px;
+      padding: 8px 20px;
       font-size: 0.95rem;
       font-weight: 600;
       border-radius: 20px;
@@ -92,9 +102,13 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
+
+
+
     /* ==========================================================================
-       3. MAIN CONTAINER & SECTION SWITCHING
+       SECTION 3: PAGE LAYOUT & TRANSITION EFFECTS
        ========================================================================== */
+
     main {
       flex: 1;
       padding: 30px;
@@ -103,8 +117,9 @@
       width: 100%;
     }
 
+    /* Controls page visibility (SPA) */
     .page-section {
-      display: none; /* Controlled by JavaScript to show active section */
+      display: none; /* Hidden by default; JavaScript shows active section */
       animation: fadeIn 0.4s ease-in-out;
     }
 
@@ -112,44 +127,61 @@
       display: block;
     }
 
+    /* Smooth Fade-in animation when switching tabs */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { 
+        opacity: 0; 
+        transform: translateY(12px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
     }
 
+
+
+
     /* ==========================================================================
-       4. VIDEOS PAGE: CATEGORY FILTER TABS
+       SECTION 4: VIDEOS PAGE - DYNAMIC CATEGORY FILTER BUTTONS
        ========================================================================== */
+
     .category-filter {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 30px;
       padding-bottom: 15px;
       border-bottom: 1px solid var(--border-color);
+      min-height: 45px;
     }
 
     .cat-btn {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       color: var(--text-white);
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 8px;
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.3s ease;
     }
 
-    .cat-btn:hover, .cat-btn.active {
+    .cat-btn:hover, 
+    .cat-btn.active {
       background: var(--accent-cyan);
-      color: #000000; /* Black text on neon background for high contrast */
+      color: #000000; /* Black font on bright background for high contrast */
       font-weight: bold;
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
+
+
+
     /* ==========================================================================
-       5. VIDEO CARDS GRID (YOUTUBE STYLE)
+       SECTION 5: VIDEOS PAGE - YOUTUBE STYLE GRID & CARDS
        ========================================================================== */
+
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -168,17 +200,17 @@
     }
 
     .video-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-6px);
       border-color: var(--accent-cyan);
-      box-shadow: 0 8px 20px var(--accent-glow);
+      box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Thumbnail Area */
+    /* 16:9 Thumbnail Container */
     .thumbnail-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 56.25%; /* 16:9 Aspect Ratio */
-      background-color: #000;
+      padding-top: 56.25%; /* Maintains 16:9 aspect ratio */
+      background-color: #000000;
     }
 
     .thumbnail-wrapper img {
@@ -190,14 +222,14 @@
       object-fit: cover;
     }
 
-    /* Play Button Overlay on Hover */
+    /* Play Button Hover Icon */
     .play-icon {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.8);
-      width: 50px;
-      height: 50px;
+      width: 52px;
+      height: 52px;
       background: rgba(0, 243, 255, 0.9);
       border-radius: 50%;
       display: flex;
@@ -211,7 +243,7 @@
       content: '';
       border-style: solid;
       border-width: 8px 0 8px 14px;
-      border-color: transparent transparent transparent #000;
+      border-color: transparent transparent transparent #000000;
       margin-left: 3px;
     }
 
@@ -220,20 +252,13 @@
       transform: translate(-50%, -50%) scale(1);
     }
 
-    /* Card Text Details */
+    /* Video Text Details Inside Card */
     .video-info {
       padding: 15px;
       display: flex;
       flex-direction: column;
       gap: 8px;
       flex: 1;
-    }
-
-    .video-title {
-      font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.3;
-      color: var(--text-white);
     }
 
     .video-category-tag {
@@ -244,37 +269,49 @@
       padding: 3px 8px;
       border-radius: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .video-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-white);
     }
 
     .video-desc {
       font-size: 0.85rem;
       color: var(--text-muted);
       display: -webkit-box;
-      -webkit-line-clamp: 2; /* Truncate after 2 lines */
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
 
-    /* Status Message for Loading or Errors */
+    /* Loading or Error Messages */
     .status-msg {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 50px;
+      padding: 60px 20px;
       color: var(--text-muted);
       font-size: 1.1rem;
+      line-height: 1.6;
     }
 
+
+
+
     /* ==========================================================================
-       6. LIGHTBOX VIDEO PLAYER MODAL (PAUSE/PLAY/FULLSCREEN SUPPORT)
+       SECTION 6: POPUP LIGHTBOX PLAYER (MODAL)
        ========================================================================== */
+
     .video-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.92);
       backdrop-filter: blur(8px);
       display: none;
       justify-content: center;
@@ -289,19 +326,19 @@
     .modal-content {
       position: relative;
       width: 90%;
-      max-width: 900px;
+      max-width: 950px;
       background: var(--card-bg);
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--accent-cyan);
-      box-shadow: 0 0 30px var(--accent-glow);
+      box-shadow: 0 0 35px var(--accent-glow);
     }
 
     .player-container {
       position: relative;
-      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      padding-top: 56.25%; /* 16:9 ratio for embedded player */
       width: 100%;
-      background: #000;
+      background: #000000;
     }
 
     .player-container iframe,
@@ -319,7 +356,7 @@
       top: 10px;
       right: 15px;
       color: var(--text-white);
-      font-size: 2rem;
+      font-size: 2.2rem;
       cursor: pointer;
       z-index: 1010;
       line-height: 1;
@@ -329,156 +366,255 @@
     .close-modal-btn:hover {
       color: var(--accent-cyan);
     }
+
   </style>
 </head>
 <body>
 
   <!-- ==========================================================================
-       MAIN TOP NAVIGATION (SPA HEADER)
+       HTML SECTION 1: HEADER & NAVIGATION TABS
        ========================================================================== -->
+
   <header>
-    <div class="brand-title">MY<span>HUB</span></div>
+    <div class="brand-title">MY<span>SHOWCASE</span></div>
+    
+    <!-- Top Navigation Buttons -->
     <ul class="nav-tabs">
-      <li><button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button></li>
-      <li><button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button></li>
-      <li><button class="nav-btn" onclick="switchSection('status-section', this)">Status</button></li>
+      <li>
+        <button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('status-section', this)">Status</button>
+      </li>
     </ul>
   </header>
 
+
+
+
+  <!-- ==========================================================================
+       HTML SECTION 2: MAIN CONTENT CONTAINER
+       ========================================================================== -->
+
   <main>
-    <!-- ==========================================================================
-         SECTION 1: VIDEOS PAGE
-         ========================================================================== -->
+
+    <!-- ------------------------------------------------------------------------
+         PAGE 1: VIDEOS SECTION
+         ------------------------------------------------------------------------ -->
     <section id="videos-section" class="page-section active">
       
-      <!-- Category Filter Buttons -->
-      <div class="category-filter">
-        <button class="cat-btn active" onclick="filterCategory('All', this)">All</button>
-        <button class="cat-btn" onclick="filterCategory('Politics', this)">Politics</button>
-        <button class="cat-btn" onclick="filterCategory('Sprituality', this)">Spirituality</button>
-        <button class="cat-btn" onclick="filterCategory('Environment', this)">Environment</button>
-        <button class="cat-btn" onclick="filterCategory('Self Help', this)">Self Help</button>
-      </div>
+      <!-- Dynamic category tabs will be automatically created here by JS -->
+      <div id="category-filter" class="category-filter"></div>
 
-      <!-- Video Grid where cards are appended dynamically -->
+      <!-- Video cards will be dynamically injected here -->
       <div id="video-grid" class="video-grid">
         <div class="status-msg">Loading videos from Google Sheet...</div>
       </div>
+
     </section>
 
-    <!-- ==========================================================================
-         SECTION 2: PHOTOS PLACEHOLDER (FOR FUTURE MODULE)
-         ========================================================================== -->
+
+
+
+    <!-- ------------------------------------------------------------------------
+         PAGE 2: PHOTOS SECTION (PLACEHOLDER FOR FUTURE MODULE)
+         ------------------------------------------------------------------------ -->
     <section id="photos-section" class="page-section">
-      <h2 style="color: var(--accent-cyan);">Photos Gallery</h2>
-      <p style="color: var(--text-muted); margin-top: 10px;">Photos module will be constructed next!</p>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
+      <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
     </section>
 
-    <!-- ==========================================================================
-         SECTION 3: STATUS PLACEHOLDER (FOR FUTURE MODULE)
-         ========================================================================== -->
+
+
+
+    <!-- ------------------------------------------------------------------------
+         PAGE 3: STATUS SECTION (PLACEHOLDER FOR FUTURE MODULE)
+         ------------------------------------------------------------------------ -->
     <section id="status-section" class="page-section">
-      <h2 style="color: var(--accent-cyan);">Status & Updates</h2>
-      <p style="color: var(--text-muted); margin-top: 10px;">Status module will be constructed after Photos!</p>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Status Updates</h2>
+      <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
     </section>
+
   </main>
 
+
+
+
   <!-- ==========================================================================
-       POPUP VIDEO PLAYER MODAL
+       HTML SECTION 3: POPUP VIDEO PLAYER MODAL
        ========================================================================== -->
+
   <div id="video-modal" class="video-modal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
       <div id="player-container" class="player-container">
-        <!-- Player iframe/video element dynamically injected here -->
+        <!-- Iframe or HTML5 Video injected dynamically when card is clicked -->
       </div>
     </div>
   </div>
 
+
+
+
   <!-- ==========================================================================
-       JAVASCRIPT: LOGIC & GOOGLE SHEET FETCHING
+       JAVASCRIPT SECTION: BACKEND LOGIC & DYNAMIC RENDERING
        ========================================================================== -->
-<script>
-    // 1. YOUR PUBLISHED GOOGLE SHEET CSV LINK
+
+  <script>
+
+    /* 
+       --------------------------------------------------------------------------
+       1. GOOGLE SHEET CONFIGURATION
+       --------------------------------------------------------------------------
+       Paste your published Google Sheet CSV link below inside the quotes.
+    */
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTluqmzTR4sguXw7Wyr3x6lEFmrLvmJ2zcRDLTXxtFal4p1M1BfoDAxXFb3dZU5uZVDp7F9W4AIIk44/pub?output=csv';
 
-    let allVideos = []; // Stores all video data parsed from Google Sheets
+    // Global array to store parsed video objects
+    let allVideos = [];
 
-    // --------------------------------------------------------------------------
-    // SPA NAVIGATION SWITCHER
-    // --------------------------------------------------------------------------
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       2. SPA SECTION NAVIGATION (Videos / Photos / Status)
+       --------------------------------------------------------------------------
+    */
     function switchSection(sectionId, btnElement) {
-      // Hide all sections
+      // Hide all page sections
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      // Remove active class from header buttons
+
+      // Remove active highlight from all header buttons
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 
-      // Show selected section
+      // Show the selected section and highlight its button
       document.getElementById(sectionId).classList.add('active');
       btnElement.classList.add('active');
     }
 
-    // --------------------------------------------------------------------------
-    // FETCH AND PARSE GOOGLE SHEETS CSV DATA
-    // --------------------------------------------------------------------------
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       3. FETCH CSV DATA FROM GOOGLE SHEETS
+       --------------------------------------------------------------------------
+    */
     async function loadVideos() {
       const grid = document.getElementById('video-grid');
 
-      // Check if URL is missing or still using default placeholder
+      // Validation check to make sure placeholder text was replaced
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
-        grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> in the HTML code with your published Google Sheet CSV link.</div>`;
+        grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> in the code with your published Google Sheet CSV link.</div>`;
         return;
       }
 
       try {
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        const csvData = await response.text();
+        const csvText = await response.text();
 
-        // Convert raw CSV text into array of objects
-        allVideos = parseCSV(csvData);
+        // Convert raw text into structured JSON array
+        allVideos = parseCSV(csvText);
 
         if (allVideos.length === 0) {
-          grid.innerHTML = `<div class="status-msg">No videos found in your spreadsheet. Make sure Row 1 has headers: Title, VideoURL, Category, ThumbnailURL, Description</div>`;
+          grid.innerHTML = `<div class="status-msg">No videos found in your spreadsheet.<br>Verify Row 1 headers: <b>Title, VideoURL, Category, ThumbnailURL, Description</b></div>`;
           return;
         }
 
+        // Generate category buttons dynamically from backend values
+        renderCategoryButtons();
+
+        // Render all video cards into the grid
         renderVideoCards(allVideos);
+
       } catch (err) {
-        console.error('Error fetching CSV:', err);
-        grid.innerHTML = `<div class="status-msg">Error loading videos. Verify your Google Sheet is Published to Web as CSV.</div>`;
+        console.error('Fetch error:', err);
+        grid.innerHTML = `<div class="status-msg">Error loading videos from Google Sheets.<br>Verify your sheet is Published to Web as CSV.</div>`;
       }
     }
 
-    // Helper: Parses CSV text into array of JSON objects handling quoted fields
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       4. CSV TEXT PARSER
+       --------------------------------------------------------------------------
+    */
     function parseCSV(csvText) {
       const lines = csvText.trim().split('\n');
       if (lines.length < 2) return [];
 
+      // Extract column headers from Row 1
       const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
       const results = [];
 
       for (let i = 1; i < lines.length; i++) {
-        // Regex handles values that contain commas wrapped in quotes
+        // Regex handles comma separated values wrapped inside quotes
         const values = lines[i].match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$)/g) || [];
         if (values.length === 0) continue;
 
         const row = {};
         headers.forEach((header, index) => {
           let val = values[index] ? values[index].trim() : '';
-          val = val.replace(/^"|"$/g, '').replace(/""/g, '"'); // Clean double quotes
+          val = val.replace(/^"|"$/g, '').replace(/""/g, '"'); // Remove quotes
           row[header] = val;
         });
 
+        // Only add rows that have at least a Title and a VideoURL
         if (row.Title && row.VideoURL) {
           results.push(row);
         }
       }
+
       return results;
     }
 
-    // --------------------------------------------------------------------------
-    // RENDER VIDEO CARDS
-    // --------------------------------------------------------------------------
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       5. DYNAMIC CATEGORY BUTTON GENERATOR
+       --------------------------------------------------------------------------
+    */
+    function renderCategoryButtons() {
+      const filterContainer = document.getElementById('category-filter');
+
+      // Extract unique categories from the video list
+      const uniqueCategories = [
+        'All',
+        ...new Set(
+          allVideos
+            .map(video => video.Category ? video.Category.trim() : '')
+            .filter(cat => cat !== '')
+        )
+      ];
+
+      filterContainer.innerHTML = ''; // Clear container
+
+      // Build a filter button for each category found in the backend
+      uniqueCategories.forEach((category, index) => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${index === 0 ? 'active' : ''}`; // 'All' is active by default
+        btn.textContent = category;
+        btn.onclick = (e) => filterCategory(category, e.target);
+        filterContainer.appendChild(btn);
+      });
+    }
+
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       6. RENDER VIDEO CARDS IN THE GRID
+       --------------------------------------------------------------------------
+    */
     function renderVideoCards(videos) {
       const grid = document.getElementById('video-grid');
       grid.innerHTML = '';
@@ -490,8 +626,8 @@
 
       videos.forEach(video => {
         const youtubeId = extractYouTubeID(video.VideoURL);
-        
-        // Auto-generate YouTube thumbnail if custom ThumbnailURL is blank
+
+        // Determine thumbnail: Custom URL > Auto YouTube HQ Thumbnail > Placeholder
         let thumbUrl = video.ThumbnailURL;
         if (!thumbUrl && youtubeId) {
           thumbUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
@@ -519,21 +655,20 @@
       });
     }
 
-    // Helper: Extract YouTube ID from multiple link formats
-    function extractYouTubeID(url) {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
 
-    // --------------------------------------------------------------------------
-    // CATEGORY FILTERING LOGIC
-    // --------------------------------------------------------------------------
+
+
+    /* 
+       --------------------------------------------------------------------------
+       7. CATEGORY FILTERING LOGIC
+       --------------------------------------------------------------------------
+    */
     function filterCategory(category, btnElement) {
+      // Update active button state
       document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
 
+      // Filter array and re-render grid
       if (category === 'All') {
         renderVideoCards(allVideos);
       } else {
@@ -544,15 +679,20 @@
       }
     }
 
-    // --------------------------------------------------------------------------
-    // POPUP MODAL PLAYER (PAUSE/PLAY/FULLSCREEN)
-    // --------------------------------------------------------------------------
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       8. POPUP LIGHTBOX PLAYER MODAL (OPEN / CLOSE)
+       --------------------------------------------------------------------------
+    */
     function openModal(videoUrl, youtubeId) {
       const modal = document.getElementById('video-modal');
       const container = document.getElementById('player-container');
 
       if (youtubeId) {
-        // Render YouTube Embed
+        // Embed YouTube player
         container.innerHTML = `
           <iframe 
             src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
@@ -560,11 +700,11 @@
             allowfullscreen>
           </iframe>`;
       } else {
-        // Render HTML5 Video for Direct MP4 / OneDrive Links
+        // Embed standard HTML5 video player for MP4 / OneDrive direct streams
         container.innerHTML = `
           <video controls autoplay name="media">
             <source src="${videoUrl}" type="video/mp4">
-            Your browser does not support the video tag.
+            Your browser does not support playing this video.
           </video>`;
       }
 
@@ -574,13 +714,36 @@
     function closeModal() {
       const modal = document.getElementById('video-modal');
       const container = document.getElementById('player-container');
-      
+
       modal.classList.remove('active');
-      container.innerHTML = ''; // Destroy video player to stop audio
+      container.innerHTML = ''; // Clear container to stop audio/video playback immediately
     }
 
-    // Load data on page load
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       9. HELPER: YOUTUBE LINK PARSER
+       --------------------------------------------------------------------------
+    */
+    function extractYouTubeID(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       10. INITIALIZATION ON PAGE LOAD
+       --------------------------------------------------------------------------
+    */
     window.addEventListener('DOMContentLoaded', loadVideos);
+
   </script>
 </body>
 </html>
