@@ -463,17 +463,15 @@
        JAVASCRIPT SECTION: BACKEND LOGIC & DYNAMIC RENDERING
        ========================================================================== -->
 
-  <script>
+ <script>
 
     /* 
        --------------------------------------------------------------------------
        1. GOOGLE SHEET CONFIGURATION
        --------------------------------------------------------------------------
-       Paste your published Google Sheet CSV link below inside the quotes.
     */
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTluqmzTR4sguXw7Wyr3x6lEFmrLvmJ2zcRDLTXxtFal4p1M1BfoDAxXFb3dZU5uZVDp7F9W4AIIk44/pub?output=csv';
 
-    // Global array to store parsed video objects
     let allVideos = [];
 
 
@@ -481,17 +479,13 @@
 
     /* 
        --------------------------------------------------------------------------
-       2. SPA SECTION NAVIGATION (Videos / Photos / Status)
+       2. SPA SECTION NAVIGATION
        --------------------------------------------------------------------------
     */
     function switchSection(sectionId, btnElement) {
-      // Hide all page sections
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-
-      // Remove active highlight from all header buttons
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 
-      // Show the selected section and highlight its button
       document.getElementById(sectionId).classList.add('active');
       btnElement.classList.add('active');
     }
@@ -507,9 +501,8 @@
     async function loadVideos() {
       const grid = document.getElementById('video-grid');
 
-      // Validation check to make sure placeholder text was replaced
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
-        grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> in the code with your published Google Sheet CSV link.</div>`;
+        grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
         return;
       }
 
@@ -517,18 +510,14 @@
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
         const csvText = await response.text();
 
-        // Convert raw text into structured JSON array
         allVideos = parseCSV(csvText);
 
         if (allVideos.length === 0) {
-          grid.innerHTML = `<div class="status-msg">No videos found in your spreadsheet.<br>Verify Row 1 headers: <b>Title, VideoURL, Category, ThumbnailURL, Description</b></div>`;
+          grid.innerHTML = `<div class="status-msg">No videos found. Check that Row 1 has headers: <b>Title, VideoURL, Category, ThumbnailURL, Description</b></div>`;
           return;
         }
 
-        // Generate category buttons dynamically from backend values
         renderCategoryButtons();
-
-        // Render all video cards into the grid
         renderVideoCards(allVideos);
 
       } catch (err) {
@@ -542,30 +531,35 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. CSV TEXT PARSER
+       4. CSV TEXT PARSER (CASE-INSENSITIVE & CLEAN TRIMMING)
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
       const lines = csvText.trim().split('\n');
       if (lines.length < 2) return [];
 
-      // Extract column headers from Row 1
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      // Extract and clean headers from Row 1
+      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
       const results = [];
 
       for (let i = 1; i < lines.length; i++) {
-        // Regex handles comma separated values wrapped inside quotes
         const values = lines[i].match(/(".*?"|[^",\r\n]+)(?=\s*,|\s*$)/g) || [];
         if (values.length === 0) continue;
 
         const row = {};
-        headers.forEach((header, index) => {
+        rawHeaders.forEach((header, index) => {
           let val = values[index] ? values[index].trim() : '';
-          val = val.replace(/^"|"$/g, '').replace(/""/g, '"'); // Remove quotes
-          row[header] = val;
+          val = val.replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+          
+          // Case-insensitive key mapping
+          const lowerHeader = header.toLowerCase().replace(/\s+/g, '');
+          if (lowerHeader === 'title') row.Title = val;
+          if (lowerHeader === 'videourl') row.VideoURL = val;
+          if (lowerHeader === 'category') row.Category = val;
+          if (lowerHeader === 'thumbnailurl') row.ThumbnailURL = val;
+          if (lowerHeader === 'description') row.Description = val;
         });
 
-        // Only add rows that have at least a Title and a VideoURL
         if (row.Title && row.VideoURL) {
           results.push(row);
         }
@@ -585,7 +579,6 @@
     function renderCategoryButtons() {
       const filterContainer = document.getElementById('category-filter');
 
-      // Extract unique categories from the video list
       const uniqueCategories = [
         'All',
         ...new Set(
@@ -595,12 +588,11 @@
         )
       ];
 
-      filterContainer.innerHTML = ''; // Clear container
+      filterContainer.innerHTML = '';
 
-      // Build a filter button for each category found in the backend
       uniqueCategories.forEach((category, index) => {
         const btn = document.createElement('button');
-        btn.className = `cat-btn ${index === 0 ? 'active' : ''}`; // 'All' is active by default
+        btn.className = `cat-btn ${index === 0 ? 'active' : ''}`;
         btn.textContent = category;
         btn.onclick = (e) => filterCategory(category, e.target);
         filterContainer.appendChild(btn);
@@ -612,7 +604,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       6. RENDER VIDEO CARDS IN THE GRID
+       6. RENDER VIDEO CARDS
        --------------------------------------------------------------------------
     */
     function renderVideoCards(videos) {
@@ -624,15 +616,17 @@
         return;
       }
 
+      // Built-in inline SVG placeholder if no image exists
+      const fallbackSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="%23141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2300f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>';
+
       videos.forEach(video => {
         const youtubeId = extractYouTubeID(video.VideoURL);
 
-        // Determine thumbnail: Custom URL > Auto YouTube HQ Thumbnail > Placeholder
-        let thumbUrl = video.ThumbnailURL;
+        let thumbUrl = video.ThumbnailURL ? video.ThumbnailURL.trim() : '';
         if (!thumbUrl && youtubeId) {
           thumbUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
         } else if (!thumbUrl) {
-          thumbUrl = 'https://via.placeholder.com/400x225/141322/00f3ff?text=No+Thumbnail';
+          thumbUrl = fallbackSVG;
         }
 
         const card = document.createElement('div');
@@ -641,7 +635,7 @@
 
         card.innerHTML = `
           <div class="thumbnail-wrapper">
-            <img src="${thumbUrl}" alt="${video.Title}" loading="lazy">
+            <img src="${thumbUrl}" alt="${video.Title}" loading="lazy" onerror="this.src='${fallbackSVG}'">
             <div class="play-icon"></div>
           </div>
           <div class="video-info">
@@ -664,11 +658,9 @@
        --------------------------------------------------------------------------
     */
     function filterCategory(category, btnElement) {
-      // Update active button state
       document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
 
-      // Filter array and re-render grid
       if (category === 'All') {
         renderVideoCards(allVideos);
       } else {
@@ -684,15 +676,17 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. POPUP LIGHTBOX PLAYER MODAL (OPEN / CLOSE)
+       8. POPUP LIGHTBOX PLAYER MODAL (AUTO-HANDLES ONEDRIVE LINKS)
        --------------------------------------------------------------------------
     */
     function openModal(videoUrl, youtubeId) {
       const modal = document.getElementById('video-modal');
       const container = document.getElementById('player-container');
 
+      let finalUrl = videoUrl.trim();
+
       if (youtubeId) {
-        // Embed YouTube player
+        // Embed YouTube
         container.innerHTML = `
           <iframe 
             src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
@@ -700,11 +694,16 @@
             allowfullscreen>
           </iframe>`;
       } else {
-        // Embed standard HTML5 video player for MP4 / OneDrive direct streams
+        // Auto-convert OneDrive Embed link to Download link if necessary
+        if (finalUrl.includes('onedrive.live.com/embed')) {
+          finalUrl = finalUrl.replace('/embed', '/download');
+        }
+
+        // Embed HTML5 Video for MP4 / OneDrive streams
         container.innerHTML = `
-          <video controls autoplay name="media">
-            <source src="${videoUrl}" type="video/mp4">
-            Your browser does not support playing this video.
+          <video controls autoplay style="width:100%; height:100%;">
+            <source src="${finalUrl}" type="video/mp4">
+            Your browser does not support this video stream format.
           </video>`;
       }
 
@@ -716,7 +715,7 @@
       const container = document.getElementById('player-container');
 
       modal.classList.remove('active');
-      container.innerHTML = ''; // Clear container to stop audio/video playback immediately
+      container.innerHTML = ''; // Stop video playback
     }
 
 
@@ -724,14 +723,15 @@
 
     /* 
        --------------------------------------------------------------------------
-       9. HELPER: YOUTUBE LINK PARSER
+       9. IMPROVED YOUTUBE LINK PARSER (SUPPORTS SHORTS & MOBILE LINKS)
        --------------------------------------------------------------------------
     */
     function extractYouTubeID(url) {
       if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+      const cleanUrl = url.trim();
+      const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = cleanUrl.match(regExp);
+      return (match && match[1]) ? match[1] : null;
     }
 
 
@@ -739,11 +739,10 @@
 
     /* 
        --------------------------------------------------------------------------
-       10. INITIALIZATION ON PAGE LOAD
+       10. INITIALIZATION
        --------------------------------------------------------------------------
     */
     window.addEventListener('DOMContentLoaded', loadVideos);
 
-  </script>
-</body>
+  </script></body>
 </html>
