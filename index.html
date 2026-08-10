@@ -45,6 +45,9 @@
       flex-direction: column;
     }
 
+
+
+
     /* ==========================================================================
        SECTION 2: HEADER & NAVIGATION TABS
        ========================================================================== */
@@ -102,6 +105,9 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
+
+
+
     /* ==========================================================================
        SECTION 3: PAGE LAYOUT & TRANSITIONS
        ========================================================================== */
@@ -127,6 +133,9 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+
+
 
     /* ==========================================================================
        SECTION 4: CATEGORY FILTERS
@@ -160,6 +169,9 @@
       font-weight: bold;
       box-shadow: 0 0 12px var(--accent-glow);
     }
+
+
+
 
     /* ==========================================================================
        SECTION 5: GRIDS & CARDS
@@ -289,8 +301,11 @@
       line-height: 1.6;
     }
 
+
+
+
     /* ==========================================================================
-       SECTION 6: EXPANDED FULLSCREEN MODAL & BOOK READER STYLES
+       SECTION 6: EXPANDED 150% MODAL & BOOK READER STYLES WITH SCROLLBAR
        ========================================================================== */
 
     .modal-overlay {
@@ -302,76 +317,64 @@
       background: rgba(0, 0, 0, 0.92);
       backdrop-filter: blur(8px);
       display: none;
-      justify-content: center;
-      align-items: center;
+      overflow: auto; /* Allows scrolling when modal content is larger than viewport */
       z-index: 1000;
-      padding: 20px;
+      padding: 30px;
     }
 
     .modal-overlay.active {
       display: flex;
     }
 
-    /* Standard Modal View */
-    .modal-content {
-      position: relative;
-      width: 90vw;
-      max-width: 1200px;
-      height: 85vh;
-      background: var(--card-bg);
-      border-radius: 12px;
-      overflow-y: auto;
-      border: 1px solid var(--accent-cyan);
-      box-shadow: 0 0 35px var(--accent-glow);
-      padding: 40px;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      user-select: none;
+    /* Custom Neon Scrollbars for 150% view */
+    .modal-overlay::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
     }
-
-    /* Ultra Expanded State on Double Click */
-    .modal-content.ultra-expanded {
-      width: 98vw !important;
-      height: 96vh !important;
-      max-width: 1800px !important;
-      padding: 50px !important;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 50px rgba(0, 243, 255, 0.6);
-    }
-
-    /* CUSTOM SLEEK SCROLLBAR STYLING */
-    .modal-content::-webkit-scrollbar {
-      width: 10px;
-    }
-    .modal-content::-webkit-scrollbar-track {
+    .modal-overlay::-webkit-scrollbar-track {
       background: #0a0a12;
-      border-radius: 5px;
     }
-    .modal-content::-webkit-scrollbar-thumb {
+    .modal-overlay::-webkit-scrollbar-thumb {
       background: var(--accent-cyan);
-      border-radius: 5px;
+      border-radius: 6px;
       box-shadow: 0 0 10px var(--accent-glow);
     }
-    .modal-content::-webkit-scrollbar-thumb:hover {
+    .modal-overlay::-webkit-scrollbar-thumb:hover {
       background: #ffffff;
+    }
+
+    /* Expands content to 150% of screen size */
+    .modal-content {
+      position: relative;
+      width: 150vw;
+      min-height: 150vh;
+      margin: auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 35px var(--accent-glow);
+      padding: 50px;
     }
 
     .modal-content.video-modal-content {
       padding: 0;
-      height: auto;
+      width: 95vw;
+      min-height: auto;
       max-width: 950px;
       overflow: hidden;
     }
 
     .close-modal-btn {
-      position: absolute;
-      top: 20px;
-      right: 25px;
+      position: sticky;
+      top: 10px;
+      float: right;
       color: var(--text-white);
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       cursor: pointer;
       z-index: 1010;
       line-height: 1;
       transition: color 0.2s ease;
+      margin-left: 20px;
     }
 
     .close-modal-btn:hover {
@@ -395,6 +398,10 @@
       border: none;
     }
 
+    /* --------------------------------------------------------------------------
+       BOOK MODAL: LARGER 3D COVER & TEXT WRAPPING
+       -------------------------------------------------------------------------- */
+    
     .clearfix::after {
       content: "";
       clear: both;
@@ -507,6 +514,10 @@
       gap: 10px;
     }
 
+    /* --------------------------------------------------------------------------
+       BOOK NOTES: CURVY FONT, DOUBLE SPACING & FRESH HIGHLIGHTERS
+       -------------------------------------------------------------------------- */
+    
     .notes-stream,
     .notes-stream mark {
       font-family: 'Shantell Sans', sans-serif !important;
@@ -516,8 +527,9 @@
       color: #ffffff;
     }
 
+    /* flow-root prevents mid-sentence awkward wrapping around cover float */
     .note-line {
-      margin-bottom: 56px;
+      margin-bottom: 56px; /* Doubled sentence spacing */
       display: flow-root;
     }
 
@@ -529,15 +541,24 @@
       -webkit-box-decoration-break: clone;
     }
 
+    /* Glowing Yellowish-Green [Y] */
     .hl-y-1 { background: rgba(235, 255, 60, 0.38); text-shadow: 0 0 8px rgba(235,255,60,0.3); }
     .hl-y-2 { background: rgba(195, 225, 30, 0.42); }
+
+    /* Fluorescent Green [F] */
     .hl-f-1 { background: rgba(0, 255, 180, 0.32); text-shadow: 0 0 8px rgba(0,255,180,0.3); }
     .hl-f-2 { background: rgba(0, 210, 130, 0.38); }
+
+    /* Glowing Fresh Yellowish-Orange [O] */
     .hl-o-1 { background: rgba(255, 165, 0, 0.42); text-shadow: 0 0 8px rgba(255,165,0,0.3); }
     .hl-o-2 { background: rgba(230, 135, 0, 0.48); }
+
     .hl-default { background: rgba(255, 255, 255, 0.12); }
 
-    /* Zoom Overlay */
+    /* --------------------------------------------------------------------------
+       FULLSCREEN IMAGE ZOOM LIGHTBOX
+       -------------------------------------------------------------------------- */
+    
     .zoom-overlay {
       position: fixed;
       top: 0;
@@ -568,21 +589,42 @@
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- ==========================================================================
+       HTML SECTION 1: HEADER & NAVIGATION TABS
+       ========================================================================== -->
+
   <header>
     <div class="brand-title">MY<span>SHOWCASE</span></div>
     
     <ul class="nav-tabs">
-      <li><button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button></li>
-      <li><button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button></li>
-      <li><button class="nav-btn" onclick="switchSection('books-section', this)">Books</button></li>
-      <li><button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button></li>
-      <li><button class="nav-btn" onclick="switchSection('status-section', this)">Status</button></li>
+      <li>
+        <button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('books-section', this)">Books</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('status-section', this)">Status</button>
+      </li>
     </ul>
   </header>
 
-  <!-- MAIN CONTENT -->
+
+
+
+  <!-- ==========================================================================
+       HTML SECTION 2: MAIN CONTENT PAGES
+       ========================================================================== -->
+
   <main>
+
+    <!-- PAGE 1: VIDEOS SECTION -->
     <section id="videos-section" class="page-section active">
       <div id="category-filter-videos" class="category-filter"></div>
       <div id="video-grid" class="grid-container">
@@ -590,6 +632,7 @@
       </div>
     </section>
 
+    <!-- PAGE 2: SHORTS SECTION -->
     <section id="shorts-section" class="page-section">
       <div id="category-filter-shorts" class="category-filter"></div>
       <div id="shorts-grid" class="grid-container">
@@ -597,6 +640,7 @@
       </div>
     </section>
 
+    <!-- PAGE 3: BOOKS SECTION -->
     <section id="books-section" class="page-section">
       <div id="category-filter-books" class="category-filter"></div>
       <div id="books-grid" class="grid-container books-grid">
@@ -604,18 +648,27 @@
       </div>
     </section>
 
+    <!-- PAGE 4: PHOTOS SECTION -->
     <section id="photos-section" class="page-section">
       <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
       <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
     </section>
 
+    <!-- PAGE 5: STATUS SECTION -->
     <section id="status-section" class="page-section">
       <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Status Updates</h2>
       <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
     </section>
+
   </main>
 
-  <!-- MODALS -->
+
+
+
+  <!-- ==========================================================================
+       HTML SECTION 3: POPUP MODALS & FULLSCREEN ZOOM
+       ========================================================================== -->
+
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -623,16 +676,39 @@
     </div>
   </div>
 
+  <!-- Dedicated Fullscreen Cover Zoom Lightbox -->
   <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
     <img id="zoom-img" src="" alt="Zoomed Cover">
   </div>
 
+
+
+
+  <!-- ==========================================================================
+       JAVASCRIPT SECTION: BACKEND LOGIC & PARSING
+       ========================================================================== -->
+
   <script>
+
+    /* 
+       --------------------------------------------------------------------------
+       1. GOOGLE SHEET CONFIGURATION
+       --------------------------------------------------------------------------
+    */
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9maPUHMbAkZTS4c72grAzJvX3pCMQCIfSPXzb7lRH2vEILq4OuoAsF1zPtFEMHkleJkqRr0iZLfvy/pub?output=csv';
 
     let allItems = [];
+
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Cover Available</text></svg>');
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       2. SPA SECTION NAVIGATION
+       --------------------------------------------------------------------------
+    */
     function switchSection(sectionId, btnElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -641,6 +717,14 @@
       btnElement.classList.add('active');
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       3. FETCH CSV DATA FROM GOOGLE SHEETS
+       --------------------------------------------------------------------------
+    */
     async function loadContent() {
       const videoGrid = document.getElementById('video-grid');
       const shortsGrid = document.getElementById('shorts-grid');
@@ -681,6 +765,14 @@
       }
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       4. ACCURATE CSV PARSER
+       --------------------------------------------------------------------------
+    */
     function parseCSV(csvText) {
       const lines = csvText.trim().split(/\r?\n/);
       if (lines.length < 2) return [];
@@ -708,7 +800,10 @@
           if (['notes', 'highlights', 'quote', 'quotes'].includes(cleanHeader)) row.Notes = val;
         });
 
-        if (row.Type && row.Type.toLowerCase() === 'private') continue;
+        // Skip Private entries
+        if (row.Type && row.Type.toLowerCase() === 'private') {
+          continue;
+        }
 
         if (row.Title && (row.VideoURL || row.ThumbnailURL)) {
           results.push(row);
@@ -737,6 +832,14 @@
       return result;
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       5. RENDER SECTIONS
+       --------------------------------------------------------------------------
+    */
     function renderSection(sectionType, selectedCategory = 'All') {
       const isShorts = sectionType === 'shorts';
       const isBooks = sectionType === 'books';
@@ -762,7 +865,11 @@
       const filterContainer = document.getElementById(filterId);
       const uniqueCategories = [
         'All',
-        ...new Set(sectionItems.map(item => item.Category ? item.Category.trim() : '').filter(cat => cat !== ''))
+        ...new Set(
+          sectionItems
+            .map(item => item.Category ? item.Category.trim() : '')
+            .filter(cat => cat !== '')
+        )
       ];
 
       filterContainer.innerHTML = '';
@@ -835,6 +942,14 @@
       });
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       6. HELPER: FORMAT IMAGE URLS
+       --------------------------------------------------------------------------
+    */
     function formatCustomImageURL(url) {
       if (!url) return '';
       let clean = url.trim();
@@ -848,7 +963,14 @@
       return clean;
     }
 
-    /* DOUBLE-CLICK EXPANDABLE BOOK MODAL LOGIC */
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       7. BOOK MODAL & HIGHLIGHTER LOGIC ([Y], [F], [O])
+       --------------------------------------------------------------------------
+    */
     function openBookModal(book) {
       const modal = document.getElementById('modal-overlay');
       const content = document.getElementById('modal-content');
@@ -856,15 +978,9 @@
 
       content.classList.remove('video-modal-content');
 
-      // Attach double-click listener to content to toggle ultra-expanded view
-      content.ondblclick = function(e) {
-        // Prevent toggle if double clicking buttons
-        if(e.target.tagName === 'BUTTON' || e.target.classList.contains('close-modal-btn')) return;
-        content.classList.toggle('ultra-expanded');
-      };
-
       const frontCover = formatCustomImageURL(book.VideoURL) || FALLBACK_SVG;
       const backCover = formatCustomImageURL(book.ThumbnailURL) || frontCover;
+
       const parsedNotes = parseBookNotes(book.Notes);
 
       body.innerHTML = `
@@ -881,7 +997,7 @@
               </div>
             </div>
             <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
-            <div class="zoom-hint">💡 Single-click cover to expand image | Double-click modal body to toggle fullscreen view</div>
+            <div class="zoom-hint">💡 Click cover to expand fullscreen</div>
           </div>
 
           <!-- BOOK TITLE & SUMMARY -->
@@ -919,6 +1035,7 @@
       }
     }
 
+    // Parse [Y], [F], and [O] Tags
     function parseBookNotes(notesRaw) {
       if (!notesRaw) return '';
 
@@ -941,6 +1058,7 @@
           tag = 'O';
         }
 
+        // Cleanly strip all tag brackets from displayed sentence
         trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
 
         if (tag && tag === lastTag) {
@@ -969,6 +1087,14 @@
       return html;
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       8. FULLSCREEN IMAGE ZOOM LOGIC
+       --------------------------------------------------------------------------
+    */
     function zoomImage(src) {
       if (!src) return;
       const overlay = document.getElementById('zoom-overlay');
@@ -982,6 +1108,14 @@
       document.getElementById('zoom-overlay').classList.remove('active');
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       9. VIDEO POPUP MODAL
+       --------------------------------------------------------------------------
+    */
     function openVideoModal(videoUrl, youtubeId) {
       const modal = document.getElementById('modal-overlay');
       const content = document.getElementById('modal-content');
@@ -1030,16 +1164,20 @@
     function closeModal(event) {
       if (event && event.stopPropagation) event.stopPropagation();
       const modal = document.getElementById('modal-overlay');
-      const content = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
-
-      content.classList.remove('ultra-expanded');
-      content.ondblclick = null;
 
       modal.classList.remove('active');
       body.innerHTML = '';
     }
 
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       10. HELPER URL PARSERS & INIT
+       --------------------------------------------------------------------------
+    */
     function extractYouTubeID(url) {
       if (!url) return null;
       const cleanUrl = url.trim();
@@ -1058,6 +1196,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', loadContent);
+
   </script>
 </body>
 </html>
