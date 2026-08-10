@@ -519,7 +519,16 @@
     .note-line mark {
       color: #ffffff;
       padding: 4px 16px;
-      clip-path: polygon(12px 2%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 6px) 100%, 6px 98%, 0% 50%);
+      display: inline-block;
+      
+      /* Natural brush/chisel angle & organic borders */
+      transform: rotate(-1.2deg) skewX(-10deg);
+      border-radius: 8px 4px 12px 5px / 4px 12px 5px 8px;
+      
+      /* Tapered gradient opacity at start and end */
+      -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,1) 4%, rgba(0,0,0,1) 96%, rgba(0,0,0,0.3) 100%);
+      mask-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,1) 4%, rgba(0,0,0,1) 96%, rgba(0,0,0,0.3) 100%);
+      
       box-decoration-break: clone;
       -webkit-box-decoration-break: clone;
     }
