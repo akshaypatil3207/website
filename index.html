@@ -972,15 +972,15 @@
           <!-- LEFT FLOATING ENLARGED 3D COVER -->
           <div class="book-cover-container">
             <div id="flip-card-inner" class="flip-card-inner">
-              <div class="flip-front" ondblclick="zoomImage('${frontCover}')">
+              <div class="flip-front" onclick="zoomImage('${frontCover}')">
                 <img src="${frontCover}" alt="${book.Title} Front Cover">
               </div>
-              <div class="flip-back" ondblclick="zoomImage('${backCover}')">
+              <div class="flip-back" onclick="zoomImage('${backCover}')">
                 <img src="${backCover}" alt="${book.Title} Back Cover">
               </div>
             </div>
             <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
-            <div class="zoom-hint">💡 Double-click cover to expand fullscreen</div>
+            <div class="zoom-hint">💡 Click cover to expand fullscreen</div>
           </div>
 
           <!-- BOOK TITLE & SUMMARY -->
