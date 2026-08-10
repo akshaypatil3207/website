@@ -563,7 +563,7 @@
           if (['type'].includes(cleanHeader)) row.Type = val;
         });
 
-        // Skip Private entries seamlessly
+        // Skip Private entries
         if (row.Type && row.Type.toLowerCase() === 'private') {
           continue;
         }
@@ -576,7 +576,6 @@
       return results;
     }
 
-    // Line parser that preserves empty comma slots (,,)
     function parseCSVLine(text) {
       const result = [];
       let cur = '';
@@ -619,7 +618,7 @@
         }
       });
 
-      // Build dynamic category buttons for this specific page
+      // Build category buttons
       const filterContainer = document.getElementById(filterId);
       const uniqueCategories = [
         'All',
@@ -699,9 +698,9 @@
       let clean = url.trim();
 
       if (clean.includes('drive.google.com')) {
-        const match = clean.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-          return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        const driveId = extractGoogleDriveID(clean);
+        if (driveId) {
+          return `https://lh3.googleusercontent.com/d/${driveId}`;
         }
       }
       return clean;
@@ -712,7 +711,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. POPUP LIGHTBOX PLAYER MODAL
+       7. POPUP LIGHTBOX PLAYER MODAL (HANDLES YOUTUBE, GOOGLE DRIVE & DIRECT MP4)
        --------------------------------------------------------------------------
     */
     function openModal(videoUrl, youtubeId) {
@@ -720,15 +719,26 @@
       const container = document.getElementById('player-container');
 
       let finalUrl = videoUrl.trim();
+      const driveId = extractGoogleDriveID(finalUrl);
 
       if (youtubeId) {
+        // YouTube Player
         container.innerHTML = `
           <iframe 
             src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
           </iframe>`;
+      } else if (driveId) {
+        // Google Drive Player (Embed Preview)
+        container.innerHTML = `
+          <iframe 
+            src="https://drive.google.com/file/d/${driveId}/preview" 
+            allow="autoplay" 
+            allowfullscreen>
+          </iframe>`;
       } else {
+        // Direct MP4 / OneDrive Video Stream Player
         if (finalUrl.includes('onedrive.live.com/embed')) {
           finalUrl = finalUrl.replace('/embed', '/download');
         }
@@ -756,7 +766,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. YOUTUBE LINK PARSER
+       8. URL ID PARSERS (YOUTUBE & GOOGLE DRIVE)
        --------------------------------------------------------------------------
     */
     function extractYouTubeID(url) {
@@ -764,6 +774,15 @@
       const cleanUrl = url.trim();
       const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = cleanUrl.match(regExp);
+      return (match && match[1]) ? match[1] : null;
+    }
+
+    function extractGoogleDriveID(url) {
+      if (!url) return null;
+      const cleanUrl = url.trim();
+      const match = cleanUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || 
+                    cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || 
+                    cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       return (match && match[1]) ? match[1] : null;
     }
 
