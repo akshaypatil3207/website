@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Personal Website</title>
+  <title>My Personal Showcase</title>
+
+  <!-- Romantic Handwriting Font for Book Notes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
 
@@ -12,17 +17,17 @@
        ========================================================================== */
 
     :root {
-      /* Background colors */
       --bg-main: #0a0a12;          /* 95% Dark background */
       --card-bg: #141322;          /* Dark purplish container surface */
       --card-hover: #1f1d36;       /* Elevated purple for hover states */
 
-      /* Text & Accent colors */
       --accent-cyan: #00f3ff;      /* Bright fluorescent cyan */
       --accent-glow: rgba(0, 243, 255, 0.35); /* Neon glow effect */
       --text-white: #ffffff;       /* Pure white heading text */
       --text-muted: #a0a0c0;       /* Muted ice blue secondary text */
       --border-color: #272545;    /* Subtle dark border */
+      
+      --font-notes: 'Caveat', cursive; /* Handwritten font for book notes */
     }
 
     * {
@@ -60,7 +65,6 @@
       align-items: center;
     }
 
-    /* Site Title / Logo */
     .brand-title {
       font-size: 1.5rem;
       font-weight: 700;
@@ -69,10 +73,9 @@
     }
 
     .brand-title span {
-      color: var(--accent-cyan); /* Highlight word in neon cyan */
+      color: var(--accent-cyan);
     }
 
-    /* Main Section Buttons (Videos, Shorts, Photos, Status) */
     .nav-tabs {
       display: flex;
       gap: 12px;
@@ -117,9 +120,8 @@
       width: 100%;
     }
 
-    /* Controls page visibility (SPA) */
     .page-section {
-      display: none; /* Hidden by default; JavaScript shows active section */
+      display: none;
       animation: fadeIn 0.4s ease-in-out;
     }
 
@@ -127,7 +129,6 @@
       display: block;
     }
 
-    /* Smooth Fade-in animation when switching tabs */
     @keyframes fadeIn {
       from { 
         opacity: 0; 
@@ -143,7 +144,7 @@
 
 
     /* ==========================================================================
-       SECTION 4: DYNAMIC CATEGORY FILTER BUTTONS & HEADINGS
+       SECTION 4: DYNAMIC CATEGORY FILTER BUTTONS
        ========================================================================== */
 
     .category-filter {
@@ -170,7 +171,7 @@
     .cat-btn:hover, 
     .cat-btn.active {
       background: var(--accent-cyan);
-      color: #000000; /* Black font on bright background for high contrast */
+      color: #000000;
       font-weight: bold;
       box-shadow: 0 0 12px var(--accent-glow);
     }
@@ -179,16 +180,21 @@
 
 
     /* ==========================================================================
-       SECTION 5: YOUTUBE STYLE GRID & CARDS
+       SECTION 5: CARDS & GRIDS (VIDEOS, SHORTS, & BOOKS)
        ========================================================================== */
 
-    .video-grid {
+    .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 25px;
     }
 
-    .video-card {
+    /* Books grid uses portrait-oriented cards */
+    .books-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -199,21 +205,30 @@
       flex-direction: column;
     }
 
-    .video-card:hover {
+    .card:hover {
       transform: translateY(-6px);
       border-color: var(--accent-cyan);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* 16:9 Thumbnail Container */
+    /* Standard 16:9 Thumbnail for Videos/Shorts */
     .thumbnail-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 56.25%; /* Maintains 16:9 aspect ratio */
+      padding-top: 56.25%;
       background-color: #000000;
     }
 
-    .thumbnail-wrapper img {
+    /* 2:3 Aspect Ratio for Book Covers */
+    .book-thumbnail-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 150%; 
+      background-color: #000000;
+    }
+
+    .thumbnail-wrapper img,
+    .book-thumbnail-wrapper img {
       position: absolute;
       top: 0;
       left: 0;
@@ -222,7 +237,7 @@
       object-fit: cover;
     }
 
-    /* Play Button Hover Icon */
+    /* Play Icon Hover Overlay */
     .play-icon {
       position: absolute;
       top: 50%;
@@ -247,13 +262,12 @@
       margin-left: 3px;
     }
 
-    .video-card:hover .play-icon {
+    .card:hover .play-icon {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
     }
 
-    /* Video Text Details Inside Card */
-    .video-info {
+    .card-info {
       padding: 15px;
       display: flex;
       flex-direction: column;
@@ -261,7 +275,7 @@
       flex: 1;
     }
 
-    .video-category-tag {
+    .category-tag {
       align-self: flex-start;
       font-size: 0.75rem;
       color: var(--accent-cyan);
@@ -272,14 +286,14 @@
       font-weight: 600;
     }
 
-    .video-title {
+    .card-title {
       font-size: 1rem;
       font-weight: 600;
       line-height: 1.3;
       color: var(--text-white);
     }
 
-    .video-desc {
+    .card-desc {
       font-size: 0.85rem;
       color: var(--text-muted);
       display: -webkit-box;
@@ -288,7 +302,6 @@
       overflow: hidden;
     }
 
-    /* Loading or Error Messages */
     .status-msg {
       grid-column: 1 / -1;
       text-align: center;
@@ -302,10 +315,10 @@
 
 
     /* ==========================================================================
-       SECTION 6: POPUP LIGHTBOX PLAYER (MODAL)
+       SECTION 6: MODAL LIGHTBOX & BOOK READER STYLES
        ========================================================================== */
 
-    .video-modal {
+    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -317,26 +330,51 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      padding: 20px;
     }
 
-    .video-modal.active {
+    .modal-overlay.active {
       display: flex;
     }
 
     .modal-content {
       position: relative;
-      width: 90%;
+      width: 100%;
       max-width: 950px;
+      max-height: 90vh;
       background: var(--card-bg);
       border-radius: 12px;
-      overflow: hidden;
+      overflow-y: auto;
       border: 1px solid var(--accent-cyan);
       box-shadow: 0 0 35px var(--accent-glow);
+      padding: 30px;
+    }
+
+    /* Special size for Video Modal */
+    .modal-content.video-modal-content {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: var(--text-white);
+      font-size: 2.2rem;
+      cursor: pointer;
+      z-index: 1010;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .close-modal-btn:hover {
+      color: var(--accent-cyan);
     }
 
     .player-container {
       position: relative;
-      padding-top: 56.25%; /* 16:9 ratio for embedded player */
+      padding-top: 56.25%;
       width: 100%;
       background: #000000;
     }
@@ -351,21 +389,132 @@
       border: none;
     }
 
-    .close-modal-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      color: var(--text-white);
-      font-size: 2.2rem;
-      cursor: pointer;
-      z-index: 1010;
-      line-height: 1;
-      transition: color 0.2s ease;
+    /* --------------------------------------------------------------------------
+       BOOK MODAL: FLOAT LAYOUT & 3D FLIP CARD
+       -------------------------------------------------------------------------- */
+    
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
     }
 
-    .close-modal-btn:hover {
-      color: var(--accent-cyan);
+    .book-cover-container {
+      float: left;
+      width: 230px;
+      margin-right: 30px;
+      margin-bottom: 20px;
+      perspective: 1000px;
     }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 335px;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+
+    .flip-card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flip-front, .flip-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000000;
+      border: 1px solid var(--border-color);
+    }
+
+    .flip-front img, .flip-back img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .flip-back {
+      transform: rotateY(180deg);
+    }
+
+    .flip-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 9px;
+      background: var(--card-hover);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .flip-btn:hover {
+      background: var(--accent-cyan);
+      color: #000000;
+    }
+
+    .book-header-info {
+      margin-bottom: 20px;
+    }
+
+    .book-header-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 6px;
+    }
+
+    .book-header-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    /* --------------------------------------------------------------------------
+       BOOK NOTES: CURVY FONT & HIGHLIGHTER MARKERS
+       -------------------------------------------------------------------------- */
+    
+    .notes-stream {
+      font-family: var(--font-notes);
+      font-size: 1.45rem;
+      line-height: 1.5;
+      letter-spacing: 0.4px;
+      color: #ffffff;
+      margin-top: 25px;
+    }
+
+    .note-line {
+      margin-bottom: 28px; /* Large space between highlighted thoughts */
+      display: block;
+    }
+
+    .note-line mark {
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    /* Fluorescent Green Marker Shades */
+    .hl-f-1 { background: rgba(180, 255, 0, 0.28); }
+    .hl-f-2 { background: rgba(120, 220, 50, 0.35); }
+
+    /* Orange Marker Shades */
+    .hl-o-1 { background: rgba(255, 120, 0, 0.30); }
+    .hl-o-2 { background: rgba(230, 90, 20, 0.38); }
+
+    .hl-default { background: rgba(255, 255, 255, 0.12); }
 
   </style>
 </head>
@@ -378,13 +527,15 @@
   <header>
     <div class="brand-title">MY<span>SHOWCASE</span></div>
     
-    <!-- Top Navigation Buttons -->
     <ul class="nav-tabs">
       <li>
         <button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button>
       </li>
       <li>
         <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('books-section', this)">Books</button>
       </li>
       <li>
         <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
@@ -399,7 +550,7 @@
 
 
   <!-- ==========================================================================
-       HTML SECTION 2: MAIN CONTENT CONTAINER
+       HTML SECTION 2: MAIN CONTENT PAGES
        ========================================================================== -->
 
   <main>
@@ -407,7 +558,7 @@
     <!-- PAGE 1: VIDEOS SECTION -->
     <section id="videos-section" class="page-section active">
       <div id="category-filter-videos" class="category-filter"></div>
-      <div id="video-grid" class="video-grid">
+      <div id="video-grid" class="grid-container">
         <div class="status-msg">Loading videos from DB...</div>
       </div>
     </section>
@@ -415,21 +566,29 @@
     <!-- PAGE 2: SHORTS SECTION -->
     <section id="shorts-section" class="page-section">
       <div id="category-filter-shorts" class="category-filter"></div>
-      <div id="shorts-grid" class="video-grid">
+      <div id="shorts-grid" class="grid-container">
         <div class="status-msg">Loading shorts from DB...</div>
       </div>
     </section>
 
-    <!-- PAGE 3: PHOTOS SECTION -->
-    <section id="photos-section" class="page-section">
-      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
-      <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
+    <!-- PAGE 3: BOOKS SECTION -->
+    <section id="books-section" class="page-section">
+      <div id="category-filter-books" class="category-filter"></div>
+      <div id="books-grid" class="grid-container books-grid">
+        <div class="status-msg">Loading books from DB...</div>
+      </div>
     </section>
 
-    <!-- PAGE 4: STATUS SECTION -->
+    <!-- PAGE 4: PHOTOS SECTION -->
+    <section id="photos-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
+      <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
+    </section>
+
+    <!-- PAGE 5: STATUS SECTION -->
     <section id="status-section" class="page-section">
       <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Status Updates</h2>
-      <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
+      <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
     </section>
 
   </main>
@@ -438,15 +597,13 @@
 
 
   <!-- ==========================================================================
-       HTML SECTION 3: POPUP VIDEO PLAYER MODAL
+       HTML SECTION 3: POPUP LIGHTBOX MODAL
        ========================================================================== -->
 
-  <div id="video-modal" class="video-modal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
-      <div id="player-container" class="player-container">
-        <!-- Iframe or HTML5 Video injected dynamically when card is clicked -->
-      </div>
+      <div id="modal-body"></div>
     </div>
   </div>
 
@@ -468,8 +625,7 @@
 
     let allItems = [];
 
-    // Fallback SVG if no thumbnail is available
-    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>');
+    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Cover Available</text></svg>');
 
 
 
@@ -498,11 +654,13 @@
     async function loadContent() {
       const videoGrid = document.getElementById('video-grid');
       const shortsGrid = document.getElementById('shorts-grid');
+      const booksGrid = document.getElementById('books-grid');
 
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
         const msg = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
         videoGrid.innerHTML = msg;
         shortsGrid.innerHTML = msg;
+        booksGrid.innerHTML = msg;
         return;
       }
 
@@ -513,19 +671,23 @@
         allItems = parseCSV(csvText);
 
         if (allItems.length === 0) {
-          videoGrid.innerHTML = `<div class="status-msg">No items found in DB. Verify Row 1 headers: <b>Title, VideoURL, Category, ThumbnailURL, Description, Type</b></div>`;
-          shortsGrid.innerHTML = `<div class="status-msg">No shorts found in DB.</div>`;
+          const emptyMsg = `<div class="status-msg">No items found in DB.</div>`;
+          videoGrid.innerHTML = emptyMsg;
+          shortsGrid.innerHTML = emptyMsg;
+          booksGrid.innerHTML = emptyMsg;
           return;
         }
 
         renderSection('videos');
         renderSection('shorts');
+        renderSection('books');
 
       } catch (err) {
         console.error('Fetch error:', err);
         const errMsg = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
         videoGrid.innerHTML = errMsg;
         shortsGrid.innerHTML = errMsg;
+        booksGrid.innerHTML = errMsg;
       }
     }
 
@@ -534,7 +696,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. ACCURATE CSV PARSER (PRESERVES BLANK CELLS & FILTERS OUT 'PRIVATE')
+       4. ACCURATE CSV PARSER (MAPS BOOK NOTES & PRESERVES BLANK CELLS)
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
@@ -555,12 +717,13 @@
           
           const cleanHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
           
-          if (['title'].includes(cleanHeader)) row.Title = val;
-          if (['videourl', 'video', 'link', 'url'].includes(cleanHeader)) row.VideoURL = val;
-          if (['category', 'cat'].includes(cleanHeader)) row.Category = val;
-          if (['thumbnailurl', 'thumbnail', 'thumb', 'image', 'img'].includes(cleanHeader)) row.ThumbnailURL = val;
-          if (['description', 'desc'].includes(cleanHeader)) row.Description = val;
+          if (['title', 'name', 'book'].includes(cleanHeader)) row.Title = val;
+          if (['videourl', 'video', 'link', 'url', 'frontcover'].includes(cleanHeader)) row.VideoURL = val;
+          if (['category', 'cat', 'genre'].includes(cleanHeader)) row.Category = val;
+          if (['thumbnailurl', 'thumbnail', 'thumb', 'image', 'img', 'backcover'].includes(cleanHeader)) row.ThumbnailURL = val;
+          if (['description', 'desc', 'author', 'summary'].includes(cleanHeader)) row.Description = val;
           if (['type'].includes(cleanHeader)) row.Type = val;
+          if (['notes', 'highlights', 'quote', 'quotes'].includes(cleanHeader)) row.Notes = val;
         });
 
         // Skip Private entries
@@ -568,7 +731,7 @@
           continue;
         }
 
-        if (row.Title && row.VideoURL) {
+        if (row.Title && (row.VideoURL || row.ThumbnailURL)) {
           results.push(row);
         }
       }
@@ -600,25 +763,33 @@
 
     /* 
        --------------------------------------------------------------------------
-       5. RENDER SECTION (CATEGORIES + GRID CARDS)
+       5. RENDER SECTIONS (VIDEOS, SHORTS, & BOOKS)
        --------------------------------------------------------------------------
     */
     function renderSection(sectionType, selectedCategory = 'All') {
       const isShorts = sectionType === 'shorts';
-      const gridId = isShorts ? 'shorts-grid' : 'video-grid';
-      const filterId = isShorts ? 'category-filter-shorts' : 'category-filter-videos';
+      const isBooks = sectionType === 'books';
+
+      let gridId = 'video-grid';
+      let filterId = 'category-filter-videos';
+
+      if (isShorts) {
+        gridId = 'shorts-grid';
+        filterId = 'category-filter-shorts';
+      } else if (isBooks) {
+        gridId = 'books-grid';
+        filterId = 'category-filter-books';
+      }
 
       // Filter by Type
       const sectionItems = allItems.filter(item => {
         const t = (item.Type || '').toLowerCase().trim();
-        if (isShorts) {
-          return t === 'shorts' || t === 'short';
-        } else {
-          return t === 'videos' || t === 'video' || t === '';
-        }
+        if (isShorts) return t === 'shorts' || t === 'short';
+        if (isBooks) return t === 'books' || t === 'book';
+        return t === 'videos' || t === 'video' || t === '';
       });
 
-      // Build category buttons
+      // Build Category Filter Buttons
       const filterContainer = document.getElementById(filterId);
       const uniqueCategories = [
         'All',
@@ -651,35 +822,53 @@
       grid.innerHTML = '';
 
       if (finalItems.length === 0) {
-        grid.innerHTML = `<div class="status-msg">No ${isShorts ? 'shorts' : 'videos'} found in this category.</div>`;
+        grid.innerHTML = `<div class="status-msg">No ${sectionType} found in this category.</div>`;
         return;
       }
 
-      finalItems.forEach(video => {
-        const youtubeId = extractYouTubeID(video.VideoURL);
-        let thumbUrl = formatCustomThumbnail(video.ThumbnailURL);
-
-        if (!thumbUrl && youtubeId) {
-          thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
-        } else if (!thumbUrl) {
-          thumbUrl = FALLBACK_SVG;
-        }
-
+      finalItems.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'video-card';
-        card.onclick = () => openModal(video.VideoURL, youtubeId);
+        card.className = 'card';
 
-        card.innerHTML = `
-          <div class="thumbnail-wrapper">
-            <img src="${thumbUrl}" alt="${video.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
-            <div class="play-icon"></div>
-          </div>
-          <div class="video-info">
-            <span class="video-category-tag">${video.Category || 'General'}</span>
-            <div class="video-title">${video.Title}</div>
-            <div class="video-desc">${video.Description || ''}</div>
-          </div>
-        `;
+        if (isBooks) {
+          // BOOK CARD LAYOUT (2:3 PORTRAIT RATIO)
+          const frontCover = formatCustomImageURL(item.VideoURL) || FALLBACK_SVG;
+          
+          card.onclick = () => openBookModal(item);
+          card.innerHTML = `
+            <div class="book-thumbnail-wrapper">
+              <img src="${frontCover}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            </div>
+            <div class="card-info">
+              <span class="category-tag">${item.Category || 'Book'}</span>
+              <div class="card-title">${item.Title}</div>
+              <div class="card-desc">${item.Description || ''}</div>
+            </div>
+          `;
+        } else {
+          // VIDEO & SHORT CARD LAYOUT (16:9 RATIO)
+          const youtubeId = extractYouTubeID(item.VideoURL);
+          let thumbUrl = formatCustomImageURL(item.ThumbnailURL);
+
+          if (!thumbUrl && youtubeId) {
+            thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+          } else if (!thumbUrl) {
+            thumbUrl = FALLBACK_SVG;
+          }
+
+          card.onclick = () => openVideoModal(item.VideoURL, youtubeId);
+          card.innerHTML = `
+            <div class="thumbnail-wrapper">
+              <img src="${thumbUrl}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+              <div class="play-icon"></div>
+            </div>
+            <div class="card-info">
+              <span class="category-tag">${item.Category || 'General'}</span>
+              <div class="card-title">${item.Title}</div>
+              <div class="card-desc">${item.Description || ''}</div>
+            </div>
+          `;
+        }
 
         grid.appendChild(card);
       });
@@ -690,10 +879,10 @@
 
     /* 
        --------------------------------------------------------------------------
-       6. HELPER: FORMAT CUSTOM THUMBNAIL URLS
+       6. HELPER: FORMAT CUSTOM IMAGE & THUMBNAIL URLS
        --------------------------------------------------------------------------
     */
-    function formatCustomThumbnail(url) {
+    function formatCustomImageURL(url) {
       if (!url) return '';
       let clean = url.trim();
 
@@ -711,54 +900,114 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. POPUP LIGHTBOX PLAYER MODAL (HANDLES YOUTUBE, GOOGLE DRIVE & DIRECT MP4)
+       7. BOOK MODAL READER & HIGHLIGHTER LOGIC
        --------------------------------------------------------------------------
     */
-    function openModal(videoUrl, youtubeId) {
-      const modal = document.getElementById('video-modal');
-      const container = document.getElementById('player-container');
+    function openBookModal(book) {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      const body = document.getElementById('modal-body');
 
-      let finalUrl = videoUrl.trim();
-      const driveId = extractGoogleDriveID(finalUrl);
+      content.classList.remove('video-modal-content');
 
-      if (youtubeId) {
-        // YouTube Player
-        container.innerHTML = `
-          <iframe 
-            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-          </iframe>`;
-      } else if (driveId) {
-        // Google Drive Player (Embed Preview)
-        container.innerHTML = `
-          <iframe 
-            src="https://drive.google.com/file/d/${driveId}/preview" 
-            allow="autoplay" 
-            allowfullscreen>
-          </iframe>`;
-      } else {
-        // Direct MP4 / OneDrive Video Stream Player
-        if (finalUrl.includes('onedrive.live.com/embed')) {
-          finalUrl = finalUrl.replace('/embed', '/download');
-        }
+      const frontCover = formatCustomImageURL(book.VideoURL) || FALLBACK_SVG;
+      const backCover = formatCustomImageURL(book.ThumbnailURL) || frontCover;
 
-        container.innerHTML = `
-          <video controls autoplay style="width:100%; height:100%;">
-            <source src="${finalUrl}" type="video/mp4">
-            Your browser does not support this video stream format.
-          </video>`;
-      }
+      const parsedNotes = parseBookNotes(book.Notes);
+
+      body.innerHTML = `
+        <div class="clearfix">
+          
+          <!-- LEFT FLOATING 3D BOOK COVER -->
+          <div class="book-cover-container">
+            <div id="flip-card-inner" class="flip-card-inner">
+              <div class="flip-front">
+                <img src="${frontCover}" alt="${book.Title} Front Cover">
+              </div>
+              <div class="flip-back">
+                <img src="${backCover}" alt="${book.Title} Back Cover">
+              </div>
+            </div>
+            <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
+          </div>
+
+          <!-- BOOK TITLE & AUTHOR HEADER -->
+          <div class="book-header-info">
+            <span class="category-tag">${book.Category || 'Book'}</span>
+            <h1 class="book-header-title">${book.Title}</h1>
+            <div class="book-header-desc">${book.Description || ''}</div>
+          </div>
+
+          <!-- FLOATING HANDWRITTEN HIGHLIGHTED NOTES -->
+          <div class="notes-stream">
+            ${parsedNotes || '<div style="color:var(--text-muted); font-size:1.1rem; margin-top:20px;">No highlighted notes added for this book yet.</div>'}
+          </div>
+
+        </div>
+      `;
 
       modal.classList.add('active');
     }
 
-    function closeModal() {
-      const modal = document.getElementById('video-modal');
-      const container = document.getElementById('player-container');
+    // Toggle 3D Cover Flip
+    function toggleBookFlip() {
+      const cardInner = document.getElementById('flip-card-inner');
+      const btn = event.target;
 
-      modal.classList.remove('active');
-      container.innerHTML = '';
+      cardInner.classList.toggle('flipped');
+      if (cardInner.classList.contains('flipped')) {
+        btn.textContent = 'Flip to Front Cover';
+      } else {
+        btn.textContent = 'Flip to Back Cover';
+      }
+    }
+
+    // Parse [F] and [O] Tags with Alternating Color Shades
+    function parseBookNotes(notesRaw) {
+      if (!notesRaw) return '';
+
+      const sentences = notesRaw.split(';');
+      let html = '';
+
+      let lastTag = '';
+      let toggleShade = false;
+
+      sentences.forEach(raw => {
+        let trimmed = raw.trim();
+        if (!trimmed) return;
+
+        let tag = '';
+        if (/\[F\]/i.test(trimmed)) {
+          tag = 'F';
+          trimmed = trimmed.replace(/\[F\]/gi, '').trim();
+        } else if (/\[O\]/i.test(trimmed)) {
+          tag = 'O';
+          trimmed = trimmed.replace(/\[O\]/gi, '').trim();
+        }
+
+        // Alternating color shades for consecutive matching tags
+        if (tag && tag === lastTag) {
+          toggleShade = !toggleShade;
+        } else {
+          toggleShade = false;
+          lastTag = tag;
+        }
+
+        let hlClass = 'hl-default';
+        if (tag === 'F') {
+          hlClass = toggleShade ? 'hl-f-2' : 'hl-f-1';
+        } else if (tag === 'O') {
+          hlClass = toggleShade ? 'hl-o-2' : 'hl-o-1';
+        }
+
+        html += `
+          <div class="note-line">
+            <mark class="${hlClass}">${trimmed}</mark>
+          </div>
+        `;
+      });
+
+      return html;
     }
 
 
@@ -766,7 +1015,69 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. URL ID PARSERS (YOUTUBE & GOOGLE DRIVE)
+       8. VIDEO POPUP MODAL
+       --------------------------------------------------------------------------
+    */
+    function openVideoModal(videoUrl, youtubeId) {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      const body = document.getElementById('modal-body');
+
+      content.classList.add('video-modal-content');
+
+      let finalUrl = videoUrl.trim();
+      const driveId = extractGoogleDriveID(finalUrl);
+
+      if (youtubeId) {
+        body.innerHTML = `
+          <div class="player-container">
+            <iframe 
+              src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>`;
+      } else if (driveId) {
+        body.innerHTML = `
+          <div class="player-container">
+            <iframe 
+              src="https://drive.google.com/file/d/${driveId}/preview" 
+              allow="autoplay" 
+              allowfullscreen>
+            </iframe>
+          </div>`;
+      } else {
+        if (finalUrl.includes('onedrive.live.com/embed')) {
+          finalUrl = finalUrl.replace('/embed', '/download');
+        }
+
+        body.innerHTML = `
+          <div class="player-container">
+            <video controls autoplay style="width:100%; height:100%;">
+              <source src="${finalUrl}" type="video/mp4">
+              Your browser does not support this video stream format.
+            </video>
+          </div>`;
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal(event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const modal = document.getElementById('modal-overlay');
+      const body = document.getElementById('modal-body');
+
+      modal.classList.remove('active');
+      body.innerHTML = '';
+    }
+
+
+
+
+    /* 
+       --------------------------------------------------------------------------
+       9. HELPER URL PARSERS
        --------------------------------------------------------------------------
     */
     function extractYouTubeID(url) {
@@ -791,7 +1102,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       9. INITIALIZATION
+       10. INITIALIZATION
        --------------------------------------------------------------------------
     */
     window.addEventListener('DOMContentLoaded', loadContent);
