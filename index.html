@@ -338,6 +338,29 @@
       border: 1px solid var(--accent-cyan);
       box-shadow: 0 0 35px var(--accent-glow);
       padding: 40px;
+
+      /* Firefox scrollbar styling */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.9) transparent;
+    }
+
+    /* WebKit (Chrome, Safari, Edge) custom scrollbar styling */
+    .modal-content::-webkit-scrollbar {
+      width: 8px; /* Sleek width so it stays cleanly inside the card */
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: transparent; /* Totally transparent track (preserves clean cyan border) */
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.9); /* 90% black movable scroll thumb */
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle border for visibility */
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #000000; /* Solid black on hover */
     }
 
     .modal-content.video-modal-content {
