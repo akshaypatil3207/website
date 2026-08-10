@@ -143,7 +143,7 @@
 
 
     /* ==========================================================================
-       SECTION 4: VIDEOS PAGE - DYNAMIC CATEGORY FILTER BUTTONS
+       SECTION 4: VIDEOS PAGE - DYNAMIC CATEGORY FILTER BUTTONS & HEADINGS
        ========================================================================== */
 
     .category-filter {
@@ -175,11 +175,28 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
+    /* Section Headings for Videos & Shorts */
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-divider {
+      margin: 45px 0 25px 0;
+      border: none;
+      border-top: 1px solid var(--border-color);
+    }
+
 
 
 
     /* ==========================================================================
-       SECTION 5: VIDEOS PAGE - YOUTUBE STYLE GRID & CARDS
+       SECTION 5: VIDEOS & SHORTS PAGE - YOUTUBE STYLE GRID & CARDS
        ========================================================================== */
 
     .video-grid {
@@ -292,7 +309,7 @@
     .status-msg {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 60px 20px;
+      padding: 40px 20px;
       color: var(--text-muted);
       font-size: 1.1rem;
       line-height: 1.6;
@@ -402,16 +419,25 @@
   <main>
 
     <!-- ------------------------------------------------------------------------
-         PAGE 1: VIDEOS SECTION
+         PAGE 1: VIDEOS & SHORTS SECTION
          ------------------------------------------------------------------------ -->
     <section id="videos-section" class="page-section active">
       
       <!-- Dynamic category tabs will be automatically created here by JS -->
       <div id="category-filter" class="category-filter"></div>
 
-      <!-- Video cards will be dynamically injected here -->
+      <!-- Videos Subsection -->
+      <h2 class="section-title">Videos</h2>
       <div id="video-grid" class="video-grid">
-        <div class="status-msg">Loading videos from DB...</div>
+        <div class="status-msg">Loading content from DB...</div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Shorts Subsection -->
+      <h2 class="section-title">Shorts</h2>
+      <div id="shorts-grid" class="video-grid">
+        <div class="status-msg">Loading content from DB...</div>
       </div>
 
     </section>
@@ -472,7 +498,7 @@
     */
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9maPUHMbAkZTS4c72grAzJvX3pCMQCIfSPXzb7lRH2vEILq4OuoAsF1zPtFEMHkleJkqRr0iZLfvy/pub?output=csv';
 
-    let allVideos = [];
+    let allItems = []; // Contains all parsed entries (excluding 'Private')
 
     // Fallback SVG if no thumbnail is available
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>');
@@ -502,10 +528,13 @@
        --------------------------------------------------------------------------
     */
     async function loadVideos() {
-      const grid = document.getElementById('video-grid');
+      const videoGrid = document.getElementById('video-grid');
+      const shortsGrid = document.getElementById('shorts-grid');
 
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
-        grid.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
+        const msg = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
+        videoGrid.innerHTML = msg;
+        shortsGrid.innerHTML = '';
         return;
       }
 
@@ -513,19 +542,22 @@
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
         const csvText = await response.text();
 
-        allVideos = parseCSV(csvText);
+        allItems = parseCSV(csvText);
 
-        if (allVideos.length === 0) {
-          grid.innerHTML = `<div class="status-msg">No videos found. Check that Row 1 has headers: <b>Title, VideoURL, Category, ThumbnailURL, Description</b></div>`;
+        if (allItems.length === 0) {
+          videoGrid.innerHTML = `<div class="status-msg">No items found. Check that Row 1 headers match: <b>Title, VideoURL, Category, ThumbnailURL, Description, Type</b></div>`;
+          shortsGrid.innerHTML = '';
           return;
         }
 
         renderCategoryButtons();
-        renderVideoCards(allVideos);
+        renderAllSections(allItems);
 
       } catch (err) {
         console.error('Fetch error:', err);
-        grid.innerHTML = `<div class="status-msg">Error loading videos from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        const errMsg = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        videoGrid.innerHTML = errMsg;
+        shortsGrid.innerHTML = '';
       }
     }
 
@@ -534,7 +566,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. ACCURATE CSV PARSER (PRESERVES BLANK CELLS)
+       4. ACCURATE CSV PARSER (EXTRACTS 'TYPE' & FILTERS OUT 'PRIVATE')
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
@@ -560,7 +592,13 @@
           if (['category', 'cat'].includes(cleanHeader)) row.Category = val;
           if (['thumbnailurl', 'thumbnail', 'thumb', 'image', 'img'].includes(cleanHeader)) row.ThumbnailURL = val;
           if (['description', 'desc'].includes(cleanHeader)) row.Description = val;
+          if (['type'].includes(cleanHeader)) row.Type = val;
         });
+
+        // Ignore rows where Type is explicitly 'Private'
+        if (row.Type && row.Type.toLowerCase() === 'private') {
+          return;
+        }
 
         if (row.Title && row.VideoURL) {
           results.push(row);
@@ -604,8 +642,8 @@
       const uniqueCategories = [
         'All',
         ...new Set(
-          allVideos
-            .map(video => video.Category ? video.Category.trim() : '')
+          allItems
+            .map(item => item.Category ? item.Category.trim() : '')
             .filter(cat => cat !== '')
         )
       ];
@@ -626,19 +664,35 @@
 
     /* 
        --------------------------------------------------------------------------
-       6. RENDER VIDEO CARDS
+       6. RENDER VIDEOS & SHORTS SECTIONS
        --------------------------------------------------------------------------
     */
-    function renderVideoCards(videos) {
-      const grid = document.getElementById('video-grid');
+    function renderAllSections(items) {
+      // Filter videos and shorts separately (defaulting to 'videos' if Type is omitted)
+      const videos = items.filter(item => {
+        const t = (item.Type || '').toLowerCase().trim();
+        return t === 'videos' || t === 'video' || t === '';
+      });
+
+      const shorts = items.filter(item => {
+        const t = (item.Type || '').toLowerCase().trim();
+        return t === 'shorts' || t === 'short';
+      });
+
+      renderGrid(videos, 'video-grid', 'No videos found.');
+      renderGrid(shorts, 'shorts-grid', 'No shorts found.');
+    }
+
+    function renderGrid(itemList, gridId, emptyMsg) {
+      const grid = document.getElementById(gridId);
       grid.innerHTML = '';
 
-      if (videos.length === 0) {
-        grid.innerHTML = `<div class="status-msg">No videos found under this category.</div>`;
+      if (itemList.length === 0) {
+        grid.innerHTML = `<div class="status-msg">${emptyMsg}</div>`;
         return;
       }
 
-      videos.forEach(video => {
+      itemList.forEach(video => {
         const youtubeId = extractYouTubeID(video.VideoURL);
         let thumbUrl = formatCustomThumbnail(video.ThumbnailURL);
 
@@ -703,12 +757,12 @@
       btnElement.classList.add('active');
 
       if (category === 'All') {
-        renderVideoCards(allVideos);
+        renderAllSections(allItems);
       } else {
-        const filtered = allVideos.filter(v => 
+        const filtered = allItems.filter(v => 
           v.Category && v.Category.trim().toLowerCase() === category.toLowerCase()
         );
-        renderVideoCards(filtered);
+        renderAllSections(filtered);
       }
     }
 
@@ -782,5 +836,6 @@
     */
     window.addEventListener('DOMContentLoaded', loadVideos);
 
-  </script></body>
+  </script>
+</body>
 </html>
