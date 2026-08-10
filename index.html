@@ -411,7 +411,7 @@
 
       <!-- Video cards will be dynamically injected here -->
       <div id="video-grid" class="video-grid">
-        <div class="status-msg">Loading videos from Google Sheet...</div>
+        <div class="status-msg">Loading videos from DB...</div>
       </div>
 
     </section>
@@ -525,7 +525,7 @@
 
       } catch (err) {
         console.error('Fetch error:', err);
-        grid.innerHTML = `<div class="status-msg">Error loading videos from Google Sheets.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        grid.innerHTML = `<div class="status-msg">Error loading videos from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
       }
     }
 
