@@ -305,7 +305,7 @@
 
 
     /* ==========================================================================
-       SECTION 6: EXPANDED FULLSCREEN MODAL & BOOK READER STYLES
+       SECTION 6: EXPANDED MODAL & BOOK READER STYLES
        ========================================================================== */
 
     .modal-overlay {
@@ -382,7 +382,7 @@
     }
 
     /* --------------------------------------------------------------------------
-       BOOK MODAL: LARGER 3D COVER & HOVER-TO-ZOOM MAGNIFIER
+       BOOK MODAL: LARGER 3D COVER & TEXT WRAPPING
        -------------------------------------------------------------------------- */
     
     .clearfix::after {
@@ -423,7 +423,7 @@
       overflow: hidden;
       background: #000000;
       border: 1px solid var(--border-color);
-      cursor: crosshair;
+      cursor: zoom-in;
     }
 
     .flip-front img, .flip-back img {
@@ -435,37 +435,6 @@
 
     .flip-back {
       transform: rotateY(180deg);
-    }
-
-    /* Highlight Lens inside Cover */
-    .zoom-lens {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border: 2px solid var(--accent-cyan);
-      background: rgba(0, 243, 255, 0.25);
-      box-shadow: 0 0 12px var(--accent-glow);
-      pointer-events: none;
-      display: none;
-      z-index: 10;
-      border-radius: 4px;
-    }
-
-    /* Zoom Preview Window Floating directly on the Right */
-    .zoom-preview-window {
-      position: absolute;
-      top: 0;
-      left: 340px;
-      width: 380px;
-      height: 460px;
-      border: 2px solid var(--accent-cyan);
-      border-radius: 12px;
-      background-color: #000000;
-      background-repeat: no-repeat;
-      display: none;
-      z-index: 200;
-      box-shadow: 0 0 35px var(--accent-glow);
-      pointer-events: none;
     }
 
     .flip-btn {
@@ -570,7 +539,7 @@
     .hl-default { background: rgba(255, 255, 255, 0.12); }
 
     /* --------------------------------------------------------------------------
-       FULLSCREEN IMAGE ZOOM LIGHTBOX
+       FULLSCREEN IMAGE EXPANSION & HOVER-TO-ZOOM MAGNIFIER
        -------------------------------------------------------------------------- */
     
     .zoom-overlay {
@@ -579,24 +548,71 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.96);
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 2000;
-      cursor: zoom-out;
     }
 
     .zoom-overlay.active {
       display: flex;
     }
 
-    .zoom-overlay img {
-      max-width: 90vw;
-      max-height: 90vh;
+    .fullscreen-zoom-container {
+      position: relative;
+      width: 92vw;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 4vw;
+    }
+
+    .zoom-img-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: crosshair;
+    }
+
+    .zoom-img-wrapper img {
+      max-width: 38vw;
+      max-height: 85vh;
       object-fit: contain;
+      display: block;
       border-radius: 8px;
-      box-shadow: 0 0 40px rgba(0, 243, 255, 0.4);
+      box-shadow: 0 0 35px rgba(0, 243, 255, 0.4);
+    }
+
+    .fullscreen-lens {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 2px solid var(--accent-cyan);
+      background: rgba(0, 243, 255, 0.25);
+      box-shadow: 0 0 15px var(--accent-glow);
+      pointer-events: none;
+      display: none;
+      z-index: 10;
+      border-radius: 4px;
+    }
+
+    .fullscreen-zoom-preview {
+      position: absolute;
+      left: calc(38vw + 8vw);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42vw;
+      height: 85vh;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      background-color: #000000;
+      background-repeat: no-repeat;
+      display: none;
+      box-shadow: 0 0 35px var(--accent-glow);
+      pointer-events: none;
+      z-index: 2100;
     }
 
   </style>
@@ -680,7 +696,7 @@
 
 
   <!-- ==========================================================================
-       HTML SECTION 3: POPUP MODALS & FULLSCREEN ZOOM
+       HTML SECTION 3: POPUP MODALS & FULLSCREEN EXPANSION WITH HOVER ZOOM
        ========================================================================== -->
 
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
@@ -690,9 +706,16 @@
     </div>
   </div>
 
-  <!-- Dedicated Fullscreen Cover Zoom Lightbox -->
-  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
-    <img id="zoom-img" src="" alt="Zoomed Cover">
+  <!-- Dedicated Fullscreen Cover Expansion Lightbox with Hover Zoom -->
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
+    <span class="close-modal-btn" style="top: 25px; right: 35px;" onclick="closeZoom()">&times;</span>
+    <div class="fullscreen-zoom-container" onclick="event.stopPropagation()">
+      <div id="zoom-img-wrapper" class="zoom-img-wrapper">
+        <div id="fullscreen-lens" class="fullscreen-lens"></div>
+        <img id="zoom-img" src="" alt="Zoomed Cover">
+      </div>
+      <div id="fullscreen-zoom-preview" class="fullscreen-zoom-preview"></div>
+    </div>
   </div>
 
 
@@ -982,7 +1005,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. BOOK MODAL, HOVER ZOOM & HIGHLIGHTER LOGIC
+       7. BOOK MODAL & HIGHLIGHTER LOGIC
        --------------------------------------------------------------------------
     */
     function openBookModal(book) {
@@ -1000,23 +1023,18 @@
       body.innerHTML = `
         <div class="clearfix">
           
-          <!-- LEFT FLOATING ENLARGED 3D COVER WITH HOVER MAGNIFIER -->
+          <!-- LEFT FLOATING ENLARGED 3D COVER -->
           <div class="book-cover-container">
-            <!-- FLOATING ZOOM WINDOW ON THE RIGHT -->
-            <div id="zoom-preview-window" class="zoom-preview-window"></div>
-
             <div id="flip-card-inner" class="flip-card-inner">
-              <div class="flip-front zoom-target" onclick="zoomImage('${frontCover}')">
-                <div class="zoom-lens"></div>
+              <div class="flip-front" onclick="zoomImage('${frontCover}')">
                 <img src="${frontCover}" alt="${book.Title} Front Cover">
               </div>
-              <div class="flip-back zoom-target" onclick="zoomImage('${backCover}')">
-                <div class="zoom-lens"></div>
+              <div class="flip-back" onclick="zoomImage('${backCover}')">
                 <img src="${backCover}" alt="${book.Title} Back Cover">
               </div>
             </div>
             <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
-            <div class="zoom-hint">🔍 Hover to zoom region | Click to expand fullscreen</div>
+            <div class="zoom-hint">💡 Click cover image to fully expand</div>
           </div>
 
           <!-- BOOK TITLE & SUMMARY -->
@@ -1040,7 +1058,6 @@
       `;
 
       modal.classList.add('active');
-      setupHoverZoom();
     }
 
     function toggleBookFlip() {
@@ -1053,68 +1070,6 @@
       } else {
         btn.textContent = 'Flip to Back Cover';
       }
-    }
-
-    /* Hover-to-Zoom Lens and Right-Side Magnifier Window Logic */
-    function setupHoverZoom() {
-      const container = document.querySelector('.book-cover-container');
-      const preview = document.getElementById('zoom-preview-window');
-      if (!container || !preview) return;
-
-      const targets = container.querySelectorAll('.zoom-target');
-
-      targets.forEach(target => {
-        const img = target.querySelector('img');
-        const lens = target.querySelector('.zoom-lens');
-
-        target.addEventListener('mouseenter', () => {
-          preview.style.backgroundImage = `url('${img.src}')`;
-          preview.style.display = 'block';
-          if (lens) lens.style.display = 'block';
-        });
-
-        target.addEventListener('mouseleave', () => {
-          preview.style.display = 'none';
-          if (lens) lens.style.display = 'none';
-        });
-
-        target.addEventListener('mousemove', (e) => {
-          const rect = target.getBoundingClientRect();
-
-          let x = e.clientX - rect.left;
-          let y = e.clientY - rect.top;
-
-          const lensWidth = 100;
-          const lensHeight = 100;
-
-          let lensX = x - lensWidth / 2;
-          let lensY = y - lensHeight / 2;
-
-          if (lensX < 0) lensX = 0;
-          if (lensY < 0) lensY = 0;
-          if (lensX > rect.width - lensWidth) lensX = rect.width - lensWidth;
-          if (lensY > rect.height - lensHeight) lensY = rect.height - lensHeight;
-
-          if (lens) {
-            lens.style.left = lensX + 'px';
-            lens.style.top = lensY + 'px';
-          }
-
-          const zoomFactor = 2.5; 
-          preview.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
-
-          const rx = lensX / (rect.width - lensWidth);
-          const ry = lensY / (rect.height - lensHeight);
-
-          const bgW = rect.width * zoomFactor - preview.clientWidth;
-          const bgH = rect.height * zoomFactor - preview.clientHeight;
-
-          const bgX = rx * bgW;
-          const bgY = ry * bgH;
-
-          preview.style.backgroundPosition = `-${bgX}px -${bgY}px`;
-        });
-      });
     }
 
     // Parse [Y], [F], and [O] Tags
@@ -1173,7 +1128,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. FULLSCREEN IMAGE ZOOM LOGIC
+       8. FULL EXPANSION & HOVER-TO-ZOOM MAGNIFIER LOGIC
        --------------------------------------------------------------------------
     */
     function zoomImage(src) {
@@ -1183,10 +1138,75 @@
 
       img.src = src;
       overlay.classList.add('active');
+
+      document.getElementById('fullscreen-zoom-preview').style.display = 'none';
+      document.getElementById('fullscreen-lens').style.display = 'none';
     }
 
-    function closeZoom() {
+    function closeZoom(event) {
+      if (event && event.stopPropagation) event.stopPropagation();
       document.getElementById('zoom-overlay').classList.remove('active');
+    }
+
+    function initFullscreenHoverZoom() {
+      const wrapper = document.getElementById('zoom-img-wrapper');
+      const img = document.getElementById('zoom-img');
+      const lens = document.getElementById('fullscreen-lens');
+      const preview = document.getElementById('fullscreen-zoom-preview');
+
+      if (!wrapper || !img || !lens || !preview) return;
+
+      wrapper.addEventListener('mouseenter', () => {
+        if (!img.src) return;
+        preview.style.backgroundImage = `url('${img.src}')`;
+        preview.style.display = 'block';
+        lens.style.display = 'block';
+      });
+
+      wrapper.addEventListener('mouseleave', () => {
+        preview.style.display = 'none';
+        lens.style.display = 'none';
+      });
+
+      wrapper.addEventListener('mousemove', (e) => {
+        const rect = img.getBoundingClientRect();
+
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > rect.width) x = rect.width;
+        if (y > rect.height) y = rect.height;
+
+        const lensWidth = 110;
+        const lensHeight = 110;
+
+        let lensX = x - lensWidth / 2;
+        let lensY = y - lensHeight / 2;
+
+        if (lensX < 0) lensX = 0;
+        if (lensY < 0) lensY = 0;
+        if (lensX > rect.width - lensWidth) lensX = rect.width - lensWidth;
+        if (lensY > rect.height - lensHeight) lensY = rect.height - lensHeight;
+
+        lens.style.left = lensX + 'px';
+        lens.style.top = lensY + 'px';
+
+        const zoomFactor = 2.5;
+        preview.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+
+        const rx = (rect.width > lensWidth) ? lensX / (rect.width - lensWidth) : 0;
+        const ry = (rect.height > lensHeight) ? lensY / (rect.height - lensHeight) : 0;
+
+        const bgW = rect.width * zoomFactor - preview.clientWidth;
+        const bgH = rect.height * zoomFactor - preview.clientHeight;
+
+        const bgX = rx * bgW;
+        const bgY = ry * bgH;
+
+        preview.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+      });
     }
 
 
@@ -1276,7 +1296,10 @@
       return (match && match[1]) ? match[1] : null;
     }
 
-    window.addEventListener('DOMContentLoaded', loadContent);
+    window.addEventListener('DOMContentLoaded', () => {
+      loadContent();
+      initFullscreenHoverZoom();
+    });
 
   </script>
 </body>
