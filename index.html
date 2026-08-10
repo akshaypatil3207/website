@@ -72,10 +72,10 @@
       color: var(--accent-cyan); /* Highlight word in neon cyan */
     }
 
-    /* Main Section Buttons (Videos, Photos, Status) */
+    /* Main Section Buttons (Videos, Shorts, Photos, Status) */
     .nav-tabs {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       list-style: none;
     }
 
@@ -83,7 +83,7 @@
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-muted);
-      padding: 8px 20px;
+      padding: 8px 18px;
       font-size: 0.95rem;
       font-weight: 600;
       border-radius: 20px;
@@ -143,7 +143,7 @@
 
 
     /* ==========================================================================
-       SECTION 4: VIDEOS PAGE - DYNAMIC CATEGORY FILTER BUTTONS & HEADINGS
+       SECTION 4: DYNAMIC CATEGORY FILTER BUTTONS & HEADINGS
        ========================================================================== */
 
     .category-filter {
@@ -175,28 +175,11 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Section Headings for Videos & Shorts */
-    .section-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--accent-cyan);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .section-divider {
-      margin: 45px 0 25px 0;
-      border: none;
-      border-top: 1px solid var(--border-color);
-    }
-
 
 
 
     /* ==========================================================================
-       SECTION 5: VIDEOS & SHORTS PAGE - YOUTUBE STYLE GRID & CARDS
+       SECTION 5: YOUTUBE STYLE GRID & CARDS
        ========================================================================== */
 
     .video-grid {
@@ -309,7 +292,7 @@
     .status-msg {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
       color: var(--text-muted);
       font-size: 1.1rem;
       line-height: 1.6;
@@ -401,6 +384,9 @@
         <button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button>
       </li>
       <li>
+        <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
+      </li>
+      <li>
         <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
       </li>
       <li>
@@ -418,47 +404,29 @@
 
   <main>
 
-    <!-- ------------------------------------------------------------------------
-         PAGE 1: VIDEOS & SHORTS SECTION
-         ------------------------------------------------------------------------ -->
+    <!-- PAGE 1: VIDEOS SECTION -->
     <section id="videos-section" class="page-section active">
-      
-      <!-- Dynamic category tabs will be automatically created here by JS -->
-      <div id="category-filter" class="category-filter"></div>
-
-      <!-- Videos Subsection -->
-      <h2 class="section-title">Videos</h2>
+      <div id="category-filter-videos" class="category-filter"></div>
       <div id="video-grid" class="video-grid">
-        <div class="status-msg">Loading content from DB...</div>
+        <div class="status-msg">Loading videos from DB...</div>
       </div>
-
-      <hr class="section-divider">
-
-      <!-- Shorts Subsection -->
-      <h2 class="section-title">Shorts</h2>
-      <div id="shorts-grid" class="video-grid">
-        <div class="status-msg">Loading content from DB...</div>
-      </div>
-
     </section>
 
+    <!-- PAGE 2: SHORTS SECTION -->
+    <section id="shorts-section" class="page-section">
+      <div id="category-filter-shorts" class="category-filter"></div>
+      <div id="shorts-grid" class="video-grid">
+        <div class="status-msg">Loading shorts from DB...</div>
+      </div>
+    </section>
 
-
-
-    <!-- ------------------------------------------------------------------------
-         PAGE 2: PHOTOS SECTION (PLACEHOLDER FOR FUTURE MODULE)
-         ------------------------------------------------------------------------ -->
+    <!-- PAGE 3: PHOTOS SECTION -->
     <section id="photos-section" class="page-section">
       <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
       <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
     </section>
 
-
-
-
-    <!-- ------------------------------------------------------------------------
-         PAGE 3: STATUS SECTION (PLACEHOLDER FOR FUTURE MODULE)
-         ------------------------------------------------------------------------ -->
+    <!-- PAGE 4: STATUS SECTION -->
     <section id="status-section" class="page-section">
       <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Status Updates</h2>
       <p style="color: var(--text-muted);">This section will be populated in the next development step.</p>
@@ -489,7 +457,7 @@
        JAVASCRIPT SECTION: BACKEND LOGIC & DYNAMIC RENDERING
        ========================================================================== -->
 
- <script>
+  <script>
 
     /* 
        --------------------------------------------------------------------------
@@ -498,7 +466,7 @@
     */
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9maPUHMbAkZTS4c72grAzJvX3pCMQCIfSPXzb7lRH2vEILq4OuoAsF1zPtFEMHkleJkqRr0iZLfvy/pub?output=csv';
 
-    let allItems = []; // Contains all parsed entries (excluding 'Private')
+    let allItems = [];
 
     // Fallback SVG if no thumbnail is available
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Thumbnail</text></svg>');
@@ -527,14 +495,14 @@
        3. FETCH CSV DATA FROM GOOGLE SHEETS
        --------------------------------------------------------------------------
     */
-    async function loadVideos() {
+    async function loadContent() {
       const videoGrid = document.getElementById('video-grid');
       const shortsGrid = document.getElementById('shorts-grid');
 
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
         const msg = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
         videoGrid.innerHTML = msg;
-        shortsGrid.innerHTML = '';
+        shortsGrid.innerHTML = msg;
         return;
       }
 
@@ -545,19 +513,19 @@
         allItems = parseCSV(csvText);
 
         if (allItems.length === 0) {
-          videoGrid.innerHTML = `<div class="status-msg">No items found. Check that Row 1 headers match: <b>Title, VideoURL, Category, ThumbnailURL, Description, Type</b></div>`;
-          shortsGrid.innerHTML = '';
+          videoGrid.innerHTML = `<div class="status-msg">No items found in DB. Verify Row 1 headers: <b>Title, VideoURL, Category, ThumbnailURL, Description, Type</b></div>`;
+          shortsGrid.innerHTML = `<div class="status-msg">No shorts found in DB.</div>`;
           return;
         }
 
-        renderCategoryButtons();
-        renderAllSections(allItems);
+        renderSection('videos');
+        renderSection('shorts');
 
       } catch (err) {
         console.error('Fetch error:', err);
         const errMsg = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
         videoGrid.innerHTML = errMsg;
-        shortsGrid.innerHTML = '';
+        shortsGrid.innerHTML = errMsg;
       }
     }
 
@@ -566,7 +534,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. ACCURATE CSV PARSER (EXTRACTS 'TYPE' & FILTERS OUT 'PRIVATE')
+       4. ACCURATE CSV PARSER (PRESERVES BLANK CELLS & FILTERS OUT 'PRIVATE')
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
@@ -595,9 +563,9 @@
           if (['type'].includes(cleanHeader)) row.Type = val;
         });
 
-        // Ignore rows where Type is explicitly 'Private'
+        // Skip Private entries seamlessly
         if (row.Type && row.Type.toLowerCase() === 'private') {
-          return;
+          continue;
         }
 
         if (row.Title && row.VideoURL) {
@@ -633,70 +601,65 @@
 
     /* 
        --------------------------------------------------------------------------
-       5. DYNAMIC CATEGORY BUTTON GENERATOR
+       5. RENDER SECTION (CATEGORIES + GRID CARDS)
        --------------------------------------------------------------------------
     */
-    function renderCategoryButtons() {
-      const filterContainer = document.getElementById('category-filter');
+    function renderSection(sectionType, selectedCategory = 'All') {
+      const isShorts = sectionType === 'shorts';
+      const gridId = isShorts ? 'shorts-grid' : 'video-grid';
+      const filterId = isShorts ? 'category-filter-shorts' : 'category-filter-videos';
 
+      // Filter by Type
+      const sectionItems = allItems.filter(item => {
+        const t = (item.Type || '').toLowerCase().trim();
+        if (isShorts) {
+          return t === 'shorts' || t === 'short';
+        } else {
+          return t === 'videos' || t === 'video' || t === '';
+        }
+      });
+
+      // Build dynamic category buttons for this specific page
+      const filterContainer = document.getElementById(filterId);
       const uniqueCategories = [
         'All',
         ...new Set(
-          allItems
+          sectionItems
             .map(item => item.Category ? item.Category.trim() : '')
             .filter(cat => cat !== '')
         )
       ];
 
       filterContainer.innerHTML = '';
-
-      uniqueCategories.forEach((category, index) => {
+      uniqueCategories.forEach(category => {
         const btn = document.createElement('button');
-        btn.className = `cat-btn ${index === 0 ? 'active' : ''}`;
+        btn.className = `cat-btn ${category.toLowerCase() === selectedCategory.toLowerCase() ? 'active' : ''}`;
         btn.textContent = category;
-        btn.onclick = (e) => filterCategory(category, e.target);
+        btn.onclick = () => renderSection(sectionType, category);
         filterContainer.appendChild(btn);
       });
-    }
 
+      // Filter by Category
+      let finalItems = sectionItems;
+      if (selectedCategory !== 'All') {
+        finalItems = sectionItems.filter(v => 
+          v.Category && v.Category.trim().toLowerCase() === selectedCategory.toLowerCase()
+        );
+      }
 
-
-
-    /* 
-       --------------------------------------------------------------------------
-       6. RENDER VIDEOS & SHORTS SECTIONS
-       --------------------------------------------------------------------------
-    */
-    function renderAllSections(items) {
-      // Filter videos and shorts separately (defaulting to 'videos' if Type is omitted)
-      const videos = items.filter(item => {
-        const t = (item.Type || '').toLowerCase().trim();
-        return t === 'videos' || t === 'video' || t === '';
-      });
-
-      const shorts = items.filter(item => {
-        const t = (item.Type || '').toLowerCase().trim();
-        return t === 'shorts' || t === 'short';
-      });
-
-      renderGrid(videos, 'video-grid', 'No videos found.');
-      renderGrid(shorts, 'shorts-grid', 'No shorts found.');
-    }
-
-    function renderGrid(itemList, gridId, emptyMsg) {
+      // Render Grid
       const grid = document.getElementById(gridId);
       grid.innerHTML = '';
 
-      if (itemList.length === 0) {
-        grid.innerHTML = `<div class="status-msg">${emptyMsg}</div>`;
+      if (finalItems.length === 0) {
+        grid.innerHTML = `<div class="status-msg">No ${isShorts ? 'shorts' : 'videos'} found in this category.</div>`;
         return;
       }
 
-      itemList.forEach(video => {
+      finalItems.forEach(video => {
         const youtubeId = extractYouTubeID(video.VideoURL);
         let thumbUrl = formatCustomThumbnail(video.ThumbnailURL);
 
-        // Auto-generate YouTube thumbnail if ThumbnailURL is empty
         if (!thumbUrl && youtubeId) {
           thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
         } else if (!thumbUrl) {
@@ -728,7 +691,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. HELPER: FORMAT CUSTOM THUMBNAIL URLS
+       6. HELPER: FORMAT CUSTOM THUMBNAIL URLS
        --------------------------------------------------------------------------
     */
     function formatCustomThumbnail(url) {
@@ -749,29 +712,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. CATEGORY FILTERING LOGIC
-       --------------------------------------------------------------------------
-    */
-    function filterCategory(category, btnElement) {
-      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
-
-      if (category === 'All') {
-        renderAllSections(allItems);
-      } else {
-        const filtered = allItems.filter(v => 
-          v.Category && v.Category.trim().toLowerCase() === category.toLowerCase()
-        );
-        renderAllSections(filtered);
-      }
-    }
-
-
-
-
-    /* 
-       --------------------------------------------------------------------------
-       9. POPUP LIGHTBOX PLAYER MODAL
+       7. POPUP LIGHTBOX PLAYER MODAL
        --------------------------------------------------------------------------
     */
     function openModal(videoUrl, youtubeId) {
@@ -815,7 +756,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       10. YOUTUBE LINK PARSER
+       8. YOUTUBE LINK PARSER
        --------------------------------------------------------------------------
     */
     function extractYouTubeID(url) {
@@ -831,10 +772,10 @@
 
     /* 
        --------------------------------------------------------------------------
-       11. INITIALIZATION
+       9. INITIALIZATION
        --------------------------------------------------------------------------
     */
-    window.addEventListener('DOMContentLoaded', loadVideos);
+    window.addEventListener('DOMContentLoaded', loadContent);
 
   </script>
 </body>
