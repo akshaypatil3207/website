@@ -305,7 +305,7 @@
 
 
     /* ==========================================================================
-       SECTION 6: EXPANDED 150% MODAL & BOOK READER STYLES WITH SCROLLBAR
+       SECTION 6: EXPANDED FULLSCREEN MODAL & BOOK READER STYLES
        ========================================================================== */
 
     .modal-overlay {
@@ -317,64 +317,47 @@
       background: rgba(0, 0, 0, 0.92);
       backdrop-filter: blur(8px);
       display: none;
-      overflow: auto; /* Allows scrolling when modal content is larger than viewport */
+      justify-content: center;
+      align-items: center;
       z-index: 1000;
-      padding: 30px;
+      padding: 20px;
     }
 
     .modal-overlay.active {
       display: flex;
     }
 
-    /* Custom Neon Scrollbars for 150% view */
-    .modal-overlay::-webkit-scrollbar {
-      width: 12px;
-      height: 12px;
-    }
-    .modal-overlay::-webkit-scrollbar-track {
-      background: #0a0a12;
-    }
-    .modal-overlay::-webkit-scrollbar-thumb {
-      background: var(--accent-cyan);
-      border-radius: 6px;
-      box-shadow: 0 0 10px var(--accent-glow);
-    }
-    .modal-overlay::-webkit-scrollbar-thumb:hover {
-      background: #ffffff;
-    }
-
-    /* Expands content to 150% of screen size */
+    /* Occupies ~95% of screen width & height */
     .modal-content {
       position: relative;
-      width: 150vw;
-      min-height: 150vh;
-      margin: auto;
+      width: 95vw;
+      max-width: 1400px;
+      height: 92vh;
       background: var(--card-bg);
       border-radius: 12px;
+      overflow-y: auto;
       border: 1px solid var(--accent-cyan);
       box-shadow: 0 0 35px var(--accent-glow);
-      padding: 50px;
+      padding: 40px;
     }
 
     .modal-content.video-modal-content {
       padding: 0;
-      width: 95vw;
-      min-height: auto;
+      height: auto;
       max-width: 950px;
       overflow: hidden;
     }
 
     .close-modal-btn {
-      position: sticky;
-      top: 10px;
-      float: right;
+      position: absolute;
+      top: 20px;
+      right: 25px;
       color: var(--text-white);
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       cursor: pointer;
       z-index: 1010;
       line-height: 1;
       transition: color 0.2s ease;
-      margin-left: 20px;
     }
 
     .close-modal-btn:hover {
@@ -520,7 +503,7 @@
     
     .notes-stream,
     .notes-stream mark {
-      font-family: 'Shantell Sans', sans-serif !important;
+     font-family: 'Shantell Sans', sans-serif !important;
       font-size: 1.5rem;
       line-height: 1.5;
       letter-spacing: 0.4px;
