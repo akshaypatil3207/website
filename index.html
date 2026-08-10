@@ -305,7 +305,7 @@
 
 
     /* ==========================================================================
-       SECTION 6: EXPANDED FULLSCREEN MODAL & BOOK READER STYLES
+       SECTION 6: EXPANDED MODAL & BOOK READER STYLES
        ========================================================================== */
 
     .modal-overlay {
@@ -327,7 +327,6 @@
       display: flex;
     }
 
-    /* Occupies ~95% of screen width & height */
     .modal-content {
       position: relative;
       width: 95vw;
@@ -391,8 +390,8 @@
       display: table;
     }
 
-    /* Enlarged book cover container */
     .book-cover-container {
+      position: relative;
       float: left;
       width: 320px;
       margin-right: 40px;
@@ -430,6 +429,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
 
     .flip-back {
@@ -481,7 +481,6 @@
       line-height: 1.6;
     }
 
-    /* Clear Section Header for Notes */
     .notes-heading {
       color: var(--accent-cyan);
       font-size: 1.5rem;
@@ -503,16 +502,15 @@
     
     .notes-stream,
     .notes-stream mark {
-     font-family: 'Shantell Sans', sans-serif !important;
+      font-family: 'Shantell Sans', sans-serif !important;
       font-size: 1.5rem;
       line-height: 1.5;
       letter-spacing: 0.4px;
       color: #ffffff;
     }
 
-    /* flow-root prevents mid-sentence awkward wrapping around cover float */
     .note-line {
-      margin-bottom: 56px; /* Doubled sentence spacing */
+      margin-bottom: 56px;
       display: flow-root;
     }
 
@@ -524,22 +522,19 @@
       -webkit-box-decoration-break: clone;
     }
 
-    /* Glowing Yellowish-Green [Y] */
     .hl-y-1 { background: rgba(235, 255, 60, 0.38); text-shadow: 0 0 8px rgba(235,255,60,0.3); }
     .hl-y-2 { background: rgba(195, 225, 30, 0.42); }
 
-    /* Fluorescent Green [F] */
     .hl-f-1 { background: rgba(0, 255, 180, 0.32); text-shadow: 0 0 8px rgba(0,255,180,0.3); }
     .hl-f-2 { background: rgba(0, 210, 130, 0.38); }
 
-    /* Glowing Fresh Yellowish-Orange [O] */
     .hl-o-1 { background: rgba(255, 165, 0, 0.42); text-shadow: 0 0 8px rgba(255,165,0,0.3); }
     .hl-o-2 { background: rgba(230, 135, 0, 0.48); }
 
     .hl-default { background: rgba(255, 255, 255, 0.12); }
 
     /* --------------------------------------------------------------------------
-       FULLSCREEN IMAGE ZOOM LIGHTBOX
+       FULLSCREEN IMAGE EXPANSION & HOVER-TO-ZOOM MAGNIFIER
        -------------------------------------------------------------------------- */
     
     .zoom-overlay {
@@ -548,24 +543,74 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.96);
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 2000;
-      cursor: zoom-out;
+      cursor: pointer; /* Single click anywhere to exit */
     }
 
     .zoom-overlay.active {
       display: flex;
     }
 
-    .zoom-overlay img {
-      max-width: 90vw;
-      max-height: 90vh;
+    .fullscreen-zoom-container {
+      position: relative;
+      width: 92vw;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 3vw;
+    }
+
+    .zoom-img-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: crosshair;
+    }
+
+    /* Restored Larger Display Size for Expanded Book Cover */
+    .zoom-img-wrapper img {
+      max-width: 44vw;
+      max-height: 88vh;
       object-fit: contain;
+      display: block;
       border-radius: 8px;
-      box-shadow: 0 0 40px rgba(0, 243, 255, 0.4);
+      box-shadow: 0 0 35px rgba(0, 243, 255, 0.4);
+    }
+
+    .fullscreen-lens {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 2px solid var(--accent-cyan);
+      background: rgba(0, 243, 255, 0.25);
+      box-shadow: 0 0 15px var(--accent-glow);
+      pointer-events: none;
+      display: none;
+      z-index: 10;
+      border-radius: 4px;
+    }
+
+    /* Positioned beside the slightly larger image */
+    .fullscreen-zoom-preview {
+      position: absolute;
+      left: calc(44vw + 5vw);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42vw;
+      height: 88vh;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      background-color: #000000;
+      background-repeat: no-repeat;
+      display: none;
+      box-shadow: 0 0 35px var(--accent-glow);
+      pointer-events: none;
+      z-index: 2100;
     }
 
   </style>
@@ -649,7 +694,7 @@
 
 
   <!-- ==========================================================================
-       HTML SECTION 3: POPUP MODALS & FULLSCREEN ZOOM
+       HTML SECTION 3: POPUP MODALS & FULLSCREEN EXPANSION WITH HOVER ZOOM
        ========================================================================== -->
 
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
@@ -659,9 +704,16 @@
     </div>
   </div>
 
-  <!-- Dedicated Fullscreen Cover Zoom Lightbox -->
-  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
-    <img id="zoom-img" src="" alt="Zoomed Cover">
+  <!-- Dedicated Fullscreen Cover Expansion Lightbox (Single click anywhere exits) -->
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
+    <span class="close-modal-btn" style="top: 25px; right: 35px;" onclick="closeZoom(event)">&times;</span>
+    <div class="fullscreen-zoom-container">
+      <div id="zoom-img-wrapper" class="zoom-img-wrapper">
+        <div id="fullscreen-lens" class="fullscreen-lens"></div>
+        <img id="zoom-img" src="" alt="Zoomed Cover">
+      </div>
+      <div id="fullscreen-zoom-preview" class="fullscreen-zoom-preview"></div>
+    </div>
   </div>
 
 
@@ -951,7 +1003,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. BOOK MODAL & HIGHLIGHTER LOGIC ([Y], [F], [O])
+       7. BOOK MODAL & HIGHLIGHTER LOGIC
        --------------------------------------------------------------------------
     */
     function openBookModal(book) {
@@ -980,7 +1032,7 @@
               </div>
             </div>
             <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
-            <div class="zoom-hint">💡 Click cover to expand fullscreen</div>
+            <div class="zoom-hint">💡 Click cover image to fully expand</div>
           </div>
 
           <!-- BOOK TITLE & SUMMARY -->
@@ -1041,7 +1093,6 @@
           tag = 'O';
         }
 
-        // Cleanly strip all tag brackets from displayed sentence
         trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
 
         if (tag && tag === lastTag) {
@@ -1075,7 +1126,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. FULLSCREEN IMAGE ZOOM LOGIC
+       8. FULL EXPANSION & HOVER-TO-ZOOM MAGNIFIER LOGIC
        --------------------------------------------------------------------------
     */
     function zoomImage(src) {
@@ -1085,10 +1136,76 @@
 
       img.src = src;
       overlay.classList.add('active');
+
+      document.getElementById('fullscreen-zoom-preview').style.display = 'none';
+      document.getElementById('fullscreen-lens').style.display = 'none';
     }
 
-    function closeZoom() {
+    // Single click anywhere on the expanded overlay exits zoom
+    function closeZoom(event) {
+      if (event && event.stopPropagation) event.stopPropagation();
       document.getElementById('zoom-overlay').classList.remove('active');
+    }
+
+    function initFullscreenHoverZoom() {
+      const wrapper = document.getElementById('zoom-img-wrapper');
+      const img = document.getElementById('zoom-img');
+      const lens = document.getElementById('fullscreen-lens');
+      const preview = document.getElementById('fullscreen-zoom-preview');
+
+      if (!wrapper || !img || !lens || !preview) return;
+
+      wrapper.addEventListener('mouseenter', () => {
+        if (!img.src) return;
+        preview.style.backgroundImage = `url('${img.src}')`;
+        preview.style.display = 'block';
+        lens.style.display = 'block';
+      });
+
+      wrapper.addEventListener('mouseleave', () => {
+        preview.style.display = 'none';
+        lens.style.display = 'none';
+      });
+
+      wrapper.addEventListener('mousemove', (e) => {
+        const rect = img.getBoundingClientRect();
+
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > rect.width) x = rect.width;
+        if (y > rect.height) y = rect.height;
+
+        const lensWidth = 110;
+        const lensHeight = 110;
+
+        let lensX = x - lensWidth / 2;
+        let lensY = y - lensHeight / 2;
+
+        if (lensX < 0) lensX = 0;
+        if (lensY < 0) lensY = 0;
+        if (lensX > rect.width - lensWidth) lensX = rect.width - lensWidth;
+        if (lensY > rect.height - lensHeight) lensY = rect.height - lensHeight;
+
+        lens.style.left = lensX + 'px';
+        lens.style.top = lensY + 'px';
+
+        const zoomFactor = 2.5;
+        preview.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+
+        const rx = (rect.width > lensWidth) ? lensX / (rect.width - lensWidth) : 0;
+        const ry = (rect.height > lensHeight) ? lensY / (rect.height - lensHeight) : 0;
+
+        const bgW = rect.width * zoomFactor - preview.clientWidth;
+        const bgH = rect.height * zoomFactor - preview.clientHeight;
+
+        const bgX = rx * bgW;
+        const bgY = ry * bgH;
+
+        preview.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+      });
     }
 
 
@@ -1178,7 +1295,10 @@
       return (match && match[1]) ? match[1] : null;
     }
 
-    window.addEventListener('DOMContentLoaded', loadContent);
+    window.addEventListener('DOMContentLoaded', () => {
+      loadContent();
+      initFullscreenHoverZoom();
+    });
 
   </script>
 </body>
