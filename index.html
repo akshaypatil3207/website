@@ -503,30 +503,25 @@
     
     .notes-stream,
     .notes-stream mark {
-      font-family: 'Shantell Sans', cursive !important;
-      font-size: 1.4rem;
-      line-height: 1.6;
+     font-family: 'Shantell Sans', sans-serif !important;
+      font-size: 1.5rem;
+      line-height: 1.5;
       letter-spacing: 0.4px;
       color: #ffffff;
     }
 
     /* flow-root prevents mid-sentence awkward wrapping around cover float */
     .note-line {
-      margin-bottom: 35px;
+      margin-bottom: 56px; /* Doubled sentence spacing */
       display: flow-root;
     }
 
-    /* UNEVEN HIGHLIGHTER EFFECT: Square sides, top longer on left, bottom longer on right */
     .note-line mark {
       color: #ffffff;
-      padding: 6px 16px;
-      border-radius: 0px; /* Square left and right edges */
+      padding: 4px 10px;
+      border-radius: 4px;
       box-decoration-break: clone;
       -webkit-box-decoration-break: clone;
-      display: inline-block;
-      /* Top edge extends left (0% 0%), Top-right pulled in (97% 3%), 
-         Bottom-right extends right (100% 100%), Bottom-left pulled in (3% 97%) */
-      clip-path: polygon(0% 0%, 97% 3%, 100% 100%, 3% 97%);
     }
 
     /* Glowing Yellowish-Green [Y] */
@@ -544,7 +539,7 @@
     .hl-default { background: rgba(255, 255, 255, 0.12); }
 
     /* --------------------------------------------------------------------------
-       FULLSCREEN IMAGE ZOOM LIGHTBOX WITH HIGH-RES MAGNIFICATION
+       FULLSCREEN IMAGE ZOOM LIGHTBOX
        -------------------------------------------------------------------------- */
     
     .zoom-overlay {
@@ -553,72 +548,24 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.95);
+      background: rgba(0, 0, 0, 0.96);
       display: none;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       z-index: 2000;
-      overflow: auto; /* Enables full scrolling when magnified */
+      cursor: zoom-out;
     }
 
     .zoom-overlay.active {
       display: flex;
     }
 
-    .zoom-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 2010;
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      padding: 15px;
-      background: rgba(10, 10, 18, 0.85);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .zoom-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--accent-cyan);
-      color: var(--accent-cyan);
-      padding: 8px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .zoom-btn:hover {
-      background: var(--accent-cyan);
-      color: #000000;
-    }
-
-    .zoom-img-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 30px;
-      min-height: calc(100vh - 70px);
-    }
-
     .zoom-overlay img {
       max-width: 90vw;
-      max-height: 85vh;
+      max-height: 90vh;
       object-fit: contain;
-      border-radius: 6px;
-      box-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
-      cursor: zoom-in;
-      transition: transform 0.2s ease, max-width 0.2s ease, max-height 0.2s ease;
-    }
-
-    /* Magnified state for reading fine back-cover text */
-    .zoom-overlay img.magnified {
-      max-width: none !important;
-      max-height: none !important;
-      width: 1800px; /* Forces full resolution rendering */
-      cursor: zoom-out;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0, 243, 255, 0.4);
     }
 
   </style>
@@ -712,15 +659,9 @@
     </div>
   </div>
 
-  <!-- Fullscreen Cover Zoom Lightbox with Magnifier Controls -->
-  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
-    <div class="zoom-toolbar" onclick="event.stopPropagation()">
-      <button class="zoom-btn" onclick="toggleZoomMode()">🔍 Toggle 2x Magnify</button>
-      <button class="zoom-btn close-zoom" onclick="closeZoom()">✕ Close</button>
-    </div>
-    <div id="zoom-img-container" class="zoom-img-container" onclick="event.stopPropagation()">
-      <img id="zoom-img" src="" alt="Zoomed Cover" onclick="toggleZoomMode()">
-    </div>
+  <!-- Dedicated Fullscreen Cover Zoom Lightbox -->
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom()">
+    <img id="zoom-img" src="" alt="Zoomed Cover">
   </div>
 
 
@@ -812,65 +753,27 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. MULTILINE-AWARE ACCURATE CSV PARSER
+       4. ACCURATE CSV PARSER
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
-      const rows = [];
-      let currentRow = [];
-      let currentVal = '';
-      let inQuotes = false;
+      const lines = csvText.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
 
-      for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i];
-        const nextChar = csvText[i + 1];
-
-        if (char === '"') {
-          if (inQuotes && nextChar === '"') {
-            currentVal += '"';
-            i++; // Skip escaped quote
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          currentRow.push(currentVal);
-          currentVal = '';
-        } else if ((char === '\r' || char === '\n') && !inQuotes) {
-          if (char === '\r' && nextChar === '\n') {
-            i++;
-          }
-          currentRow.push(currentVal);
-          currentVal = '';
-          if (currentRow.some(cell => cell.trim() !== '')) {
-            rows.push(currentRow);
-          }
-          currentRow = [];
-        } else {
-          currentVal += char;
-        }
-      }
-
-      if (currentVal || currentRow.length > 0) {
-        currentRow.push(currentVal);
-        if (currentRow.some(cell => cell.trim() !== '')) {
-          rows.push(currentRow);
-        }
-      }
-
-      if (rows.length < 2) return [];
-
-      const rawHeaders = rows[0];
+      const rawHeaders = parseCSVLine(lines[0]);
       const results = [];
 
-      for (let i = 1; i < rows.length; i++) {
-        const values = rows[i];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = parseCSVLine(lines[i]);
+
         const row = {};
         rawHeaders.forEach((header, index) => {
           let val = values[index] ? values[index].trim() : '';
-          val = val.replace(/^"|"$/g, '').trim();
-
+          val = val.replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+          
           const cleanHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
-
+          
           if (['title', 'name', 'book'].includes(cleanHeader)) row.Title = val;
           if (['videourl', 'video', 'link', 'url', 'frontcover'].includes(cleanHeader)) row.VideoURL = val;
           if (['category', 'cat', 'genre'].includes(cleanHeader)) row.Category = val;
@@ -880,14 +783,36 @@
           if (['notes', 'highlights', 'quote', 'quotes'].includes(cleanHeader)) row.Notes = val;
         });
 
-        if (row.Type && row.Type.toLowerCase() === 'private') continue;
+        // Skip Private entries
+        if (row.Type && row.Type.toLowerCase() === 'private') {
+          continue;
+        }
 
-        if (row.Title && (row.VideoURL || row.ThumbnailURL || row.Notes)) {
+        if (row.Title && (row.VideoURL || row.ThumbnailURL)) {
           results.push(row);
         }
       }
 
       return results;
+    }
+
+    function parseCSVLine(text) {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+          result.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      result.push(cur);
+      return result;
     }
 
 
@@ -1055,7 +980,7 @@
               </div>
             </div>
             <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
-            <div class="zoom-hint">💡 Double-click cover to magnify / read text</div>
+            <div class="zoom-hint">💡 Double-click cover to expand fullscreen</div>
           </div>
 
           <!-- BOOK TITLE & SUMMARY -->
@@ -1093,11 +1018,11 @@
       }
     }
 
-    // Parse [Y], [F], and [O] Tags (Supports both ';' and Line Breaks '\n')
+    // Parse [Y], [F], and [O] Tags
     function parseBookNotes(notesRaw) {
       if (!notesRaw) return '';
 
-      const sentences = notesRaw.split(/;|\r?\n/);
+      const sentences = notesRaw.split(';');
       let html = '';
 
       let lastTag = '';
@@ -1116,8 +1041,8 @@
           tag = 'O';
         }
 
+        // Cleanly strip all tag brackets from displayed sentence
         trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
-        if (!trimmed) return;
 
         if (tag && tag === lastTag) {
           toggleShade = !toggleShade;
@@ -1150,7 +1075,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       8. FULLSCREEN IMAGE ZOOM & HIGH-RES MAGNIFIER LOGIC
+       8. FULLSCREEN IMAGE ZOOM LOGIC
        --------------------------------------------------------------------------
     */
     function zoomImage(src) {
@@ -1159,21 +1084,11 @@
       const img = document.getElementById('zoom-img');
 
       img.src = src;
-      img.classList.remove('magnified');
       overlay.classList.add('active');
     }
 
-    function toggleZoomMode() {
-      const img = document.getElementById('zoom-img');
-      img.classList.toggle('magnified');
-    }
-
-    function closeZoom(e) {
-      if (e && e.target && e.target.id !== 'zoom-overlay' && !e.target.classList.contains('close-zoom')) {
-        return;
-      }
+    function closeZoom() {
       document.getElementById('zoom-overlay').classList.remove('active');
-      document.getElementById('zoom-img').classList.remove('magnified');
     }
 
 
