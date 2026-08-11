@@ -1,1 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fly Up Shuffle Effect Test</title>
+  <style>
+    body {
+      background: #0a0a12;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+    }
 
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #141322;
+      border: 1px solid #272545;
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    button.active {
+      background: #00f3ff;
+      color: #000000;
+      border-color: #00f3ff;
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.35);
+    }
+
+    /* ==========================================
+       FLY UP SHUFFLE ANIMATION (WITH SPRING BOUNCE)
+       ========================================== */
+    @keyframes flyUp {
+      0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.92);
+        filter: blur(8px);
+      }
+      70% {
+        opacity: 0.9;
+        transform: translateY(-8px) scale(1.02); /* Slight upward overshoot for spring feel */
+        filter: blur(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .notes-container {
+      background: #141322;
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid #00f3ff;
+      max-width: 600px;
+    }
+
+    /* Class applied during switch */
+    .fly-up-effect {
+      animation: flyUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .note-line {
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    mark {
+      background: rgba(0, 243, 255, 0.2);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="btn-group">
+    <button id="btn-top" class="active" onclick="switchNotes('top')">Top</button>
+    <button id="btn-natural" onclick="switchNotes('natural')">Natural Sequence</button>
+  </div>
+
+  <div id="notes-container" class="notes-container fly-up-effect">
+    <div class="note-line"><mark>Top Note 1: Most important takeaway</mark></div>
+    <div class="note-line"><mark>Top Note 2: Key high-priority insight</mark></div>
+    <div class="note-line"><mark>Top Note 3: Essential strategy summary</mark></div>
+  </div>
+
+  <script>
+    const topContent = `
+      <div class="note-line"><mark>Top Note 1: Most important takeaway</mark></div>
+      <div class="note-line"><mark>Top Note 2: Key high-priority insight</mark></div>
+      <div class="note-line"><mark>Top Note 3: Essential strategy summary</mark></div>
+    `;
+
+    const naturalContent = `
+      <div class="note-line"><mark>Natural 1: Chapter 1 introduction note</mark></div>
+      <div class="note-line"><mark>Natural 2: Chapter 4 mid-book highlight</mark></div>
+      <div class="note-line"><mark>Natural 3: Final chapter conclusion</mark></div>
+    `;
+
+    function switchNotes(type) {
+      const container = document.getElementById('notes-container');
+      const btnTop = document.getElementById('btn-top');
+      const btnNatural = document.getElementById('btn-natural');
+
+      if (type === 'top') {
+        btnTop.classList.add('active');
+        btnNatural.classList.remove('active');
+        container.innerHTML = topContent;
+      } else {
+        btnNatural.classList.add('active');
+        btnTop.classList.remove('active');
+        container.innerHTML = naturalContent;
+      }
+
+      // Re-trigger the fly-up animation
+      container.classList.remove('fly-up-effect');
+      void container.offsetWidth; // Force CSS reflow
+      container.classList.add('fly-up-effect');
+    }
+  </script>
+
+</body>
+</html>
