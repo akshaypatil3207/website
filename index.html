@@ -1105,9 +1105,28 @@
       const frontCover = formatCustomImageURL(book.VideoURL) || FALLBACK_SVG;
       const backCover = formatCustomImageURL(book.ThumbnailURL) || frontCover;
 
-      // By default populate 'Top Notes' (Fallback to 'Notes' if Top Notes is empty)
-      const initialNotesRaw = book.TopNotes ? book.TopNotes : book.Notes;
+      // Check if both Notes and TopNotes columns have valid entries
+      const hasNaturalNotes = Boolean(book.Notes && book.Notes.trim());
+      const hasTopNotes = Boolean(book.TopNotes && book.TopNotes.trim());
+      const showToggles = hasNaturalNotes && hasTopNotes;
+
+      // Determine initial notes to display
+      let initialNotesRaw = '';
+      if (showToggles || hasTopNotes) {
+        initialNotesRaw = book.TopNotes; // Default to Top if both exist or only Top exists
+      } else if (hasNaturalNotes) {
+        initialNotesRaw = book.Notes;
+      }
+
       const parsedNotes = parseBookNotes(initialNotesRaw);
+
+      // Render toggle buttons ONLY if BOTH columns have entries
+      const toggleButtonsHTML = showToggles ? `
+        <div class="notes-toggle-group">
+          <button id="btn-notes-top" class="notes-toggle-btn active" onclick="switchNotesSequence('top')">Top</button>
+          <button id="btn-notes-natural" class="notes-toggle-btn" onclick="switchNotesSequence('natural')">Natural Sequence</button>
+        </div>
+      ` : '';
 
       body.innerHTML = `
         <div class="clearfix">
@@ -1133,15 +1152,12 @@
             <div class="book-header-desc">${book.Description || ''}</div>
           </div>
 
-          <!-- NOTES HEADING WITH SEQUENCE TOGGLES -->
+          <!-- NOTES HEADING WITH CONDITIONAL SEQUENCE TOGGLES -->
           <div class="notes-heading">
             <div class="notes-heading-title">
               <span>📝</span> Highlighted Notes
             </div>
-            <div class="notes-toggle-group">
-              <button id="btn-notes-top" class="notes-toggle-btn active" onclick="switchNotesSequence('top')">Top</button>
-              <button id="btn-notes-natural" class="notes-toggle-btn" onclick="switchNotesSequence('natural')">Natural Sequence</button>
-            </div>
+            ${toggleButtonsHTML}
           </div>
 
           <!-- FLOATING HANDWRITTEN HIGHLIGHTS STREAM -->
@@ -1154,7 +1170,6 @@
 
       modal.classList.add('active');
     }
-
     /* Switch Sequence Order between 'Top Notes' and 'Natural Sequence Notes' */
     function switchNotesSequence(mode) {
       if (!currentBookModalData) return;
