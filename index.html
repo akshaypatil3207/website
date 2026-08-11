@@ -346,21 +346,21 @@
 
     /* WebKit (Chrome, Safari, Edge) custom scrollbar styling */
     .modal-content::-webkit-scrollbar {
-      width: 8px; /* Sleek width so it stays cleanly inside the card */
+      width: 8px;
     }
 
     .modal-content::-webkit-scrollbar-track {
-      background: transparent; /* Totally transparent track (preserves clean cyan border) */
+      background: transparent;
     }
 
     .modal-content::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.5); /* 90% black movable scroll thumb */
+      background: rgba(255, 255, 255, 0.5);
       border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle border for visibility */
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .modal-content::-webkit-scrollbar-thumb:hover {
-      background: #000000; /* Solid black on hover */
+      background: #000000;
     }
 
     .modal-content.video-modal-content {
@@ -404,7 +404,7 @@
     }
 
     /* --------------------------------------------------------------------------
-       BOOK MODAL: LARGER 3D COVER & TEXT WRAPPING
+       BOOK MODAL: COVER & HEADER STYLES
        -------------------------------------------------------------------------- */
     
     .clearfix::after {
@@ -504,6 +504,10 @@
       line-height: 1.6;
     }
 
+    /* --------------------------------------------------------------------------
+       HIGHLIGHTED NOTES HEADING & SEQUENCE TOGGLES
+       -------------------------------------------------------------------------- */
+
     .notes-heading {
       color: var(--accent-cyan);
       font-size: 1.5rem;
@@ -512,15 +516,75 @@
       text-transform: uppercase;
       margin-top: 35px;
       margin-bottom: 20px;
-      padding-bottom: 8px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .notes-heading-title {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
+    /* Option Toggles matching Category Button styles */
+    .notes-toggle-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .notes-toggle-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: none;
+    }
+
+    .notes-toggle-btn:hover,
+    .notes-toggle-btn.active {
+      background: var(--accent-cyan);
+      color: #000000;
+      font-weight: bold;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Reshuffling Keyframe Animation */
+    @keyframes reshuffleAnimation {
+      0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+        filter: blur(4px);
+      }
+      50% {
+        opacity: 0.5;
+        transform: translateY(5px) scale(1.01);
+        filter: blur(1px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .notes-stream.reshuffling {
+      animation: reshuffleAnimation 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
     /* --------------------------------------------------------------------------
-       BOOK NOTES: CURVY FONT, DOUBLE SPACING & FRESH HIGHLIGHTERS
+       BOOK NOTES: CURVY FONT, DOUBLE SPACING & HIGHLIGHTERS
        -------------------------------------------------------------------------- */
     
     .notes-stream,
@@ -572,7 +636,7 @@
       justify-content: center;
       align-items: center;
       z-index: 2000;
-      cursor: pointer; /* Single click anywhere to exit */
+      cursor: pointer;
     }
 
     .zoom-overlay.active {
@@ -595,7 +659,6 @@
       cursor: crosshair;
     }
 
-    /* Restored Larger Display Size for Expanded Book Cover */
     .zoom-img-wrapper img {
       max-width: 44vw;
       max-height: 88vh;
@@ -618,7 +681,6 @@
       border-radius: 4px;
     }
 
-    /* Positioned beside the slightly larger image */
     .fullscreen-zoom-preview {
       position: absolute;
       left: calc(44vw + 5vw);
@@ -727,7 +789,7 @@
     </div>
   </div>
 
-  <!-- Dedicated Fullscreen Cover Expansion Lightbox (Single click anywhere exits) -->
+  <!-- Dedicated Fullscreen Cover Expansion Lightbox -->
   <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
     <span class="close-modal-btn" style="top: 25px; right: 35px;" onclick="closeZoom(event)">&times;</span>
     <div class="fullscreen-zoom-container">
@@ -756,6 +818,7 @@
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9maPUHMbAkZTS4c72grAzJvX3pCMQCIfSPXzb7lRH2vEILq4OuoAsF1zPtFEMHkleJkqRr0iZLfvy/pub?output=csv';
 
     let allItems = [];
+    let currentBookModalData = null; // Store active book details for sequence toggling
 
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Cover Available</text></svg>');
 
@@ -828,7 +891,7 @@
 
     /* 
        --------------------------------------------------------------------------
-       4. ACCURATE CSV PARSER
+       4. ACCURATE CSV PARSER (With Top Notes Column Support)
        --------------------------------------------------------------------------
     */
     function parseCSV(csvText) {
@@ -856,6 +919,7 @@
           if (['description', 'desc', 'author', 'summary'].includes(cleanHeader)) row.Description = val;
           if (['type'].includes(cleanHeader)) row.Type = val;
           if (['notes', 'highlights', 'quote', 'quotes'].includes(cleanHeader)) row.Notes = val;
+          if (['topnotes', 'topnote', 'toporder', 'topnotesorder'].includes(cleanHeader)) row.TopNotes = val;
         });
 
         // Skip Private entries
@@ -1026,10 +1090,12 @@
 
     /* 
        --------------------------------------------------------------------------
-       7. BOOK MODAL & HIGHLIGHTER LOGIC
+       7. BOOK MODAL, HIGHLIGHTER & SEQUENCE SWITCHING
        --------------------------------------------------------------------------
     */
     function openBookModal(book) {
+      currentBookModalData = book; // Save reference globally
+
       const modal = document.getElementById('modal-overlay');
       const content = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
@@ -1039,7 +1105,9 @@
       const frontCover = formatCustomImageURL(book.VideoURL) || FALLBACK_SVG;
       const backCover = formatCustomImageURL(book.ThumbnailURL) || frontCover;
 
-      const parsedNotes = parseBookNotes(book.Notes);
+      // By default populate 'Top Notes' (Fallback to 'Notes' if Top Notes is empty)
+      const initialNotesRaw = book.TopNotes ? book.TopNotes : book.Notes;
+      const parsedNotes = parseBookNotes(initialNotesRaw);
 
       body.innerHTML = `
         <div class="clearfix">
@@ -1065,13 +1133,19 @@
             <div class="book-header-desc">${book.Description || ''}</div>
           </div>
 
-          <!-- NOTES HEADING -->
+          <!-- NOTES HEADING WITH SEQUENCE TOGGLES -->
           <div class="notes-heading">
-            <span>📝</span> Highlighted Notes
+            <div class="notes-heading-title">
+              <span>📝</span> Highlighted Notes
+            </div>
+            <div class="notes-toggle-group">
+              <button id="btn-notes-top" class="notes-toggle-btn active" onclick="switchNotesSequence('top')">Top</button>
+              <button id="btn-notes-natural" class="notes-toggle-btn" onclick="switchNotesSequence('natural')">Natural Sequence</button>
+            </div>
           </div>
 
-          <!-- FLOATING HANDWRITTEN HIGHLIGHTS -->
-          <div class="notes-stream">
+          <!-- FLOATING HANDWRITTEN HIGHLIGHTS STREAM -->
+          <div id="notes-stream-container" class="notes-stream">
             ${parsedNotes || '<div style="color:var(--text-muted); font-size:1.1rem; margin-top:20px;">No highlighted notes added for this book yet.</div>'}
           </div>
 
@@ -1079,6 +1153,38 @@
       `;
 
       modal.classList.add('active');
+    }
+
+    /* Switch Sequence Order between 'Top Notes' and 'Natural Sequence Notes' */
+    function switchNotesSequence(mode) {
+      if (!currentBookModalData) return;
+
+      const topBtn = document.getElementById('btn-notes-top');
+      const naturalBtn = document.getElementById('btn-notes-natural');
+      const container = document.getElementById('notes-stream-container');
+
+      if (!container) return;
+
+      let notesRaw = '';
+
+      if (mode === 'top') {
+        topBtn.classList.add('active');
+        naturalBtn.classList.remove('active');
+        notesRaw = currentBookModalData.TopNotes || currentBookModalData.Notes || '';
+      } else {
+        naturalBtn.classList.add('active');
+        topBtn.classList.remove('active');
+        notesRaw = currentBookModalData.Notes || '';
+      }
+
+      const renderedNotes = parseBookNotes(notesRaw);
+
+      // Trigger Reshuffling Animation
+      container.classList.remove('reshuffling');
+      void container.offsetWidth; // Force Reflow
+      container.classList.add('reshuffling');
+
+      container.innerHTML = renderedNotes || '<div style="color:var(--text-muted); font-size:1.1rem; margin-top:20px;">No highlighted notes added for this sequence view.</div>';
     }
 
     function toggleBookFlip() {
@@ -1164,7 +1270,6 @@
       document.getElementById('fullscreen-lens').style.display = 'none';
     }
 
-    // Single click anywhere on the expanded overlay exits zoom
     function closeZoom(event) {
       if (event && event.stopPropagation) event.stopPropagation();
       document.getElementById('zoom-overlay').classList.remove('active');
@@ -1291,6 +1396,7 @@
 
       modal.classList.remove('active');
       body.innerHTML = '';
+      currentBookModalData = null;
     }
 
 
