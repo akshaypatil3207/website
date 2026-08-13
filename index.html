@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Personal Showcase</title>
 
-  <!-- Romantic Handwriting Font for Book Notes -->
+  <!-- Google Fonts: Shantell Sans for Latin & Noto Sans Devanagari for Marathi -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
   <style>
 
@@ -27,7 +27,7 @@
       --text-muted: #a0a0c0;       /* Muted blue text */
       --border-color: #272545;    /* Subtle dark border */
       
-      --font-notes: 'Shantell Sans', cursive; /* Handwritten font */
+      --font-notes: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif;
     }
 
     * {
@@ -584,12 +584,12 @@
     }
 
     /* --------------------------------------------------------------------------
-       BOOK NOTES: CURVY FONT, DOUBLE SPACING & HIGHLIGHTERS
+       BOOK NOTES: MULTI-LANGUAGE FONT SUPPORT & HIGHLIGHTERS
        -------------------------------------------------------------------------- */
     
     .notes-stream,
     .notes-stream mark {
-      font-family: 'Shantell Sans', sans-serif !important;
+      font-family: 'Shantell Sans', 'Noto Sans Devanagari', sans-serif !important;
       font-size: 1.5rem;
       line-height: 1.5;
       letter-spacing: 0.4px;
@@ -710,23 +710,23 @@
     <div class="brand-title">MY<span>SHOWCASE</span></div>
     
     <ul class="nav-tabs">
-      <li>
-        <button class="nav-btn active" onclick="switchSection('videos-section', this)">Videos</button>
-      </li>
-      <li>
-        <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
-      </li>
-      <li>
-        <button class="nav-btn" onclick="switchSection('books-section', this)">Books</button>
-      </li>
-      <li>
-        <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
-      </li>
-      <li>
-        <button class="nav-btn" onclick="switchSection('status-section', this)">Status</button>
-      </li>
-    </ul>
-  </header>
+  <li>
+    <button class="nav-btn active" onclick="switchSection('books-section', this)">Books</button>
+  </li>
+  <li>
+    <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
+  </li>
+  <li>
+    <button class="nav-btn" onclick="switchSection('videos-section', this)">Videos</button>
+  </li>
+  <li>
+    <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
+  </li>
+  <li>
+    <button class="nav-btn" onclick="switchSection('status-section', this)">Status</button>
+  </li>
+</ul>
+</header>
 
 
 
@@ -738,7 +738,7 @@
   <main>
 
     <!-- PAGE 1: VIDEOS SECTION -->
-    <section id="videos-section" class="page-section active">
+    <section id="videos-section" class="page-section">
       <div id="category-filter-videos" class="category-filter"></div>
       <div id="video-grid" class="grid-container">
         <div class="status-msg">Loading videos from DB...</div>
@@ -754,7 +754,7 @@
     </section>
 
     <!-- PAGE 3: BOOKS SECTION -->
-    <section id="books-section" class="page-section">
+    <section id="books-section" class="page-section active">
       <div id="category-filter-books" class="category-filter"></div>
       <div id="books-grid" class="grid-container books-grid">
         <div class="status-msg">Loading books from DB...</div>
@@ -1214,11 +1214,14 @@
       }
     }
 
-    // Parse [Y], [F], and [O] Tags
+    // Parse [Y], [F], and [O] Tags with full Devanagari & UTF-8 character support
     function parseBookNotes(notesRaw) {
       if (!notesRaw) return '';
 
-      const sentences = notesRaw.split(';');
+      // Normalize non-breaking spaces (\u00a0) that commonly copy from Excel cells
+      const cleanedNotes = notesRaw.replace(/\u00a0/g, ' ');
+
+      const sentences = cleanedNotes.split(';');
       let html = '';
 
       let lastTag = '';
