@@ -1214,6 +1214,8 @@
       }
     }
 
+		  
+	  
     // Parse [Y], [F], and [O] Tags with full Devanagari & UTF-8 character support
     function parseBookNotes(notesRaw) {
       if (!notesRaw) return '';
@@ -1240,9 +1242,12 @@
           tag = 'O';
         }
 
-        trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
+	 trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
+     trimmed = trimmed.replace(/\\n|\n/g, '<br>');
+     trimmed = trimmed.replace(/\{([^}]+)\}/g, '<mark class="hl-f-1">$1</mark>');
 
-	trimmed = trimmed.replace(/\\n|\n/g, '<br>');
+
+
 	
 	
 
@@ -1262,8 +1267,7 @@
           hlClass = toggleShade ? 'hl-o-2' : 'hl-o-1';
         }
 
-		const formattedText = trimmed.replace(/\{([^}]+)\}/g, `</mark><mark class="hl-f-1">$1</mark><mark class="${hlClass}">`);
-		  
+		
         html += `
           <div class="note-line">
             <mark class="${hlClass}">${trimmed}</mark>
@@ -1274,8 +1278,7 @@
       return html;
     }
 
-
-
+	
 
     /* 
        --------------------------------------------------------------------------
