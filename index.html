@@ -1241,6 +1241,10 @@
         }
 
         trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
+        
+      	trimmed = trimmed.replace(/\\n|\n/g, '<br>');
+	
+      	trimmed = trimmed.replace(/\{([^}]+)\}/g, '<mark class="hl-f-1">$1</mark>');
 
         if (tag && tag === lastTag) {
           toggleShade = !toggleShade;
