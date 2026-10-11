@@ -1,1 +1,356 @@
+<!-- Function: Declares that this document is written in HTML5. -->
+<!-- Necessity: Instructs the browser to render the web page using standard HTML5 rendering rules. -->
+<!DOCTYPE html>
 
+<!-- Function: Root tag of the webpage; sets primary language to English. -->
+<!-- Necessity: Essential for screen readers, translation tools, and search engines. -->
+<html lang="en">
+
+<!-- Function: Container for page metadata, fonts, title, and stylesheets. -->
+<!-- Necessity: Contains non-visible instructions critical for rendering the page properly. -->
+<head>
+
+  <!-- Function: Defines character encoding as UTF-8. -->
+  <!-- Necessity: Ensures special symbols, Devanagari script (Marathi), and emojis render correctly. -->
+  <meta charset="UTF-8">
+
+  <!-- Function: Configures viewport for responsive web design. -->
+  <!-- Necessity: Ensures proper page scaling and sizing on mobile screens and tablets. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Function: Sets the page title displayed on the browser tab. -->
+  <!-- Necessity: Identifies the site name in browser tabs, history, and search engine results. -->
+  <title>My Personal Showcase</title>
+
+  <!-- Function: Opens early network connection pre-fetch to Google Fonts domain. -->
+  <!-- Necessity: Speeds up custom typography loading times. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <!-- Function: Opens cross-origin connection to static asset server for Google Fonts. -->
+  <!-- Necessity: Prevents CORS authorization delays when fetching font files. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Function: Imports Shantell Sans and Noto Sans Devanagari font styles. -->
+  <!-- Necessity: Delivers handwritten and multi-language support for Latin and Marathi text. -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Function: Opens internal CSS stylesheet block. -->
+  <!-- Necessity: Holds layout, color, structure, animation, and responsive design rules. -->
+  <style>
+
+    /* Function: Root CSS selector for global custom variables (theme colors & fonts). */
+    /* Necessity: Centralizes colors so changing one value updates the entire theme. */
+    :root {
+      --bg-main: #0a0a12;          /* Function: Dark background color variable. | Necessity: Used as full page background. */
+      --card-bg: #141322;          /* Function: Card container surface color variable. | Necessity: Creates visual depth against dark background. */
+      --card-hover: #1f1d36;       /* Function: Elevated hover color variable. | Necessity: Gives visual feedback when hovering cards or buttons. */
+
+      --accent-cyan: #00f3ff;      /* Function: Vibrant neon cyan variable. | Necessity: Used for primary visual highlights and active states. */
+      --accent-glow: rgba(0, 243, 255, 0.35); /* Function: Transparent cyan glow variable. | Necessity: Used in box-shadows for neon glow effects. */
+      --text-white: #ffffff;       /* Function: Pure white text color variable. | Necessity: Ensures high contrast text for readability. */
+      --text-muted: #a0a0c0;       /* Function: Soft blue-grey color variable. | Necessity: Used for secondary/less important text descriptions. */
+      --border-color: #272545;    /* Function: Dark subtle border color variable. | Necessity: Delimits layout sections gently. */
+      
+      --font-notes: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif; /* Function: Multi-font stack variable. | Necessity: Renders handwriting for notes in English and Marathi. */
+    }
+
+    /* Function: Universal wildcard CSS selector targeting every element. */
+    /* Necessity: Resets default browser spacing so layout looks identical in all browsers. */
+    * {
+      box-sizing: border-box; /* Function: Includes padding/border in element total width. | Necessity: Prevents layout breaking when adding borders. */
+      margin: 0;             /* Function: Removes browser default outer margins. | Necessity: Eliminates random gaps around elements. */
+      padding: 0;            /* Function: Removes browser default inner padding. | Necessity: Provides complete spacing control. */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Function: Sets clean base font. | Necessity: Gives site modern default sans-serif look. */
+    }
+
+    /* Function: Targets HTML body container. */
+    /* Necessity: Establishes full-screen layout structure and dark theme base. */
+    body {
+      background-color: var(--bg-main); /* Function: Applies main background color. | Necessity: Sets dark background across page. */
+      color: var(--text-white);         /* Function: Sets default text color to white. | Necessity: Guarantees high readability. */
+      min-height: 100vh;                /* Function: Forces body height to at least 100% of viewport height. | Necessity: Prevents background collapsing on short content. */
+      display: flex;                    /* Function: Enables Flexbox layout mode. | Necessity: Allows header, main, and footer stack vertically. */
+      flex-direction: column;           /* Function: Arranges flex elements vertically from top to bottom. | Necessity: Keeps layout top-down. */
+    }
+
+    /* Function: Styles top header bar. */
+    /* Necessity: Sticky navbar that stays at top while scrolling. */
+    header {
+      background: rgba(20, 19, 34, 0.9); /* Function: Semi-transparent background color. | Necessity: Allows glassmorphism effect. */
+      backdrop-filter: blur(10px);        /* Function: Blurs elements scrolling beneath header. | Necessity: Creates modern glass visual effect. */
+      position: sticky;                  /* Function: Sticks header to viewport during scrolling. | Necessity: Keeps navigation accessible everywhere. */
+      top: 0;                            /* Function: Pins header to very top edge. | Necessity: Specifies sticky anchor point. */
+      z-index: 100;                      /* Function: Sets high stacking layer order. | Necessity: Ensures header floats above content cards. */
+      border-bottom: 1px solid var(--border-color); /* Function: Adds subtle bottom border line. | Necessity: Separates header visually from page content. */
+      padding: 18px 30px;                /* Function: Adds internal spacing top/bottom (18px) and sides (30px). | Necessity: Keeps text off screen edges. */
+      display: flex;                     /* Function: Enables Flexbox. | Necessity: Positions logo and nav tabs side-by-side. */
+      justify-content: space-between;    /* Function: Pushes logo to left and tabs to right. | Necessity: Creates clean navbar arrangement. */
+      align-items: center;               /* Function: Aligns items vertically in center. | Necessity: Prevents misaligned text vertically. */
+    }
+
+    /* Function: Styles website main brand title text. */
+    /* Necessity: Gives brand name distinct visual hierarchy. */
+    .brand-title {
+      font-size: 1.5rem;   /* Function: Increases font size to 24px equivalent. | Necessity: Makes brand title prominent. */
+      font-weight: 700;    /* Function: Sets bold font weight. | Necessity: Adds emphasis to logo. */
+      color: var(--text-white); /* Function: Colors brand title text white. | Necessity: High visibility. */
+      letter-spacing: 1px; /* Function: Spreads out letters by 1px. | Necessity: Delivers modern stylized typography. */
+    }
+
+    /* Function: Targets span inside brand title (e.g., "SHOWCASE"). */
+    /* Necessity: Highlights part of logo with cyan accent color. */
+    .brand-title span {
+      color: var(--accent-cyan); /* Function: Changes highlighted text color to neon cyan. | Necessity: Adds color contrast to brand. */
+    }
+
+    /* Function: Styles list container for navigation buttons. */
+    /* Necessity: Aligns navigation tab items horizontally. */
+    .nav-tabs {
+      display: flex;      /* Function: Enables flex layout for list. | Necessity: Lays navigation buttons horizontally in row. */
+      gap: 12px;          /* Function: Adds 12px spacing between buttons. | Necessity: Keeps tab buttons from touching. */
+      list-style: none;   /* Function: Removes bullet points from <ul> element. | Necessity: Cleans up default list appearance. */
+    }
+
+    /* Function: Styles individual navigation buttons. */
+    /* Necessity: Makes nav items look like clean, interactive pill buttons. */
+    .nav-btn {
+      background: transparent; /* Function: Transparent fill. | Necessity: Keeps unselected buttons subtle. */
+      border: 1px solid transparent; /* Function: Transparent border. | Necessity: Reserves border space so layout doesn't jump on select. */
+      color: var(--text-muted); /* Function: Muted text color. | Necessity: Signals inactive state. */
+      padding: 8px 18px;       /* Function: Inner padding top/bottom (8px) and left/right (18px). | Necessity: Gives button clickable area. */
+      font-size: 0.95rem;      /* Function: Sets comfortable font size. | Necessity: Readability. */
+      font-weight: 600;        /* Function: Semi-bold font weight. | Necessity: Sharp text appearance. */
+      border-radius: 20px;     /* Function: Rounded edges forming pill shape. | Necessity: Modern aesthetic. */
+      cursor: pointer;         /* Function: Changes cursor to pointer finger. | Necessity: Signals interactivity to user. */
+      transition: all 0.3s ease; /* Function: Smoothly animates hover and active changes over 0.3 seconds. | Necessity: Enhances UX feel. */
+    }
+
+    /* Function: Hover style for navigation buttons. */
+    /* Necessity: Highlights tab when mouse hovers over it. */
+    .nav-btn:hover {
+      color: var(--accent-cyan); /* Function: Turns button text cyan on hover. | Necessity: Visual feedback for hover. */
+    }
+
+    /* Function: Active tab state styling. */
+    /* Necessity: Visually marks currently active section page. */
+    .nav-btn.active {
+      background: var(--card-hover); /* Function: Dark elevated background. | Necessity: Indicates active tab state. */
+      color: var(--accent-cyan);      /* Function: Accent cyan text color. | Necessity: Draws eye to selected tab. */
+      border-color: var(--accent-cyan);/* Function: Bright cyan border outline. | Necessity: Defines active boundary. */
+      box-shadow: 0 0 10px var(--accent-glow); /* Function: Cyan neon glow shadow. | Necessity: Modern active glow indicator. */
+    }
+
+    /* Function: Main content wrapper element styling. */
+    /* Necessity: Houses page sections and sets maximum grid display width. */
+    main {
+      flex: 1;             /* Function: Expands main area to take all available vertical space. | Necessity: Pushes footer down. */
+      padding: 30px;       /* Function: Inner padding surrounding main content. | Necessity: Keeps cards away from window edges. */
+      max-width: 1400px;   /* Function: Restricts maximum layout width to 1400px. | Necessity: Prevents stretched layouts on widescreen monitors. */
+      margin: 0 auto;      /* Function: Centers content horizontally. | Necessity: Keeps site content centered cleanly. */
+      width: 100%;         /* Function: Expands width to fill screen up to max-width limit. | Necessity: Ensures full responsiveness. */
+    }
+
+    /* Function: Default hidden state for individual page sections. */
+    /* Necessity: Enables Single Page Application (SPA) switching without full page reloads. */
+    .page-section {
+      display: none;       /* Function: Hides inactive page sections. | Necessity: Ensures only selected section displays. */
+      animation: fadeIn 0.4s ease-in-out; /* Function: Runs fadeIn keyframe animation. | Necessity: Smooth section switching transitions. */
+    }
+
+    /* Function: Active page section display class. */
+    /* Necessity: Reveals section when active class is attached. */
+    .page-section.active {
+      display: block;      /* Function: Makes active section visible. | Necessity: Displays current active tab section. */
+    }
+
+    /* Function: CSS Keyframe animation defining fadeIn effect. */
+    /* Necessity: Animates smooth opacity slide-up when switching tabs. */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); } /* Function: Starts invisible and 12px lower. | Necessity: Creates entry position. */
+      to { opacity: 1; transform: translateY(0); }     /* Function: Ends fully visible and in normal position. | Necessity: Completes smooth animation. */
+    }
+
+    /* Function: Styles category filter button container bar. */
+    /* Necessity: Horizontal filter row above content grids. */
+    .category-filter {
+      display: flex;       /* Function: Flexbox container. | Necessity: Arranges filter buttons in row. */
+      gap: 12px;           /* Function: 12px spacing between buttons. | Necessity: Prevents button clutter. */
+      flex-wrap: wrap;     /* Function: Wraps buttons to next line on mobile screens. | Necessity: Responsive design support. */
+      margin-bottom: 30px; /* Function: Spacing beneath filter bar. | Necessity: Separates filters from content cards below. */
+      padding-bottom: 15px;/* Function: Inner bottom padding. | Necessity: Creates breathing space above border. */
+      border-bottom: 1px solid var(--border-color); /* Function: Bottom divider line. | Necessity: Clean visual separation. */
+      min-height: 45px;   /* Function: Minimum height reservation. | Necessity: Prevents layout shift while buttons load dynamically. */
+    }
+
+    /* Function: Individual category filter button styles. */
+    /* Necessity: Small rounded buttons for category filtering. */
+    .cat-btn {
+      background: var(--card-bg); /* Function: Card surface background. | Necessity: Matches theme palette. */
+      border: 1px solid var(--border-color); /* Function: Border outline. | Necessity: Defines button boundary. */
+      color: var(--text-white);   /* Function: White text. | Necessity: Good contrast. */
+      padding: 8px 18px;          /* Function: Inner padding. | Necessity: Touch friendly sizing. */
+      border-radius: 8px;        /* Function: Rounded corners. | Necessity: Modern look. */
+      font-size: 0.85rem;         /* Function: Small readable text size. | Necessity: Fits category text neatly. */
+      cursor: pointer;            /* Function: Pointer finger cursor. | Necessity: Interactive indicator. */
+      transition: all 0.3s ease;  /* Function: Smooth hover animation. | Necessity: Visually reactive feel. */
+    }
+
+    /* Function: Hover and Active states for category filter buttons. */
+    /* Necessity: Highlights currently selected category filter. */
+    .cat-btn:hover, 
+    .cat-btn.active {
+      background: var(--accent-cyan); /* Function: Changes background to bright cyan. | Necessity: Clearly marks active filter. */
+      color: #000000;                 /* Function: Inverts text color to black. | Necessity: High contrast against bright cyan. */
+      font-weight: bold;              /* Function: Bolds text. | Necessity: Emphasizes selected filter. */
+      box-shadow: 0 0 12px var(--accent-glow); /* Function: Cyan glow shadow. | Necessity: Active neon lighting effect. */
+    }
+
+    /* Function: Responsive Grid Layout styling for cards. */
+    /* Necessity: Automatically arranges card components into equal responsive columns. */
+    .grid-container {
+      display: grid; /* Function: Activates CSS Grid mode. | Necessity: Perfect 2D multi-column alignment. */
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Function: Dynamic column calculation. | Necessity: Auto-adjusts column count based on screen size (min 280px). */
+      gap: 25px;     /* Function: 25px spacing between grid cards. | Necessity: Clean grid gutter distribution. */
+    }
+
+    /* Function: Specialized grid rule for Books and Letters section. */
+    /* Necessity: Uses narrower column minimums tailored for vertical aspect ratios. */
+    .books-grid {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Function: Column size set to minimum 220px. | Necessity: Fits book/letter cover dimensions naturally. */
+    }
+
+    /* Function: Styles content card components. */
+    /* Necessity: Encapsulates individual showcase items (videos, shorts, books, letters). */
+    .card {
+      background: var(--card-bg); /* Function: Dark card surface color. | Necessity: Separates card content visually. */
+      border: 1px solid var(--border-color); /* Function: Border boundary line. | Necessity: Defines card frame. */
+      border-radius: 12px;        /* Function: Rounded card corners. | Necessity: Softens card appearance. */
+      overflow: hidden;           /* Function: Clips overflowing child elements (like images). | Necessity: Keeps rounded corners intact. */
+      cursor: pointer;            /* Function: Pointer cursor on hover. | Necessity: Signals card is clickable. */
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* Function: Smooth movement transition. | Necessity: Provides realistic hover lift animation. */
+      display: flex;              /* Function: Flexbox column layout inside card. | Necessity: Keeps thumbnail at top and info at bottom. */
+      flex-direction: column;     /* Function: Vertical alignment. | Necessity: Stacks thumbnail above text description. */
+    }
+
+    /* Function: Interactive Hover effect on cards. */
+    /* Necessity: Gives user immediate feedback when mouse hovers over card. */
+    .card:hover {
+      transform: translateY(-6px); /* Function: Moves card upward by 6px. | Necessity: Creates "card lifting" effect. */
+      border-color: var(--accent-cyan); /* Function: Changes border to neon cyan. | Necessity: Draws focus to active hover item. */
+      box-shadow: 0 8px 25px var(--accent-glow); /* Function: Adds glowing cyan drop shadow. | Necessity: Creates modern floating effect. */
+    }
+
+    /* Function: Aspect ratio wrapper for standard 16:9 video thumbnails. */
+    /* Necessity: Prevents cumulative layout shift (CLS) by locking image dimensions before loading. */
+    .thumbnail-wrapper {
+      position: relative; /* Function: Sets positioning context for absolute children. | Necessity: Allows image and play icon absolute placement inside. */
+      width: 100%;        /* Function: Full card width. | Necessity: Fills top card width. */
+      padding-top: 56.25%;/* Function: Top padding maintaining exact 16:9 aspect ratio (9 / 16 = 56.25%). | Necessity: Preserves video aspect ratio seamlessly. */
+      background-color: #000000; /* Function: Black background placeholder color. | Necessity: Shows dark area while image loads. */
+    }
+
+    /* Function: Aspect ratio wrapper for vertical book and letter covers (2:3 ratio). */
+    /* Necessity: Enforces uniform vertical dimensions for all vertical covers. */
+    .book-thumbnail-wrapper {
+      position: relative; /* Function: Relative positioning frame. | Necessity: Contains cover image perfectly. */
+      width: 100%;        /* Function: Full width. | Necessity: Spans across card width. */
+      padding-top: 150%;  /* Function: Aspect ratio calculation for vertical covers (3 / 2 = 150%). | Necessity: Maintains tall book/letter aspect ratio. */
+      background-color: #000000; /* Function: Black fallback background. | Necessity: Prevents white flash before image loads. */
+    }
+
+    /* Function: Absolute positioning for thumbnail image elements. */
+    /* Necessity: Fits image completely inside padded wrapper. */
+    .thumbnail-wrapper img,
+    .book-thumbnail-wrapper img {
+      position: absolute; /* Function: Absolute position pin. | Necessity: Overlays image over aspect ratio padding space. */
+      top: 0;             /* Function: Anchors image to top edge. | Necessity: Covers container top. */
+      left: 0;            /* Function: Anchors image to left edge. | Necessity: Covers container left. */
+      width: 100%;        /* Function: Expands width to 100%. | Necessity: Fills frame width. */
+      height: 100%;       /* Function: Expands height to 100%. | Necessity: Fills frame height. */
+      object-fit: cover;  /* Function: Scales image proportionally to fill without stretching. | Necessity: Prevents image distortion. */
+    }
+
+    /* Function: Circular play button icon overlay for video thumbnails. */
+    /* Necessity: Visual prompt indicating video content. */
+    .play-icon {
+      position: absolute; /* Function: Positioned absolutely. | Necessity: Centered relative to thumbnail frame. */
+      top: 50%;          /* Function: Moves top edge to 50%. | Necessity: Part of centering formula. */
+      left: 50%;         /* Function: Moves left edge to 50%. | Necessity: Part of centering formula. */
+      transform: translate(-50%, -50%) scale(0.8); /* Function: Centers element and shrinks scale slightly. | Necessity: Ensures perfect center alignment. */
+      width: 52px;       /* Function: Diameter width 52px. | Necessity: Button size. */
+      height: 52px;      /* Function: Diameter height 52px. | Necessity: Button size. */
+      background: rgba(0, 243, 255, 0.9); /* Function: Bright cyan circular fill. | Necessity: Prominent play button indicator. */
+      border-radius: 50%;/* Function: Turns box into perfect circle. | Necessity: Traditional play button styling. */
+      display: flex;     /* Function: Flexbox. | Necessity: Centers play triangle inside circle. */
+      justify-content: center; /* Function: Horizontal center alignment. | Necessity: Centers internal play triangle icon. */
+      align-items: center;    /* Function: Vertical center alignment. | Necessity: Centers internal play triangle icon. */
+      opacity: 0;        /* Function: Hidden by default. | Necessity: Makes play icon pop up smoothly on hover. */
+      transition: all 0.3s ease; /* Function: Animation transition. | Necessity: Smooth hover fade-in. */
+    }
+
+    /* Function: Creates triangle symbol inside play icon using CSS borders. */
+    /* Necessity: Eliminates need for external SVG or image icons. */
+    .play-icon::after {
+      content: '';       /* Function: Empty content string required for pseudo-element. | Necessity: Renders CSS element. */
+      border-style: solid; /* Function: Solid border type. | Necessity: Enables border-triangle trick. */
+      border-width: 8px 0 8px 14px; /* Function: Border width sizing triangle. | Necessity: Forms right-pointing arrow geometry. */
+      border-color: transparent transparent transparent #000000; /* Function: Sets arrow color to solid black. | Necessity: Renders black triangle arrow. */
+      margin-left: 3px;  /* Function: Slight offset adjustment. | Necessity: Visually centers play triangle inside circle. */
+    }
+
+    /* Function: Hover action revealing play icon. */
+    /* Necessity: Makes play button appear and scale up on card hover. */
+    .card:hover .play-icon {
+      opacity: 1;        /* Function: Full opacity. | Necessity: Reveals play icon. */
+      transform: translate(-50%, -50%) scale(1); /* Function: Scales icon back to 100%. | Necessity: Pops icon into view cleanly. */
+    }
+
+    /* Function: Text container inside cards below image. */
+    /* Necessity: Houses category badge, title, and description text cleanly. */
+    .card-info {
+      padding: 15px;     /* Function: Inner padding 15px. | Necessity: Keeps text from touching card borders. */
+      display: flex;     /* Function: Flexbox layout. | Necessity: Arranges text elements vertically. */
+      flex-direction: column; /* Function: Stacks content top-down. | Necessity: Clean structured order. */
+      gap: 8px;          /* Function: 8px vertical gap between elements. | Necessity: Consistent spacing. */
+      flex: 1;           /* Function: Takes all remaining card height. | Necessity: Aligns bottom card borders evenly in grid. */
+    }
+
+    /* Function: Category tag pill style inside cards. */
+    /* Necessity: Identifies section category type. */
+    .category-tag {
+      align-self: flex-start; /* Function: Shrinks tag width to fit text only. | Necessity: Prevents full-width stretch. */
+      font-size: 0.75rem; /* Function: Compact font size. | Necessity: Keeps category sub-text secondary. */
+      color: var(--accent-cyan); /* Function: Cyan text color. | Necessity: High visibility highlight. */
+      background: rgba(0, 243, 255, 0.1); /* Function: Soft translucent cyan pill fill. | Necessity: Badge outline styling. */
+      padding: 3px 8px;  /* Function: Small inner padding. | Necessity: Badge box spacing. */
+      border-radius: 4px;/* Function: Slightly rounded corners. | Necessity: Badge look. */
+      text-transform: uppercase; /* Function: Capitalizes all characters. | Necessity: Uniform tag styling. */
+      font-weight: 600;  /* Function: Semi-bold font. | Necessity: Sharp badge text readability. */
+    }
+
+    /* Function: Card Title style. */
+    /* Necessity: Heading for individual content items. */
+    .card-title {
+      font-size: 1rem;   /* Function: Standard card title font size. | Necessity: Clear item heading. */
+      font-weight: 600;  /* Function: Semi-bold weight. | Necessity: Makes title distinct. */
+      line-height: 1.3;  /* Function: Line height parameter. | Necessity: Prevents multi-line title overlap. */
+      color: var(--text-white); /* Function: Pure white color. | Necessity: Primary contrast visibility. */
+    }
+
+    /* Function: Card Description text style with truncation. */
+    /* Necessity: Limits long descriptions to 2 lines to maintain equal card heights. */
+    .card-desc {
+      font-size: 0.85rem;/* Function: Smaller secondary font size. | Necessity: Readable description body text. */
+      color: var(--text-muted); /* Function: Muted blue-grey color. | Necessity: Less prominent than title. */
+      display: -webkit-box; /* Function: Activates webkit multi-line text truncation engine. | Necessity: Enables multi-line ellipsis (...). */
+      -webkit-line-clamp: 2; /* Function: Restricts description display to exactly 2 lines maximum. | Necessity: Keeps layout height uniform. */
+      -webkit-box-orient: vertical; /* Function: Sets truncation orientation. | Necessity: Required for line clamping. */
+      overflow: hidden;  /* Function: Cuts off excess text beyond 2 lines. | Necessity: Prevents overflowing text. */
+    }
+
+    /* Function: Status/Message display box style for loading or empty states. */
+    /* Necessity: Informs user when content is loading or if no data was returned from Google Sheet. */
+    .status-msg {
+      grid-column: 1 / -1; /* Function: Spans full width across all grid columns. | Necessity: Centers message inside grid layout. */
+      text-align: center; /* Function: Horizontally centers text. | Necessity: Clean feedback presentation. */
+      padding: 60px 20px; /* Function: Large top/bottom padding (60
