@@ -609,6 +609,19 @@
       -webkit-box-decoration-break: clone;
     }
 
+    /* Curled Serif Quote Graphics Style with Teardrop/Dot Terminals */
+    .quote-mark {
+      color: var(--accent-cyan);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.8em;
+      font-weight: bold;
+      line-height: 0;
+      vertical-align: -0.2em;
+      margin: 0 3px;
+      display: inline-block;
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+    }
+
     .hl-y-1 { background: rgba(235, 255, 60, 0.38); text-shadow: 0 0 8px rgba(235,255,60,0.3); }
     .hl-y-2 { background: rgba(195, 225, 30, 0.42); }
 
@@ -1214,7 +1227,7 @@
       }
     }
 
-    // Parse [Y], [F], and [O] Tags with full Devanagari & UTF-8 character support
+    // Parse [Y], [F], [O], [Y,Quote], [Quote], etc. with full Devanagari & UTF-8 character support
     function parseBookNotes(notesRaw) {
       if (!notesRaw) return '';
 
@@ -1232,19 +1245,29 @@
         if (!trimmed) return;
 
         let tag = '';
-        if (/\[Y\]/i.test(trimmed)) {
-          tag = 'Y';
-        } else if (/\[F\]/i.test(trimmed)) {
-          tag = 'F';
-        } else if (/\[O\]/i.test(trimmed)) {
-          tag = 'O';
+        let hasQuote = false;
+
+        const bracketMatch = trimmed.match(/\[(.*?)\]/);
+        if (bracketMatch) {
+          const inner = bracketMatch[1].toLowerCase();
+          if (inner.includes('y')) tag = 'Y';
+          else if (inner.includes('f')) tag = 'F';
+          else if (inner.includes('o')) tag = 'O';
+
+          if (inner.includes('quote') || inner.includes('q')) {
+            hasQuote = true;
+          }
         }
 
-        trimmed = trimmed.replace(/\[(Y|F|O)\]/gi, '').trim();
+        trimmed = trimmed.replace(/\[.*?\]/g, '').trim();
+
+        trimmed = trimmed.replace(/\\n|\n/g, '<br>');
         
-      	trimmed = trimmed.replace(/\\n|\n/g, '<br>');
-	
-      	trimmed = trimmed.replace(/\{([^}]+)\}/g, '<mark class="hl-f-1">$1</mark>');
+        trimmed = trimmed.replace(/\{([^}]+)\}/g, '<mark class="hl-f-1">$1</mark>');
+
+        if (hasQuote) {
+          trimmed = `<span class="quote-mark">“</span>${trimmed}<span class="quote-mark">”</span>`;
+        }
 
         if (tag && tag === lastTag) {
           toggleShade = !toggleShade;
