@@ -219,8 +219,16 @@
       box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
     }
 
+    .modal-top-controls {
+      position: absolute;
+      top: 65px;
+      right: 30px;
+      z-index: 10;
+    }
+
     .letter-header-info {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      padding-right: 180px; /* leaves breathing room for absolute toggle buttons */
     }
 
     .letter-header-title {
@@ -238,7 +246,6 @@
     }
 
     .letter-display-box {
-      margin-top: 15px;
       width: 100%;
       flex: 1;
       display: flex;
@@ -252,7 +259,7 @@
       background: #000;
       border-radius: 8px;
       overflow: auto;
-      zoom: 1.75; /* Applies 175% zoom to enlarge the letter view */
+      zoom: 1.75;
     }
 
     .letter-text-view {
@@ -269,7 +276,7 @@
 
     .close-modal-btn {
       position: absolute;
-      top: 20px;
+      top: 15px;
       right: 25px;
       color: var(--text-white);
       font-size: 2.2rem;
@@ -282,27 +289,6 @@
       color: var(--accent-cyan);
     }
 
-    .notes-heading {
-      color: var(--accent-cyan);
-      font-size: 1.3rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-top: 15px;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .notes-heading-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
     .notes-toggle-group {
       display: flex;
       gap: 10px;
@@ -346,6 +332,15 @@
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content letter-modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
+      
+      <!-- Top control buttons positioned right below close button -->
+      <div class="modal-top-controls">
+        <div class="notes-toggle-group">
+          <button id="btn-letter-pdf" class="notes-toggle-btn active" onclick="switchLetterTab('pdf')">PDF</button>
+          <button id="btn-letter-text" class="notes-toggle-btn" onclick="switchLetterTab('text')">Text</button>
+        </div>
+      </div>
+
       <div id="modal-body" style="display:flex; flex-direction:column; flex:1;"></div>
     </div>
   </div>
@@ -546,21 +541,19 @@
         pdfEmbedHTML = `<iframe src="${rawUrl}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
       }
 
+      // Reset toggle states on open
+      const pdfBtn = document.getElementById('btn-letter-pdf');
+      const textBtn = document.getElementById('btn-letter-text');
+      if (pdfBtn && textBtn) {
+        pdfBtn.classList.add('active');
+        textBtn.classList.remove('active');
+      }
+
       body.innerHTML = `
         <div class="letter-header-info">
           <span class="category-tag">${letter.Category || 'Letter'}</span>
           <h1 class="letter-header-title">${letter.Title}</h1>
           <div class="letter-header-desc">${letter.Description || ''}</div>
-        </div>
-
-        <div class="notes-heading">
-          <div class="notes-heading-title">
-            <span>✉️</span> Letter Archive
-          </div>
-          <div class="notes-toggle-group">
-            <button id="btn-letter-pdf" class="notes-toggle-btn active" onclick="switchLetterTab('pdf')">PDF</button>
-            <button id="btn-letter-text" class="notes-toggle-btn" onclick="switchLetterTab('text')">Text</button>
-          </div>
         </div>
 
         <div id="letter-display-container" class="letter-display-box">
