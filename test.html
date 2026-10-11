@@ -251,7 +251,8 @@
       min-height: 75vh;
       background: #000;
       border-radius: 8px;
-      overflow: hidden;
+      overflow: auto;
+      zoom: 1.75; /* Applies 175% zoom to enlarge the letter view */
     }
 
     .letter-text-view {
@@ -492,7 +493,6 @@
         
         card.onclick = () => openLetterModal(item);
 
-        // Uses ThumbnailURL for cover image, falling back to VideoURL or placeholder
         const coverImg = formatCustomImageURL(item.ThumbnailURL || item.VideoURL) || FALLBACK_SVG;
 
         card.innerHTML = `
@@ -513,7 +513,6 @@
     function formatCustomImageURL(url) {
       if (!url) return '';
       let clean = url.trim();
-      // If it's a Drive link used as thumbnail, convert to direct view image format
       if (clean.includes('drive.google.com')) {
         const driveId = extractGoogleDriveID(clean);
         if (driveId) {
