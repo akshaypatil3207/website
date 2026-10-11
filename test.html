@@ -506,11 +506,10 @@
 
         grid.appendChild(card);
 
-        // Render first page of PDF as thumbnail asynchronously
         const pdfUrl = formatPDFUrl(item.VideoURL || item.ThumbnailURL);
         const imgElement = card.querySelector('.card-thumb-img');
         if (pdfUrl) {
-          renderPDFThumbnail(pdfUrl, imgElement);
+          renderPDFThumbnail(pdfUrl, imgElement, item.VideoURL || item.ThumbnailURL);
         }
       });
     }
@@ -521,16 +520,15 @@
       if (clean.includes('drive.google.com')) {
         const driveId = extractGoogleDriveID(clean);
         if (driveId) {
-          clean = `https://drive.google.com/uc?export=download&id=${driveId}`;
+          clean = `https://drive.google.com/uc?export=download&confirm=1&id=${driveId}`;
         }
       }
-      // Wrap with a CORS proxy to bypass browser cross-origin fetch restrictions
       return `https://corsproxy.io/?${encodeURIComponent(clean)}`;
     }
 
-    async function renderPDFThumbnail(url, imgElement) {
+    async function renderPDFThumbnail(proxyUrl, imgElement, rawUrl) {
       try {
-        const loadingTask = pdfjsLib.getDocument(url);
+        const loadingTask = pdfjsLib.getDocument(proxyUrl);
         const pdfDoc = await loadingTask.promise;
         const page = await pdfDoc.getPage(1);
         const viewport = page.getViewport({ scale: 1.0 });
@@ -541,7 +539,22 @@
         await page.render({ canvasContext: context, viewport: viewport }).promise;
         imgElement.src = canvas.toDataURL();
       } catch (err) {
-        console.error('PDF thumbnail render error:', err);
+        console.warn('Proxy thumbnail failed, trying direct link...', err);
+        // Fallback to direct URL if proxy fails
+        try {
+          const loadingTask = pdfjsLib.getDocument(rawUrl);
+          const pdfDoc = await loadingTask.promise;
+          const page = await pdfDoc.getPage(1);
+          const viewport = page.getViewport({ scale: 1.0 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const context = canvas.getContext('2d');
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+          imgElement.src = canvas.toDataURL();
+        } catch (e) {
+          console.error('PDF thumbnail render error:', e);
+        }
       }
     }
 
@@ -587,17 +600,18 @@
 
       modal.classList.add('active');
 
-      const pdfUrl = formatPDFUrl(letter.VideoURL || letter.ThumbnailURL);
-      if (pdfUrl) {
-        renderPDFInContainer(pdfUrl, document.getElementById('pdf-container'));
+      const proxyUrl = formatPDFUrl(letter.VideoURL || letter.ThumbnailURL);
+      const rawUrl = letter.VideoURL || letter.ThumbnailURL;
+      if (proxyUrl) {
+        renderPDFInContainer(proxyUrl, rawUrl, document.getElementById('pdf-container'), letter);
       } else {
         document.getElementById('pdf-container').innerHTML = `<div class="status-msg">No PDF link provided.</div>`;
       }
     }
 
-    async function renderPDFInContainer(url, container) {
+    async function renderPDFInContainer(proxyUrl, rawUrl, container, letter) {
       try {
-        const loadingTask = pdfjsLib.getDocument(url);
+        const loadingTask = pdfjsLib.getDocument(proxyUrl);
         const pdfDoc = await loadingTask.promise;
         container.innerHTML = '';
 
@@ -620,8 +634,20 @@
           await page.render({ canvasContext: context, viewport: viewport }).promise;
         }
       } catch (err) {
-        console.error('PDF full render error:', err);
-        container.innerHTML = `<div class="status-msg">Error loading PDF document. Please verify the shared link permissions.</div>`;
+        console.warn('Proxy PDF render failed, falling back to embedded viewer...', err);
+        
+        // Automatic Fallback: If CORS or proxy blocks direct rendering, embed via Google Drive iframe preview
+        const driveId = extractGoogleDriveID(rawUrl);
+        if (driveId) {
+          container.innerHTML = `
+            <iframe src="https://drive.google.com/file/d/${driveId}/preview" 
+                    style="width:100%; height:75vh; border:none; border-radius: 4px;" 
+                    allow="autoplay">
+            </iframe>
+          `;
+        } else {
+          container.innerHTML = `<div class="status-msg">Error loading PDF document. Please verify the shared link permissions.</div>`;
+        }
       }
     }
 
@@ -644,9 +670,10 @@
             <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading PDF pages...</div>
           </div>
         `;
-        const pdfUrl = formatPDFUrl(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL);
-        if (pdfUrl) {
-          renderPDFInContainer(pdfUrl, document.getElementById('pdf-container'));
+        const proxyUrl = formatPDFUrl(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL);
+        const rawUrl = currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL;
+        if (proxyUrl) {
+          renderPDFInContainer(proxyUrl, rawUrl, document.getElementById('pdf-container'), currentLetterModalData);
         }
       } else {
         textBtn.classList.add('active');
