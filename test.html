@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- PDF.js Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
   <style>
     :root {
       --bg-main: #0a0a12;
@@ -126,7 +131,8 @@
       background-color: #000000;
     }
 
-    .book-thumbnail-wrapper img {
+    .book-thumbnail-wrapper img,
+    .book-thumbnail-wrapper canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -217,28 +223,8 @@
       box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
     }
 
-    .letter-seal {
-      position: absolute;
-      top: 30px;
-      right: 80px;
-      width: 52px;
-      height: 52px;
-      background: radial-gradient(circle, #ff4d4d 0%, #b30000 100%);
-      border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.7), inset 0 2px 5px rgba(255,255,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.3rem;
-      color: #ffe6e6;
-      border: 2px dashed rgba(255,200,200,0.6);
-      z-index: 10;
-    }
-
     .letter-header-info {
       margin-bottom: 25px;
-      padding-right: 90px;
     }
 
     .letter-header-title {
@@ -259,19 +245,14 @@
       margin-top: 25px;
       width: 100%;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .letter-photo-view {
+    .letter-pdf-view {
       width: 100%;
+      max-width: 900px;
       background: #000;
-    }
-
-    .letter-photo-view img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
     }
 
     .letter-text-view {
@@ -375,7 +356,7 @@
     let allItems = [];
     let currentLetterModalData = null;
 
-    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Cover Available</text></svg>');
+    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
 
     async function loadContent() {
       const lettersGrid = document.getElementById('letters-grid');
@@ -509,13 +490,12 @@
       finalItems.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card';
-        const coverImg = formatCustomImageURL(item.ThumbnailURL || item.VideoURL) || FALLBACK_SVG;
         
         card.onclick = () => openLetterModal(item);
 
         card.innerHTML = `
           <div class="book-thumbnail-wrapper">
-            <img src="${coverImg}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            <img class="card-thumb-img" src="${FALLBACK_SVG}" alt="${item.Title}" loading="lazy">
           </div>
           <div class="card-info">
             <span class="category-tag">${item.Category || 'Letter'}</span>
@@ -525,19 +505,43 @@
         `;
 
         grid.appendChild(card);
+
+        // Render first page of PDF as thumbnail asynchronously
+        const pdfUrl = formatPDFUrl(item.VideoURL || item.ThumbnailURL);
+        const imgElement = card.querySelector('.card-thumb-img');
+        if (pdfUrl) {
+          renderPDFThumbnail(pdfUrl, imgElement);
+        }
       });
     }
 
-    function formatCustomImageURL(url) {
+    function formatPDFUrl(url) {
       if (!url) return '';
       let clean = url.trim();
       if (clean.includes('drive.google.com')) {
         const driveId = extractGoogleDriveID(clean);
         if (driveId) {
-          return `https://lh3.googleusercontent.com/d/${driveId}`;
+          return `https://drive.google.com/uc?export=download&id=${driveId}`;
         }
       }
       return clean;
+    }
+
+    async function renderPDFThumbnail(url, imgElement) {
+      try {
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdfDoc = await loadingTask.promise;
+        const page = await pdfDoc.getPage(1);
+        const viewport = page.getViewport({ scale: 1.0 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext('2d');
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        imgElement.src = canvas.toDataURL();
+      } catch (err) {
+        console.error('PDF thumbnail render error:', err);
+      }
     }
 
     function extractGoogleDriveID(url) {
@@ -554,12 +558,8 @@
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
 
-      const letterPhotoUrl = formatCustomImageURL(letter.VideoURL || letter.ThumbnailURL) || FALLBACK_SVG;
-
       body.innerHTML = `
         <div style="position: relative;">
-          <div class="letter-seal">📜</div>
-          
           <div class="letter-header-info">
             <span class="category-tag">${letter.Category || 'Letter'}</span>
             <h1 class="letter-header-title">${letter.Title}</h1>
@@ -571,45 +571,85 @@
               <span>✉️</span> Letter Archive
             </div>
             <div class="notes-toggle-group">
-              <button id="btn-letter-photo" class="notes-toggle-btn active" onclick="switchLetterTab('photo')">Photo</button>
+              <button id="btn-letter-pdf" class="notes-toggle-btn active" onclick="switchLetterTab('pdf')">PDF</button>
               <button id="btn-letter-text" class="notes-toggle-btn" onclick="switchLetterTab('text')">Text</button>
             </div>
           </div>
 
           <div id="letter-display-container" class="letter-display-box">
-            <div class="letter-photo-view">
-              <img src="${letterPhotoUrl}" alt="${letter.Title} Photo" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            <div id="pdf-container" class="letter-pdf-view">
+              <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading PDF pages...</div>
             </div>
           </div>
         </div>
       `;
 
       modal.classList.add('active');
+
+      const pdfUrl = formatPDFUrl(letter.VideoURL || letter.ThumbnailURL);
+      if (pdfUrl) {
+        renderPDFInContainer(pdfUrl, document.getElementById('pdf-container'));
+      } else {
+        document.getElementById('pdf-container').innerHTML = `<div class="status-msg">No PDF link provided.</div>`;
+      }
+    }
+
+    async function renderPDFInContainer(url, container) {
+      try {
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdfDoc = await loadingTask.promise;
+        container.innerHTML = '';
+
+        for (let i = 1; i <= pdfDoc.numPages; i++) {
+          const page = await pdfDoc.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          canvas.className = 'pdf-page-canvas';
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          canvas.style.width = '100%';
+          canvas.style.height = 'auto';
+          canvas.style.marginBottom = '20px';
+          canvas.style.display = 'block';
+          canvas.style.borderRadius = '4px';
+          canvas.style.boxShadow = '0 6px 20px rgba(0,0,0,0.6)';
+
+          container.appendChild(canvas);
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+        }
+      } catch (err) {
+        console.error('PDF full render error:', err);
+        container.innerHTML = `<div class="status-msg">Error loading PDF document. Please verify the shared link permissions.</div>`;
+      }
     }
 
     function switchLetterTab(mode) {
       if (!currentLetterModalData) return;
 
-      const photoBtn = document.getElementById('btn-letter-photo');
+      const pdfBtn = document.getElementById('btn-letter-pdf');
       const textBtn = document.getElementById('btn-letter-text');
       const container = document.getElementById('letter-display-container');
 
       if (!container) return;
 
-      const letterPhotoUrl = formatCustomImageURL(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL) || FALLBACK_SVG;
       const letterText = currentLetterModalData.Notes || 'No text content provided.';
 
-      if (mode === 'photo') {
-        photoBtn.classList.add('active');
+      if (mode === 'pdf') {
+        pdfBtn.classList.add('active');
         textBtn.classList.remove('active');
         container.innerHTML = `
-          <div class="letter-photo-view">
-            <img src="${letterPhotoUrl}" alt="${currentLetterModalData.Title} Photo" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+          <div id="pdf-container" class="letter-pdf-view">
+            <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading PDF pages...</div>
           </div>
         `;
+        const pdfUrl = formatPDFUrl(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL);
+        if (pdfUrl) {
+          renderPDFInContainer(pdfUrl, document.getElementById('pdf-container'));
+        }
       } else {
         textBtn.classList.add('active');
-        photoBtn.classList.remove('active');
+        pdfBtn.classList.remove('active');
         container.innerHTML = `
           <div class="letter-text-view">${letterText}</div>
         `;
