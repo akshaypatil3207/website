@@ -353,4 +353,1197 @@
     .status-msg {
       grid-column: 1 / -1; /* Function: Spans full width across all grid columns. | Necessity: Centers message inside grid layout. */
       text-align: center; /* Function: Horizontally centers text. | Necessity: Clean feedback presentation. */
-      padding: 60px 20px; /* Function: Large top/bottom padding (60
+      padding: 60px 20px; /* Function: Large top/bottom padding (60px). | Necessity: Centers message vertically within empty grids. */
+      color: var(--text-muted); /* Function: Soft muted text color. | Necessity: Unobtrusive feedback notice. */
+      font-size: 1.1rem; /* Function: Slightly larger text size. | Necessity: Makes loading notifications easily readable. */
+      line-height: 1.6;  /* Function: Comfortable line height. | Necessity: Multi-line error message readability. */
+    }
+
+    /* Function: Modal Overlay background wrapper styling. */
+    /* Necessity: Darkens and blurs page background when popup modal opens. */
+    .modal-overlay {
+      position: fixed;   /* Function: Pins overlay across full viewport. | Necessity: Covers entire browser screen regardless of scroll position. */
+      top: 0;            /* Function: Anchors top edge. | Necessity: Full coverage. */
+      left: 0;           /* Function: Anchors left edge. | Necessity: Full coverage. */
+      width: 100vw;      /* Function: Sets width to 100% of viewport width. | Necessity: Full screen span. */
+      height: 100vh;     /* Function: Sets height to 100% of viewport height. | Necessity: Full screen span. */
+      background: rgba(0, 0, 0, 0.92); /* Function: 92% opaque black tint. | Necessity: Dims background content for focus. */
+      backdrop-filter: blur(8px); /* Function: Applies 8px blur to underlying web page. | Necessity: Creates modern focus depth. */
+      display: none;     /* Function: Hidden by default. | Necessity: Modal only opens when triggered by user click. */
+      justify-content: center; /* Function: Centers modal content horizontally. | Necessity: Perfect popup positioning. */
+      align-items: center;    /* Function: Centers modal content vertically. | Necessity: Perfect popup positioning. */
+      z-index: 1000;     /* Function: Very high z-index layer. | Necessity: Ensures modal floats above all page content. */
+      padding: 20px;     /* Function: 20px outer margin on mobile. | Necessity: Keeps modal away from screen edges on small devices. */
+    }
+
+    /* Function: Active state class for showing modal overlay. */
+    /* Necessity: Switches modal display from hidden to visible flexbox. */
+    .modal-overlay.active {
+      display: flex;     /* Function: Displays overlay as flexbox. | Necessity: Activates popup modal on screen. */
+    }
+
+    /* Function: Modal Content Window box styling. */
+    /* Necessity: Main container box holding expanded book or video details. */
+    .modal-content {
+      position: relative;/* Function: Sets positioning context for absolute close button. | Necessity: Puts close button top-right inside popup. */
+      width: 95vw;       /* Function: 95% viewport width. | Necessity: Maximize viewing space. */
+      max-width: 1400px; /* Function: Cap maximum width at 1400px. | Necessity: Prevents ultra-wide stretching on large monitors. */
+      height: 92vh;      /* Function: 92% viewport height. | Necessity: Takes up most vertical screen area. */
+      background: var(--card-bg); /* Function: Dark card background. | Necessity: Popup surface theme match. */
+      border-radius: 12px;/* Function: Rounded corners. | Necessity: Matches card styling. */
+      overflow-y: auto;  /* Function: Adds vertical scrollbar if content exceeds window height. | Necessity: Allows long reading without breaking layout. */
+      border: 1px solid var(--accent-cyan); /* Function: Cyan border outline. | Necessity: Accents popup frame. */
+      box-shadow: 0 0 35px var(--accent-glow); /* Function: Neon glow drop shadow. | Necessity: Gives popup glowing floating aesthetic. */
+      padding: 40px;     /* Function: 40px inner padding. | Necessity: Comfortable spacing around modal content. */
+      scrollbar-width: thin; /* Function: Sets custom thin scrollbar for Firefox. | Necessity: Non-intrusive modern scrollbar styling. */
+      scrollbar-color: rgba(255, 255, 255, 0.5) transparent; /* Function: Sets scrollbar thumb and track colors for Firefox. | Necessity: Custom scrollbar matching dark theme. */
+    }
+
+    /* Specialized Letter Scroll Modal Theme Styling */
+    .letter-modal-content {
+      background: #111018;
+      background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
+    }
+
+    /* Wax Seal Visual Accent */
+    .letter-seal {
+      position: absolute;
+      top: 30px;
+      right: 80px;
+      width: 52px;
+      height: 52px;
+      background: radial-gradient(circle, #ff4d4d 0%, #b30000 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.7), inset 0 2px 5px rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #ffe6e6;
+      border: 2px dashed rgba(255,200,200,0.6);
+      z-index: 10;
+    }
+
+    .letter-header-info {
+      margin-bottom: 25px;
+      padding-right: 90px;
+    }
+
+    .letter-header-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
+    .letter-header-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .letter-display-box {
+      margin-top: 25px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .letter-photo-view {
+      width: 100%;
+      max-width: 1000px;
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 25px var(--accent-glow);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .letter-photo-view img {
+      width: 100%;
+      height: auto;
+      max-height: 75vh;
+      display: block;
+      object-fit: contain;
+    }
+
+    .letter-text-view {
+      width: 100%;
+      max-width: 1000px;
+      background: rgba(18, 17, 28, 0.95);
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 25px var(--accent-glow);
+      border-radius: 8px;
+      padding: 40px;
+      font-family: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif;
+      font-size: 1.4rem;
+      line-height: 1.7;
+      color: var(--text-white);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Webkit custom scrollbar width configuration (Chrome, Safari, Edge). */
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .modal-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .modal-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #000000;
+    }
+
+    /* Specialized modal modification class applied strictly to video popups. */
+    .modal-content.video-modal-content {
+      padding: 0;
+      height: auto;
+      max-width: 950px;
+      overflow: hidden;
+    }
+
+    /* Close button (X) inside modal top right corner. */
+    .close-modal-btn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      color: var(--text-white);
+      font-size: 2.2rem;
+      cursor: pointer;
+      z-index: 1010;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+    .close-modal-btn:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Video player container wrapper. */
+    .player-container {
+      position: relative;
+      padding-top: 56.25%;
+      width: 100%;
+      background: #000000;
+    }
+    .player-container iframe,
+    .player-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    /* Book cover container styling. */
+    .book-cover-container {
+      position: relative;
+      float: left;
+      width: 320px;
+      margin-right: 40px;
+      margin-bottom: 30px;
+      perspective: 1000px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 460px;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    }
+    .flip-card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .flip-front, .flip-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000000;
+      border: 1px solid var(--border-color);
+      cursor: zoom-in;
+    }
+    .flip-front img, .flip-back img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .flip-back {
+      transform: rotateY(180deg);
+    }
+    .flip-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px;
+      background: var(--card-hover);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .flip-btn:hover {
+      background: var(--accent-cyan);
+      color: #000000;
+    }
+    .zoom-hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .book-header-info {
+      margin-bottom: 25px;
+    }
+    .book-header-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+    .book-header-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Notes heading bar. */
+    .notes-heading {
+      color: var(--accent-cyan);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 35px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .notes-heading-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .notes-toggle-group {
+      display: flex;
+      gap: 10px;
+    }
+    .notes-toggle-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: none;
+    }
+    .notes-toggle-btn:hover,
+    .notes-toggle-btn.active {
+      background: var(--accent-cyan);
+      color: #000000;
+      font-weight: bold;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    @keyframes reshuffleAnimation {
+      0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+        filter: blur(4px);
+      }
+      50% {
+        opacity: 0.5;
+        transform: translateY(5px) scale(1.01);
+        filter: blur(1px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .notes-stream.reshuffling {
+      animation: reshuffleAnimation 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .notes-stream,
+    .notes-stream mark {
+      font-family: 'Shantell Sans', 'Noto Sans Devanagari', sans-serif !important;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      letter-spacing: 0.4px;
+      color: #ffffff;
+    }
+    .note-line {
+      margin-bottom: 56px;
+      display: flow-root;
+    }
+    .note-line mark {
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .hl-y-1 { background: rgba(235, 255, 60, 0.38); text-shadow: 0 0 8px rgba(235,255,60,0.3); }
+    .hl-y-2 { background: rgba(195, 225, 30, 0.42); }
+    .hl-f-1 { background: rgba(0, 255, 180, 0.32); text-shadow: 0 0 8px rgba(0,255,180,0.3); }
+    .hl-f-2 { background: rgba(0, 210, 130, 0.38); }
+    .hl-o-1 { background: rgba(255, 165, 0, 0.42); text-shadow: 0 0 8px rgba(255,165,0,0.3); }
+    .hl-o-2 { background: rgba(230, 135, 0, 0.48); }
+    .hl-default { background: rgba(255, 255, 255, 0.12); }
+
+    /* Zoom overlay lightbox. */
+    .zoom-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      cursor: pointer;
+    }
+    .zoom-overlay.active {
+      display: flex;
+    }
+    .fullscreen-zoom-container {
+      position: relative;
+      width: 92vw;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 3vw;
+    }
+    .zoom-img-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: crosshair;
+    }
+    .zoom-img-wrapper img {
+      max-width: 44vw;
+      max-height: 88vh;
+      object-fit: contain;
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 0 35px rgba(0, 243, 255, 0.4);
+    }
+    .fullscreen-lens {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 2px solid var(--accent-cyan);
+      background: rgba(0, 243, 255, 0.25);
+      box-shadow: 0 0 15px var(--accent-glow);
+      pointer-events: none;
+      display: none;
+      z-index: 10;
+      border-radius: 4px;
+    }
+    .fullscreen-zoom-preview {
+      position: absolute;
+      left: calc(44vw + 5vw);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42vw;
+      height: 88vh;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      background-color: #000000;
+      background-repeat: no-repeat;
+      display: none;
+      box-shadow: 0 0 35px var(--accent-glow);
+      pointer-events: none;
+      z-index: 2100;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       HTML SECTION 1: HEADER & NAVIGATION TABS
+       ========================================================================== -->
+  <header>
+    <div class="brand-title">MY<span>SHOWCASE</span></div>
+    
+    <ul class="nav-tabs">
+      <li>
+        <button class="nav-btn active" onclick="switchSection('books-section', this)">Books</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('letters-section', this)">Letters</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('shorts-section', this)">Shorts</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('videos-section', this)">Videos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('photos-section', this)">Photos</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('status-section', this)">Status</button>
+      </li>
+    </ul>
+  </header>
+
+  <!-- ==========================================================================
+       HTML SECTION 2: MAIN CONTENT PAGES
+       ========================================================================== -->
+  <main>
+
+    <!-- PAGE 1: BOOKS SECTION -->
+    <section id="books-section" class="page-section active">
+      <div id="category-filter-books" class="category-filter"></div>
+      <div id="books-grid" class="grid-container books-grid">
+        <div class="status-msg">Loading books from DB...</div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: LETTERS SECTION -->
+    <section id="letters-section" class="page-section">
+      <div id="category-filter-letters" class="category-filter"></div>
+      <div id="letters-grid" class="grid-container books-grid">
+        <div class="status-msg">Loading letters from DB...</div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: SHORTS SECTION -->
+    <section id="shorts-section" class="page-section">
+      <div id="category-filter-shorts" class="category-filter"></div>
+      <div id="shorts-grid" class="grid-container">
+        <div class="status-msg">Loading shorts from DB...</div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: VIDEOS SECTION -->
+    <section id="videos-section" class="page-section">
+      <div id="category-filter-videos" class="category-filter"></div>
+      <div id="video-grid" class="grid-container">
+        <div class="status-msg">Loading videos from DB...</div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: PHOTOS SECTION -->
+    <section id="photos-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Photos Gallery</h2>
+      <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
+    </section>
+
+    <!-- PAGE 6: STATUS SECTION -->
+    <section id="status-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Status Updates</h2>
+      <p style="color: var(--text-muted);">This section will be populated in the next step.</p>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       HTML SECTION 3: POPUP MODALS & FULLSCREEN EXPANSION WITH HOVER ZOOM
+       ========================================================================== -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
+      <span class="close-modal-btn" onclick="closeModal()">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
+    <span class="close-modal-btn" style="top: 25px; right: 35px;" onclick="closeZoom(event)">&times;</span>
+    <div class="fullscreen-zoom-container">
+      <div id="zoom-img-wrapper" class="zoom-img-wrapper">
+        <div id="fullscreen-lens" class="fullscreen-lens"></div>
+        <img id="zoom-img" src="" alt="Zoomed Cover">
+      </div>
+      <div id="fullscreen-zoom-preview" class="fullscreen-zoom-preview"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT SECTION: BACKEND LOGIC & PARSING
+       ========================================================================== -->
+  <script>
+
+    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9maPUHMbAkZTS4c72grAzJvX3pCMQCIfSPXzb7lRH2vEILq4OuoAsF1zPtFEMHkleJkqRr0iZLfvy/pub?output=csv';
+
+    let allItems = [];
+    let currentBookModalData = null;
+    let currentLetterModalData = null;
+
+    const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Cover Available</text></svg>');
+
+    function switchSection(sectionId, btnElement) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+      btnElement.classList.add('active');
+    }
+
+    async function loadContent() {
+      const videoGrid = document.getElementById('video-grid');
+      const shortsGrid = document.getElementById('shorts-grid');
+      const booksGrid = document.getElementById('books-grid');
+      const lettersGrid = document.getElementById('letters-grid');
+
+      if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
+        const msg = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
+        videoGrid.innerHTML = msg;
+        shortsGrid.innerHTML = msg;
+        booksGrid.innerHTML = msg;
+        lettersGrid.innerHTML = msg;
+        return;
+      }
+
+      try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        const csvText = await response.text();
+        allItems = parseCSV(csvText);
+
+        if (allItems.length === 0) {
+          const emptyMsg = `<div class="status-msg">No items found in DB.</div>`;
+          videoGrid.innerHTML = emptyMsg;
+          shortsGrid.innerHTML = emptyMsg;
+          booksGrid.innerHTML = emptyMsg;
+          lettersGrid.innerHTML = emptyMsg;
+          return;
+        }
+
+        renderSection('books');
+        renderSection('letters');
+        renderSection('shorts');
+        renderSection('videos');
+
+      } catch (err) {
+        console.error('Fetch error:', err);
+        const errMsg = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        videoGrid.innerHTML = errMsg;
+        shortsGrid.innerHTML = errMsg;
+        booksGrid.innerHTML = errMsg;
+        lettersGrid.innerHTML = errMsg;
+      }
+    }
+
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+
+      const rawHeaders = parseCSVLine(lines[0]);
+      const results = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = parseCSVLine(lines[i]);
+        const row = {};
+
+        rawHeaders.forEach((header, index) => {
+          let val = values[index] ? values[index].trim() : '';
+          val = val.replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+          
+          const cleanHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
+          
+          if (['title', 'name', 'book', 'letter'].includes(cleanHeader)) row.Title = val;
+          if (['videourl', 'video', 'link', 'url', 'frontcover', 'photourl', 'photo'].includes(cleanHeader)) row.VideoURL = val;
+          if (['category', 'cat', 'genre'].includes(cleanHeader)) row.Category = val;
+          if (['thumbnailurl', 'thumbnail', 'thumb', 'image', 'img', 'backcover'].includes(cleanHeader)) row.ThumbnailURL = val;
+          if (['description', 'desc', 'author', 'summary'].includes(cleanHeader)) row.Description = val;
+          if (['type'].includes(cleanHeader)) row.Type = val;
+          if (['notes', 'highlights', 'quote', 'quotes', 'text'].includes(cleanHeader)) row.Notes = val;
+          if (['topnotes', 'topnote', 'toporder'].includes(cleanHeader)) row.TopNotes = val;
+        });
+
+        // Fallback: Column G (index 6) maps to Notes if not already assigned
+        if (!row.Notes && values[6]) {
+          let colGVal = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+          row.Notes = colGVal;
+        }
+
+        if (row.Type && row.Type.toLowerCase() === 'private') {
+          continue;
+        }
+
+        if (row.Title && (row.VideoURL || row.ThumbnailURL)) {
+          results.push(row);
+        }
+      }
+
+      return results;
+    }
+
+    function parseCSVLine(text) {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+          result.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+      result.push(cur);
+      return result;
+    }
+
+    function renderSection(sectionType, selectedCategory = 'All') {
+      const isShorts = sectionType === 'shorts';
+      const isBooks = sectionType === 'books';
+      const isLetters = sectionType === 'letters';
+
+      let gridId = 'video-grid';
+      let filterId = 'category-filter-videos';
+
+      if (isShorts) {
+        gridId = 'shorts-grid';
+        filterId = 'category-filter-shorts';
+      } else if (isBooks) {
+        gridId = 'books-grid';
+        filterId = 'category-filter-books';
+      } else if (isLetters) {
+        gridId = 'letters-grid';
+        filterId = 'category-filter-letters';
+      }
+
+      const sectionItems = allItems.filter(item => {
+        const t = (item.Type || '').toLowerCase().trim();
+        if (isShorts) return t === 'shorts' || t === 'short';
+        if (isBooks) return t === 'books' || t === 'book';
+        if (isLetters) return t === 'letters' || t === 'letter';
+        return t === 'videos' || t === 'video' || t === '';
+      });
+
+      const filterContainer = document.getElementById(filterId);
+      const uniqueCategories = [
+        'All',
+        ...new Set(
+          sectionItems
+            .map(item => item.Category ? item.Category.trim() : '')
+            .filter(cat => cat !== '')
+        )
+      ];
+
+      filterContainer.innerHTML = '';
+      uniqueCategories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${category.toLowerCase() === selectedCategory.toLowerCase() ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => renderSection(sectionType, category);
+        filterContainer.appendChild(btn);
+      });
+
+      let finalItems = sectionItems;
+      if (selectedCategory !== 'All') {
+        finalItems = sectionItems.filter(v => 
+          v.Category && v.Category.trim().toLowerCase() === selectedCategory.toLowerCase()
+        );
+      }
+
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = '';
+
+      if (finalItems.length === 0) {
+        grid.innerHTML = `<div class="status-msg">No ${sectionType} found in this category.</div>`;
+        return;
+      }
+
+      finalItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        if (isBooks || isLetters) {
+          const coverImg = formatCustomImageURL(item.ThumbnailURL || item.VideoURL) || FALLBACK_SVG;
+          
+          if (isLetters) {
+            card.onclick = () => openLetterModal(item);
+          } else {
+            card.onclick = () => openBookModal(item);
+          }
+
+          card.innerHTML = `
+            <div class="book-thumbnail-wrapper">
+              <img src="${coverImg}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            </div>
+            <div class="card-info">
+              <span class="category-tag">${item.Category || (isLetters ? 'Letter' : 'Book')}</span>
+              <div class="card-title">${item.Title}</div>
+              <div class="card-desc">${item.Description || ''}</div>
+            </div>
+          `;
+        } else {
+          const youtubeId = extractYouTubeID(item.VideoURL);
+          let thumbUrl = formatCustomImageURL(item.ThumbnailURL);
+
+          if (!thumbUrl && youtubeId) {
+            thumbUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+          } else if (!thumbUrl) {
+            thumbUrl = FALLBACK_SVG;
+          }
+
+          card.onclick = () => openVideoModal(item.VideoURL, youtubeId);
+
+          card.innerHTML = `
+            <div class="thumbnail-wrapper">
+              <img src="${thumbUrl}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+              <div class="play-icon"></div>
+            </div>
+            <div class="card-info">
+              <span class="category-tag">${item.Category || 'General'}</span>
+              <div class="card-title">${item.Title}</div>
+              <div class="card-desc">${item.Description || ''}</div>
+            </div>
+          `;
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    function formatCustomImageURL(url) {
+      if (!url) return '';
+      let clean = url.trim();
+      if (clean.includes('drive.google.com')) {
+        const driveId = extractGoogleDriveID(clean);
+        if (driveId) {
+          return `https://lh3.googleusercontent.com/d/${driveId}`;
+        }
+      }
+      return clean;
+    }
+
+    function openBookModal(book) {
+      currentBookModalData = book;
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      const body = document.getElementById('modal-body');
+
+      content.classList.remove('video-modal-content');
+      content.classList.remove('letter-modal-content');
+
+      const frontCover = formatCustomImageURL(book.VideoURL) || FALLBACK_SVG;
+      const backCover = formatCustomImageURL(book.ThumbnailURL) || frontCover;
+
+      const hasNaturalNotes = Boolean(book.Notes && book.Notes.trim());
+      const hasTopNotes = Boolean(book.TopNotes && book.TopNotes.trim());
+      const showToggles = hasNaturalNotes && hasTopNotes;
+
+      let initialNotesRaw = '';
+      if (showToggles || hasTopNotes) {
+        initialNotesRaw = book.TopNotes;
+      } else if (hasNaturalNotes) {
+        initialNotesRaw = book.Notes;
+      }
+
+      const parsedNotes = parseBookNotes(initialNotesRaw);
+      const toggleButtonsHTML = showToggles ? `
+        <div class="notes-toggle-group">
+          <button id="btn-notes-top" class="notes-toggle-btn active" onclick="switchNotesSequence('top')">Top</button>
+          <button id="btn-notes-natural" class="notes-toggle-btn" onclick="switchNotesSequence('natural')">Natural Sequence</button>
+        </div>
+      ` : '';
+
+      body.innerHTML = `
+        <div class="clearfix">
+          <div class="book-cover-container">
+            <div id="flip-card-inner" class="flip-card-inner">
+              <div class="flip-front" onclick="zoomImage('${frontCover}')">
+                <img src="${frontCover}" alt="${book.Title} Front Cover">
+              </div>
+              <div class="flip-back" onclick="zoomImage('${backCover}')">
+                <img src="${backCover}" alt="${book.Title} Back Cover">
+              </div>
+            </div>
+            <button class="flip-btn" onclick="toggleBookFlip()">Flip to Back Cover</button>
+            <div class="zoom-hint">💡 Click cover image to fully expand</div>
+          </div>
+
+          <div class="book-header-info">
+            <span class="category-tag">${book.Category || 'Book'}</span>
+            <h1 class="book-header-title">${book.Title}</h1>
+            <div class="book-header-desc">${book.Description || ''}</div>
+          </div>
+
+          <div class="notes-heading">
+            <div class="notes-heading-title">
+              <span>📝</span> Highlighted Notes
+            </div>
+            ${toggleButtonsHTML}
+          </div>
+
+          <div id="notes-stream-container" class="notes-stream">
+            ${parsedNotes || '<div style="color:var(--text-muted); font-size:1.1rem; margin-top:20px;">No notes available.</div>'}
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('active');
+    }
+
+    // NEW: Open Letter Modal with Old Scroll Theme, Name/Description at Top, and Photo/Text Option Toggles
+    function openLetterModal(letter) {
+      currentLetterModalData = letter;
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      const body = document.getElementById('modal-body');
+
+      content.classList.remove('video-modal-content');
+      content.classList.add('letter-modal-content');
+
+      const letterPhotoUrl = formatCustomImageURL(letter.VideoURL || letter.ThumbnailURL) || FALLBACK_SVG;
+      const letterText = letter.Notes || 'No text content provided in Column G.';
+
+      body.innerHTML = `
+        <div style="position: relative;">
+          <div class="letter-seal">📜</div>
+          
+          <div class="letter-header-info">
+            <span class="category-tag">${letter.Category || 'Letter'}</span>
+            <h1 class="letter-header-title">${letter.Title}</h1>
+            <div class="letter-header-desc">${letter.Description || ''}</div>
+          </div>
+
+          <div class="notes-heading">
+            <div class="notes-heading-title">
+              <span>✉️</span> Letter Archive
+            </div>
+            <div class="notes-toggle-group">
+              <button id="btn-letter-photo" class="notes-toggle-btn active" onclick="switchLetterTab('photo')">Photo</button>
+              <button id="btn-letter-text" class="notes-toggle-btn" onclick="switchLetterTab('text')">Text</button>
+            </div>
+          </div>
+
+          <div id="letter-display-container" class="letter-display-box">
+            <div class="letter-photo-view">
+              <img src="${letterPhotoUrl}" alt="${letter.Title} Photo" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            </div>
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('active');
+    }
+
+    function switchLetterTab(mode) {
+      if (!currentLetterModalData) return;
+
+      const photoBtn = document.getElementById('btn-letter-photo');
+      const textBtn = document.getElementById('btn-letter-text');
+      const container = document.getElementById('letter-display-container');
+
+      if (!container) return;
+
+      const letterPhotoUrl = formatCustomImageURL(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL) || FALLBACK_SVG;
+      const letterText = currentLetterModalData.Notes || 'No text content provided in Column G.';
+
+      if (mode === 'photo') {
+        photoBtn.classList.add('active');
+        textBtn.classList.remove('active');
+        container.innerHTML = `
+          <div class="letter-photo-view">
+            <img src="${letterPhotoUrl}" alt="${currentLetterModalData.Title} Photo" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+          </div>
+        `;
+      } else {
+        textBtn.classList.add('active');
+        photoBtn.classList.remove('active');
+        container.innerHTML = `
+          <div class="letter-text-view">${letterText}</div>
+        `;
+      }
+    }
+
+    function switchNotesSequence(mode) {
+      if (!currentBookModalData) return;
+
+      const topBtn = document.getElementById('btn-notes-top');
+      const naturalBtn = document.getElementById('btn-notes-natural');
+      const container = document.getElementById('notes-stream-container');
+
+      if (!container) return;
+
+      let notesRaw = '';
+      if (mode === 'top') {
+        topBtn.classList.add('active');
+        naturalBtn.classList.remove('active');
+        notesRaw = currentBookModalData.TopNotes || currentBookModalData.Notes || '';
+      } else {
+        naturalBtn.classList.add('active');
+        topBtn.classList.remove('active');
+        notesRaw = currentBookModalData.Notes || '';
+      }
+
+      const renderedNotes = parseBookNotes(notesRaw);
+      container.classList.remove('reshuffling');
+      void container.offsetWidth;
+      container.classList.add('reshuffling');
+      container.innerHTML = renderedNotes || '<div style="color:var(--text-muted); font-size:1.1rem; margin-top:20px;">No notes available.</div>';
+    }
+
+    function toggleBookFlip() {
+      const cardInner = document.getElementById('flip-card-inner');
+      const btn = event.target;
+      cardInner.classList.toggle('flipped');
+
+      if (cardInner.classList.contains('flipped')) {
+        btn.textContent = 'Flip to Front Cover';
+      } else {
+        btn.textContent = 'Flip to Back Cover';
+      }
+    }
+
+    function parseBookNotes(notesRaw) {
+      if (!notesRaw) return '';
+      const cleanedNotes = notesRaw.replace(/\u00a0/g, ' ');
+      const sentences = cleanedNotes.split(';');
+      let html = '';
+      let lastTag = '';
+      let toggleShade = false;
+
+      sentences.forEach(raw => {
+        let trimmed = raw.trim();
+        if (!trimmed) return;
+
+        let tag = '';
+        if (/[Y]/i.test(trimmed)) {
+          tag = 'Y';
+        } else if (/[F]/i.test(trimmed)) {
+          tag = 'F';
+        } else if (/[O]/i.test(trimmed)) {
+          tag = 'O';
+        }
+
+        trimmed = trimmed.replace(/\[(Y\vert{}F\vert{}O)\]/gi, '').trim();
+        trimmed = trimmed.replace(/\\n|\n/g, '<br>');
+        trimmed = trimmed.replace(/\{([^}]+)\}/g, '<mark class="hl-f-1">$1</mark>');
+
+        if (tag && tag === lastTag) {
+          toggleShade = !toggleShade;
+        } else {
+          toggleShade = false;
+          lastTag = tag;
+        }
+
+        let hlClass = 'hl-default';
+        if (tag === 'Y') {
+          hlClass = toggleShade ? 'hl-y-2' : 'hl-y-1';
+        } else if (tag === 'F') {
+          hlClass = toggleShade ? 'hl-f-2' : 'hl-f-1';
+        } else if (tag === 'O') {
+          hlClass = toggleShade ? 'hl-o-2' : 'hl-o-1';
+        }
+
+        html += `
+          <div class="note-line">
+            <mark class="${hlClass}">${trimmed}</mark>
+          </div>
+        `;
+      });
+
+      return html;
+    }
+
+    function zoomImage(src) {
+      if (!src) return;
+      const overlay = document.getElementById('zoom-overlay');
+      const img = document.getElementById('zoom-img');
+
+      img.src = src;
+      overlay.classList.add('active');
+
+      document.getElementById('fullscreen-zoom-preview').style.display = 'none';
+      document.getElementById('fullscreen-lens').style.display = 'none';
+    }
+
+    function closeZoom(event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      document.getElementById('zoom-overlay').classList.remove('active');
+    }
+
+    function initFullscreenHoverZoom() {
+      const wrapper = document.getElementById('zoom-img-wrapper');
+      const img = document.getElementById('zoom-img');
+      const lens = document.getElementById('fullscreen-lens');
+      const preview = document.getElementById('fullscreen-zoom-preview');
+
+      if (!wrapper || !img || !lens || !preview) return;
+
+      wrapper.addEventListener('mouseenter', () => {
+        if (!img.src) return;
+        preview.style.backgroundImage = `url('${img.src}')`;
+        preview.style.display = 'block';
+        lens.style.display = 'block';
+      });
+
+      wrapper.addEventListener('mouseleave', () => {
+        preview.style.display = 'none';
+        lens.style.display = 'none';
+      });
+
+      wrapper.addEventListener('mousemove', (e) => {
+        const rect = img.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > rect.width) x = rect.width;
+        if (y > rect.height) y = rect.height;
+
+        const lensWidth = 110;
+        const lensHeight = 110;
+
+        let lensX = x - lensWidth / 2;
+        let lensY = y - lensHeight / 2;
+
+        if (lensX < 0) lensX = 0;
+        if (lensY < 0) lensY = 0;
+        if (lensX > rect.width - lensWidth) lensX = rect.width - lensWidth;
+        if (lensY > rect.height - lensHeight) lensY = rect.height - lensHeight;
+
+        lens.style.left = lensX + 'px';
+        lens.style.top = lensY + 'px';
+
+        const zoomFactor = 2.5;
+        preview.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+
+        const rx = (rect.width > lensWidth) ? lensX / (rect.width - lensWidth) : 0;
+        const ry = (rect.height > lensHeight) ? lensY / (rect.height - lensHeight) : 0;
+
+        const bgW = rect.width * zoomFactor - preview.clientWidth;
+        const bgH = rect.height * zoomFactor - preview.clientHeight;
+
+        const bgX = rx * bgW;
+        const bgY = ry * bgH;
+
+        preview.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+      });
+    }
+
+    function openVideoModal(videoUrl, youtubeId) {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      const body = document.getElementById('modal-body');
+
+      content.classList.add('video-modal-content');
+      content.classList.remove('letter-modal-content');
+
+      let finalUrl = videoUrl.trim();
+      const driveId = extractGoogleDriveID(finalUrl);
+
+      if (youtubeId) {
+        body.innerHTML = `
+          <div class="player-container">
+            <iframe 
+              src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>`;
+      } else if (driveId) {
+        body.innerHTML = `
+          <div class="player-container">
+            <iframe 
+              src="https://drive.google.com/file/d/${driveId}/preview" 
+              allow="autoplay" 
+              allowfullscreen>
+            </iframe>
+          </div>`;
+      } else {
+        if (finalUrl.includes('onedrive.live.com/embed')) {
+          finalUrl = finalUrl.replace('/embed', '/download');
+        }
+
+        body.innerHTML = `
+          <div class="player-container">
+            <video controls autoplay style="width:100%; height:100%;">
+              <source src="${finalUrl}" type="video/mp4">
+              Your browser does not support this video stream format.
+            </video>
+          </div>`;
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal(event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const modal = document.getElementById('modal-overlay');
+      const body = document.getElementById('modal-body');
+
+      modal.classList.remove('active');
+      body.innerHTML = '';
+      currentBookModalData = null;
+      currentLetterModalData = null;
+    }
+
+    function extractYouTubeID(url) {
+      if (!url) return null;
+      const cleanUrl = url.trim();
+      const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = cleanUrl.match(regExp);
+      return (match && match[1]) ? match[1] : null;
+    }
+
+    function extractGoogleDriveID(url) {
+      if (!url) return null;
+      const cleanUrl = url.trim();
+      const match = cleanUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || 
+                    cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || 
+                    cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      return (match && match[1]) ? match[1] : null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadContent();
+      initFullscreenHoverZoom();
+    });
+
+  </script>
+</body>
+</html>
