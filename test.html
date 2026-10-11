@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Letters Archive</title>
+  <title>My Archive Showcase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- PDF.js Library CDN for thumbnails -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
   <style>
     :root {
       --bg-main: #0a0a12;
@@ -59,12 +64,55 @@
       color: var(--accent-cyan);
     }
 
+    .nav-tabs {
+      display: flex;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--accent-cyan);
+    }
+
+    .nav-btn.active {
+      background: var(--card-hover);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
     main {
       flex: 1;
       padding: 30px;
       max-width: 1400px;
       margin: 0 auto;
       width: 100%;
+    }
+
+    .page-section {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .category-filter {
@@ -126,7 +174,8 @@
       background-color: #000000;
     }
 
-    .book-thumbnail-wrapper img {
+    .book-thumbnail-wrapper img,
+    .book-thumbnail-wrapper canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -228,7 +277,7 @@
 
     .letter-header-info {
       margin-bottom: 20px;
-      padding-right: 180px; /* leaves breathing room for absolute toggle buttons */
+      padding-right: 180px;
     }
 
     .letter-header-title {
@@ -317,15 +366,49 @@
 <body>
 
   <header>
-    <div class="brand-title">MY<span>LETTERS</span></div>
+    <div class="brand-title">MY<span>ARCHIVE</span></div>
+    
+    <ul class="nav-tabs">
+      <li>
+        <button class="nav-btn active" onclick="switchSection('letters-section', this)">Letters</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('achievements-section', this)">Achievements</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('moments-section', this)">Moments</button>
+      </li>
+      <li>
+        <button class="nav-btn" onclick="switchSection('diaries-section', this)">Diaries</button>
+      </li>
+    </ul>
   </header>
 
   <main>
+    <!-- LETTERS SECTION -->
     <section id="letters-section" class="page-section active">
       <div id="category-filter-letters" class="category-filter"></div>
       <div id="letters-grid" class="grid-container">
         <div class="status-msg">Loading letters from DB...</div>
       </div>
+    </section>
+
+    <!-- ACHIEVEMENTS SECTION -->
+    <section id="achievements-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Achievements</h2>
+      <p style="color: var(--text-muted);">This section will be populated with your achievements.</p>
+    </section>
+
+    <!-- MOMENTS SECTION -->
+    <section id="moments-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Moments</h2>
+      <p style="color: var(--text-muted);">This section will be populated with your special moments.</p>
+    </section>
+
+    <!-- DIARIES SECTION -->
+    <section id="diaries-section" class="page-section">
+      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Diaries</h2>
+      <p style="color: var(--text-muted);">This section will be populated with your diary entries.</p>
     </section>
   </main>
 
@@ -333,7 +416,6 @@
     <div id="modal-content" class="modal-content letter-modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
       
-      <!-- Top control buttons positioned right below close button -->
       <div class="modal-top-controls">
         <div class="notes-toggle-group">
           <button id="btn-letter-pdf" class="notes-toggle-btn active" onclick="switchLetterTab('pdf')">PDF</button>
@@ -352,6 +434,13 @@
     let currentLetterModalData = null;
 
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
+
+    function switchSection(sectionId, btnElement) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+      btnElement.classList.add('active');
+    }
 
     async function loadContent() {
       const lettersGrid = document.getElementById('letters-grid');
@@ -445,7 +534,7 @@
     function renderLettersSection(selectedCategory = 'All') {
       const sectionItems = allItems.filter(item => {
         const t = (item.Type || '').toLowerCase().trim();
-        return t === 'letters' || t === 'letter';
+        return t === 'letters' || t === 'letter' || t === '';
       });
 
       const filterContainer = document.getElementById('category-filter-letters');
@@ -492,7 +581,7 @@
 
         card.innerHTML = `
           <div class="book-thumbnail-wrapper">
-            <img src="${coverImg}" alt="${item.Title}" loading="lazy" onerror="this.onerror=null; this.src='${FALLBACK_SVG}';">
+            <img class="card-thumb-img" src="${FALLBACK_SVG}" alt="${item.Title}" loading="lazy">
           </div>
           <div class="card-info">
             <span class="category-tag">${item.Category || 'Letter'}</span>
@@ -502,7 +591,57 @@
         `;
 
         grid.appendChild(card);
+
+        const pdfUrl = formatPDFUrl(item.VideoURL || item.ThumbnailURL);
+        const imgElement = card.querySelector('.card-thumb-img');
+        if (pdfUrl) {
+          renderPDFThumbnail(pdfUrl, imgElement, item.VideoURL || item.ThumbnailURL);
+        } else {
+          imgElement.src = coverImg;
+        }
       });
+    }
+
+    function formatPDFUrl(url) {
+      if (!url) return '';
+      let clean = url.trim();
+      if (clean.includes('drive.google.com')) {
+        const driveId = extractGoogleDriveID(clean);
+        if (driveId) {
+          clean = `https://drive.google.com/uc?export=download&confirm=1&id=${driveId}`;
+        }
+      }
+      return `https://corsproxy.io/?${encodeURIComponent(clean)}`;
+    }
+
+    async function renderPDFThumbnail(proxyUrl, imgElement, rawUrl) {
+      try {
+        const loadingTask = pdfjsLib.getDocument(proxyUrl);
+        const pdfDoc = await loadingTask.promise;
+        const page = await pdfDoc.getPage(1);
+        const viewport = page.getViewport({ scale: 1.0 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext('2d');
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        imgElement.src = canvas.toDataURL();
+      } catch (err) {
+        try {
+          const loadingTask = pdfjsLib.getDocument(rawUrl);
+          const pdfDoc = await loadingTask.promise;
+          const page = await pdfDoc.getPage(1);
+          const viewport = page.getViewport({ scale: 1.0 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const context = canvas.getContext('2d');
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+          imgElement.src = canvas.toDataURL();
+        } catch (e) {
+          imgElement.src = formatCustomImageURL(rawUrl) || FALLBACK_SVG;
+        }
+      }
     }
 
     function formatCustomImageURL(url) {
@@ -541,7 +680,6 @@
         pdfEmbedHTML = `<iframe src="${rawUrl}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
       }
 
-      // Reset toggle states on open
       const pdfBtn = document.getElementById('btn-letter-pdf');
       const textBtn = document.getElementById('btn-letter-text');
       if (pdfBtn && textBtn) {
