@@ -521,10 +521,11 @@
       if (clean.includes('drive.google.com')) {
         const driveId = extractGoogleDriveID(clean);
         if (driveId) {
-          return `https://drive.google.com/uc?export=download&id=${driveId}`;
+          clean = `https://drive.google.com/uc?export=download&id=${driveId}`;
         }
       }
-      return clean;
+      // Wrap with a CORS proxy to bypass browser cross-origin fetch restrictions
+      return `https://corsproxy.io/?${encodeURIComponent(clean)}`;
     }
 
     async function renderPDFThumbnail(url, imgElement) {
