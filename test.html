@@ -299,6 +299,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
     }
 
     .letter-pdf-view {
@@ -318,7 +319,7 @@
       font-family: var(--font-notes);
       font-size: 1.4rem;
       line-height: 1.7;
-      color: var(--text-white);
+      color: rgba(255, 255, 255, 0.85);
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -418,8 +419,8 @@
       
       <div class="modal-top-controls">
         <div class="notes-toggle-group">
-          <button id="btn-letter-pdf" class="notes-toggle-btn active" onclick="switchLetterTab('pdf')">PDF</button>
-          <button id="btn-letter-text" class="notes-toggle-btn" onclick="switchLetterTab('text')">Text</button>
+          <button id="btn-letter-text" class="notes-toggle-btn active" onclick="switchLetterTab('text')">Text</button>
+          <button id="btn-letter-pdf" class="notes-toggle-btn" onclick="switchLetterTab('pdf')">PDF</button>
         </div>
       </div>
 
@@ -469,15 +470,59 @@
     }
 
     function parseCSV(csvText) {
-      const lines = csvText.trim().split(/\r?\n/);
-      if (lines.length < 2) return [];
+      const rows = [];
+      let currentRow = [];
+      let currentField = '';
+      let inQuotes = false;
 
-      const rawHeaders = parseCSVLine(lines[0]);
+      for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const nextChar = csvText[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && nextChar === '"') {
+            currentField += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            currentField += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ',') {
+            currentRow.push(currentField.trim());
+            currentField = '';
+          } else if (char === '\r' && nextChar === '\n') {
+            currentRow.push(currentField.trim());
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = '';
+            i++;
+          } else if (char === '\n') {
+            currentRow.push(currentField.trim());
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = '';
+          } else {
+            currentField += char;
+          }
+        }
+      }
+      if (currentField !== '' || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        rows.push(currentRow);
+      }
+
+      if (rows.length < 2) return [];
+
+      const rawHeaders = rows[0];
       const results = [];
 
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const values = parseCSVLine(lines[i]);
+      for (let i = 1; i < rows.length; i++) {
+        const values = rows[i];
+        if (!values || values.every(v => v === '')) continue;
         const row = {};
 
         rawHeaders.forEach((header, index) => {
@@ -503,32 +548,12 @@
           continue;
         }
 
-        if (row.Title && (row.VideoURL || row.ThumbnailURL)) {
+        if (row.Title && (row.VideoURL || row.ThumbnailURL || row.Notes)) {
           results.push(row);
         }
       }
 
       return results;
-    }
-
-    function parseCSVLine(text) {
-      const result = [];
-      let cur = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        if (c === '"') {
-          inQuotes = !inQuotes;
-        } else if (c === ',' && !inQuotes) {
-          result.push(cur);
-          cur = '';
-        } else {
-          cur += c;
-        }
-      }
-      result.push(cur);
-      return result;
     }
 
     function renderLettersSection(selectedCategory = 'All') {
@@ -670,22 +695,14 @@
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
 
-      const rawUrl = letter.VideoURL || letter.ThumbnailURL;
-      const driveId = extractGoogleDriveID(rawUrl);
-      
-      let pdfEmbedHTML = '';
-      if (driveId) {
-        pdfEmbedHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
-      } else {
-        pdfEmbedHTML = `<iframe src="${rawUrl}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
-      }
-
       const pdfBtn = document.getElementById('btn-letter-pdf');
       const textBtn = document.getElementById('btn-letter-text');
       if (pdfBtn && textBtn) {
-        pdfBtn.classList.add('active');
-        textBtn.classList.remove('active');
+        textBtn.classList.add('active');
+        pdfBtn.classList.remove('active');
       }
+
+      const letterText = letter.Notes || 'No text content provided.';
 
       body.innerHTML = `
         <div class="letter-header-info">
@@ -695,9 +712,7 @@
         </div>
 
         <div id="letter-display-container" class="letter-display-box">
-          <div id="pdf-container" class="letter-pdf-view">
-            ${pdfEmbedHTML}
-          </div>
+          <div class="letter-text-view">${letterText}</div>
         </div>
       `;
 
@@ -721,9 +736,14 @@
         pdfBtn.classList.add('active');
         textBtn.classList.remove('active');
         
-        let pdfEmbedHTML = driveId ? 
-          `<iframe src="https://drive.google.com/file/d/${driveId}/preview" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>` :
-          `<iframe src="${rawUrl}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
+        let pdfEmbedHTML = '';
+        if (driveId) {
+          pdfEmbedHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
+        } else if (rawUrl) {
+          pdfEmbedHTML = `<iframe src="${rawUrl}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`;
+        } else {
+          pdfEmbedHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);">No PDF/File attached</div>`;
+        }
 
         container.innerHTML = `
           <div id="pdf-container" class="letter-pdf-view">
