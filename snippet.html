@@ -262,7 +262,7 @@
       border-color: var(--accent-cyan);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
-
+  /* This is a CSS comment 
     .thumbnail-wrapper {
       position: relative;
       width: 100%;
@@ -277,6 +277,24 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }                      */
+
+    .thumbnail-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 125%; /* Maintains a clean card aspect ratio */
+      background-color: #0c0b13; /* Sleek background for letterboxing/pillarboxing */
+      overflow: hidden;
+    }
+
+    .thumbnail-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Ensures the complete image is visible without cropping */
+      padding: 8px; /* Optional: adds a tiny breathing room around full images */
     }
 
     .card-info {
