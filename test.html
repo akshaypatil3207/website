@@ -27,6 +27,22 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    /* Custom Consistent Scrollbars */
+    *::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    *::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    *::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-cyan);
+    }
+
     body {
       background-color: var(--bg-main);
       color: var(--text-white);
@@ -242,8 +258,8 @@
 
     .modal-content {
       position: relative;
-      width: 98vw;
-      max-width: 1500px;
+      width: 90%;
+      max-width: 1400px;
       height: 95vh;
       background: var(--card-bg);
       border-radius: 12px;
@@ -260,6 +276,14 @@
       background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
       border: 2px solid var(--accent-cyan);
       box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
+    }
+
+    .modal-content.no-text-mode .letter-header-info {
+      padding-right: 0;
+    }
+
+    .modal-content.no-text-mode .modal-top-controls {
+      display: none;
     }
 
     .modal-top-controls {
@@ -657,28 +681,56 @@
     function openLetterModal(letter) {
       currentLetterModalData = letter;
       const modal = document.getElementById('modal-overlay');
+      const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
-      const textBtn = document.getElementById('btn-letter-text');
-      const photosBtn = document.getElementById('btn-letter-photos');
-      if (textBtn && photosBtn) {
-        textBtn.classList.add('active');
-        photosBtn.classList.remove('active');
+      const hasText = letter.Notes && letter.Notes.trim() !== '';
+
+      if (hasText) {
+        modalContent.classList.remove('no-text-mode');
+        const textBtn = document.getElementById('btn-letter-text');
+        const photosBtn = document.getElementById('btn-letter-photos');
+        if (textBtn && photosBtn) {
+          textBtn.classList.add('active');
+          photosBtn.classList.remove('active');
+        }
+
+        body.innerHTML = `
+          <div class="letter-header-info">
+            <span class="category-tag">${letter.Category || 'Letter'}</span>
+            <h1 class="letter-header-title">${letter.Title}</h1>
+            <div class="letter-header-desc">${letter.Description || ''}</div>
+          </div>
+
+          <div id="letter-display-container" class="letter-display-box">
+            <div class="letter-text-view">${letter.Notes}</div>
+          </div>
+        `;
+      } else {
+        modalContent.classList.add('no-text-mode');
+        const urls = getImageURLs(letter.VideoURL || letter.ThumbnailURL);
+        
+        let imagesHTML = '';
+        if (urls.length > 0) {
+          imagesHTML = urls.map(url => `<img src="${url}" alt="Letter Page" loading="lazy" onerror="this.style.display='none'">`).join('');
+        } else {
+          imagesHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);">No images attached</div>`;
+        }
+
+        body.innerHTML = `
+          <div class="letter-header-info">
+            <span class="category-tag">${letter.Category || 'Letter'}</span>
+            <h1 class="letter-header-title">${letter.Title}</h1>
+            <div class="letter-header-desc">${letter.Description || ''}</div>
+          </div>
+
+          <div id="letter-display-container" class="letter-display-box">
+            <div class="letter-photos-view">
+              ${imagesHTML}
+            </div>
+          </div>
+        `;
       }
-
-      const letterText = letter.Notes || 'No text content provided.';
-
-      body.innerHTML = `
-        <div class="letter-header-info">
-          <span class="category-tag">${letter.Category || 'Letter'}</span>
-          <h1 class="letter-header-title">${letter.Title}</h1>
-          <div class="letter-header-desc">${letter.Description || ''}</div>
-        </div>
-
-        <div id="letter-display-container" class="letter-display-box">
-          <div class="letter-text-view">${letterText}</div>
-        </div>
-      `;
 
       modal.classList.add('active');
     }
@@ -692,7 +744,7 @@
 
       if (!container) return;
 
-      const letterText = currentLetterModalData.Notes || 'No text content provided.';
+      const letterText = currentLetterModalData.Notes || '';
       const urls = getImageURLs(currentLetterModalData.VideoURL || currentLetterModalData.ThumbnailURL);
 
       if (mode === 'photos') {
@@ -723,9 +775,11 @@
     function closeModal(event) {
       if (event && event.stopPropagation) event.stopPropagation();
       const modal = document.getElementById('modal-overlay');
+      const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
       modal.classList.remove('active');
+      modalContent.classList.remove('no-text-mode');
       body.innerHTML = '';
       currentLetterModalData = null;
     }
