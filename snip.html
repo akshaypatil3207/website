@@ -196,9 +196,9 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Pinterest-style Masonry Collage Grid - Updated to 3 columns */
+    /* Pinterest-style Masonry Collage Grid (Default 4 Columns) */
     .collage-grid {
-      column-count: 3;
+      column-count: 4;
       column-gap: 20px;
       width: 100%;
     }
@@ -210,7 +210,7 @@
       width: 100%;
     }
 
-    /* Horizontal Scrolling Rows - Updated to 3 items per view */
+    /* Horizontal Scrolling Rows */
     .horizontal-scroll-row {
       display: flex;
       gap: 20px;
@@ -223,18 +223,26 @@
       height: 6px;
     }
 
+    /* Portrait/Square cards: Default size (4 items per row) */
     .horizontal-scroll-row .card {
-      min-width: calc(33.333% - 14px);
-      flex: 0 0 calc(33.333% - 14px);
+      min-width: calc(25% - 15px);
+      flex: 0 0 calc(25% - 15px);
+    }
+
+    /* Landscape cards: Automatically larger (3 items per row) */
+    .horizontal-scroll-row .card.is-landscape {
+      min-width: calc(33.333% - 14px) !important;
+      flex: 0 0 calc(33.333% - 14px) !important;
     }
 
     @media (max-width: 1024px) {
       .collage-grid {
         column-count: 2;
       }
-      .horizontal-scroll-row .card {
-        min-width: calc(50% - 10px);
-        flex: 0 0 calc(50% - 10px);
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.is-landscape {
+        min-width: calc(50% - 10px) !important;
+        flex: 0 0 calc(50% - 10px) !important;
       }
     }
 
@@ -242,9 +250,10 @@
       .collage-grid {
         column-count: 1;
       }
-      .horizontal-scroll-row .card {
-        min-width: 85%;
-        flex: 0 0 85%;
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.is-landscape {
+        min-width: 85% !important;
+        flex: 0 0 85% !important;
       }
     }
 
@@ -645,6 +654,17 @@
       return (match && match[1]) ? match[1] : null;
     }
 
+    /* Checks natural image dimensions in background and flags landscape items */
+    function checkOrientation(imgElement, cardElement) {
+      const img = new Image();
+      img.onload = function() {
+        if (this.naturalWidth > this.naturalHeight) {
+          cardElement.classList.add('is-landscape');
+        }
+      };
+      img.src = imgElement.src;
+    }
+
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
       const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates'];
@@ -743,6 +763,11 @@
                 <div class="card-desc">${item.Description || ''}</div>
               </div>
             `;
+
+            // Trigger orientation check on the image inside the card
+            const imgEl = card.querySelector('img');
+            checkOrientation(imgEl, card);
+
             contentDiv.appendChild(card);
           });
         }
