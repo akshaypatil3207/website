@@ -175,6 +175,11 @@
       letter-spacing: 0.5px;
     }
 
+    .scroll-controls {
+      display: flex;
+      gap: 8px;
+    }
+
     .scroll-arrow-btn {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -196,7 +201,7 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Pinterest-style Masonry Collage Grid (Default 4 Columns) */
+    /* Pinterest-style Masonry Collage Grid */
     .collage-grid {
       column-count: 4;
       column-gap: 20px;
@@ -223,13 +228,13 @@
       height: 6px;
     }
 
-    /* Portrait/Square cards: Default size (4 items per row) */
+    /* Original Default Card Size (4 per row) for portrait and untagged photos */
     .horizontal-scroll-row .card {
       min-width: calc(25% - 15px);
       flex: 0 0 calc(25% - 15px);
     }
 
-    /* Landscape cards: Automatically larger (3 items per row) */
+    /* Landscape cards specifically larger (3 per row) */
     .horizontal-scroll-row .card.is-landscape {
       min-width: calc(33.333% - 14px) !important;
       flex: 0 0 calc(33.333% - 14px) !important;
@@ -630,7 +635,12 @@
 
     function getMediaURLs(urlStr) {
       if (!urlStr) return [];
-      return urlStr.split(';').map(u => formatCustomImageURL(u.trim())).filter(u => u !== '');
+      return urlStr.split(';').map(u => {
+        let clean = u.trim();
+        // Strip orientation tags for clean image loading
+        clean = clean.replace(/[landscape]/gi, '').replace(/[portrait]/gi, '').trim();
+        return formatCustomImageURL(clean);
+      }).filter(u => u !== '');
     }
 
     function formatCustomImageURL(url) {
@@ -654,15 +664,10 @@
       return (match && match[1]) ? match[1] : null;
     }
 
-    /* Checks natural image dimensions in background and flags landscape items */
-    function checkOrientation(imgElement, cardElement) {
-      const img = new Image();
-      img.onload = function() {
-        if (this.naturalWidth > this.naturalHeight) {
-          cardElement.classList.add('is-landscape');
-        }
-      };
-      img.src = imgElement.src;
+    /* Checks if item is explicitly tagged as [landscape] in its ThumbnailURL or VideoURL */
+    function isItemLandscape(item) {
+      const urlStr = (item.ThumbnailURL || '') + ';' + (item.VideoURL || '');
+      return urlStr.toLowerCase().includes('[landscape]');
     }
 
     function renderAchievementsView(selectedCategory = 'All') {
@@ -730,7 +735,10 @@
 
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
-            <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+            <div class="scroll-controls">
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+            </div>
           `;
         }
         wrapper.appendChild(headerRow);
@@ -749,6 +757,12 @@
           sectionItems.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card';
+            
+            // Check if explicitly tagged as landscape
+            if (isItemLandscape(item)) {
+              card.classList.add('is-landscape');
+            }
+
             card.onclick = () => openAchievementModal(item);
 
             const thumb = getThumbnail(item);
@@ -763,11 +777,6 @@
                 <div class="card-desc">${item.Description || ''}</div>
               </div>
             `;
-
-            // Trigger orientation check on the image inside the card
-            const imgEl = card.querySelector('img');
-            checkOrientation(imgEl, card);
-
             contentDiv.appendChild(card);
           });
         }
