@@ -201,10 +201,11 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Collage Grid (Flexbox to support 4-per-row normal / 3-per-row landscape) */
+    /* Natural Collage Grid (Left-aligned, no forced stretching) */
     .collage-grid {
       display: flex;
       flex-wrap: wrap;
+      justify-content: flex-start;
       gap: 20px;
       width: 100%;
     }
@@ -212,10 +213,12 @@
     .collage-grid .card {
       width: calc(25% - 15px);
       margin-bottom: 0;
+      flex-grow: 0;
     }
 
     .collage-grid .card.landscape-card {
       width: calc(33.333% - 14px);
+      flex-grow: 0;
     }
 
     /* Horizontal Scrolling Rows */
@@ -291,19 +294,21 @@
       font-size: 1.15rem;
     }
 
-    /* Natural Collage Thumbnail Wrapper */
+    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
       width: 100%;
       background-color: #0c0b13;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .collage-thumbnail-wrapper img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
       transition: transform 0.4s ease;
     }
 
