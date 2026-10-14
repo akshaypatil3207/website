@@ -156,9 +156,9 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Achievement & General Sections Styling */
+    /* Increased gap between sections */
     .achievement-category-wrapper {
-      margin-bottom: 40px;
+      margin-bottom: 60px;
     }
 
     .section-header-row {
@@ -360,7 +360,7 @@
       width: 100%;
     }
 
-    /* Modal Overlay (85% Screen Glowing Window) */
+    /* Modal Overlay (Enlarged Glowing Window Size) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -373,7 +373,7 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
-      padding: 20px;
+      padding: 15px;
     }
 
     .modal-overlay.active {
@@ -382,15 +382,15 @@
 
     .modal-content {
       position: relative;
-      width: 85vw;
-      height: 85vh;
+      width: 94vw;
+      height: 94vh;
       background: #111018;
       background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
       border-radius: 12px;
       overflow-y: auto;
       border: 2px solid var(--accent-cyan);
-      box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
-      padding: 35px;
+      box-shadow: 0 0 50px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
+      padding: 40px;
       display: flex;
       flex-direction: column;
     }
@@ -441,7 +441,7 @@
 
     .modal-media-item {
       width: 100%;
-      max-width: 950px;
+      max-width: 1100px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
@@ -451,7 +451,7 @@
 
     .modal-text-view {
       width: 100%;
-      max-width: 950px;
+      max-width: 1100px;
       background: rgba(20, 19, 34, 0.6);
       border: 1px solid var(--border-color);
       padding: 25px;
@@ -509,7 +509,7 @@
     </section>
   </main>
 
-  <!-- Glowing Modal Window (85% Screen) -->
+  <!-- Glowing Modal Window (Enlarged Size) -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -723,7 +723,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
+        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
       ];
 
       let activeSections = sectionsConfig;
@@ -965,11 +965,6 @@
             return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
           }
         }).join('');
-      } else {
-        const thumb = getThumbnail(item);
-        if (thumb && thumb !== FALLBACK_SVG) {
-          mediaHTML = `<img class="modal-media-item" src="${thumb}" alt="${item.Title}" loading="lazy">`;
-        }
       }
 
       let textHTML = '';
