@@ -6,7 +6,7 @@
   <title>My Archive Showcase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #0a0a12;
@@ -15,16 +15,17 @@
       --accent-cyan: #00f3ff;
       --accent-glow: rgba(0, 243, 255, 0.35);
       --text-white: #ffffff;
-      --text-muted: #a0a0c0;
+      --text-muted: #d0d0e0;
       --border-color: #272545;
-      --font-notes: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif;
+      --font-main: 'Shantell Sans', cursive, sans-serif;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: var(--font-main);
+      color: var(--text-white);
     }
 
     /* Custom Consistent Scrollbars */
@@ -156,116 +157,38 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Increased gap between sections (20% more than previous 25vh = 30vh) */
+    /* Increased gap between sections by 220% more (192px) */
     .achievement-category-wrapper {
-      margin-bottom: 30vh;
+      margin-bottom: 192px;
     }
 
     .section-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .section-title {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
     }
 
-    .scroll-controls {
-      display: flex;
-      gap: 8px;
-    }
-
-    .scroll-arrow-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-white);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .scroll-arrow-btn:hover {
-      background: var(--accent-cyan);
-      color: #000;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px var(--accent-glow);
-    }
-
-    /* Natural Collage Grid */
+    /* Card List Layout: Left side photo/video, Right side 3/4th text */
     .collage-grid {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
+      flex-direction: column;
       gap: 20px;
       width: 100%;
     }
 
-    .collage-grid .card {
-      width: calc(25% - 15px);
-      margin-bottom: 0;
-      flex-grow: 0;
-    }
-
-    .collage-grid .card.landscape-card {
-      width: calc(33.333% - 14px);
-      flex-grow: 0;
-    }
-
-    /* Horizontal Scrolling Rows */
     .horizontal-scroll-row {
       display: flex;
+      flex-direction: column;
       gap: 20px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding-bottom: 10px;
-    }
-
-    .horizontal-scroll-row::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .horizontal-scroll-row .card {
-      min-width: calc(25% - 15px);
-      flex: 0 0 calc(25% - 15px);
-    }
-
-    .horizontal-scroll-row .card.landscape-card {
-      min-width: calc(33.333% - 14px);
-      flex: 0 0 calc(33.333% - 14px);
-    }
-
-    @media (max-width: 1024px) {
-      .collage-grid .card,
-      .collage-grid .card.landscape-card {
-        width: calc(50% - 10px);
-      }
-      .horizontal-scroll-row .card,
-      .horizontal-scroll-row .card.landscape-card {
-        min-width: calc(50% - 10px);
-        flex: 0 0 calc(50% - 10px);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .collage-grid .card,
-      .collage-grid .card.landscape-card {
-        width: 85%;
-      }
-      .horizontal-scroll-row .card,
-      .horizontal-scroll-row .card.landscape-card {
-        min-width: 85%;
-        flex: 0 0 85%;
-      }
+      width: 100%;
     }
 
     .card {
@@ -274,48 +197,49 @@
       border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      width: 100%;
+      min-height: 180px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+    /* No hover zoom or transform effects */
     .card:hover {
-      transform: translateY(-6px);
       border-color: var(--accent-cyan);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    .card.diary-card .card-info {
-      font-family: var(--font-notes);
-    }
-    .card.diary-card .card-title {
-      font-family: var(--font-notes);
-      font-size: 1.15rem;
-    }
-
+    /* Left side photo/video wrapper (1/4th width) */
     .collage-thumbnail-wrapper {
       position: relative;
-      width: 100%;
+      flex: 0 0 25%;
+      max-width: 25%;
       background-color: #0c0b13;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-right: 1px solid var(--border-color);
     }
 
-    .collage-thumbnail-wrapper img {
+    .collage-thumbnail-wrapper img,
+    .collage-thumbnail-wrapper video {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      /* Reverted hover zoom as requested */
     }
 
+    /* Right side text area (3/4th width) */
     .card-info {
-      padding: 15px;
+      flex: 0 0 75%;
+      max-width: 75%;
+      padding: 20px 25px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      flex: 1;
+      justify-content: center;
+      gap: 10px;
     }
 
     .category-tag {
@@ -323,21 +247,21 @@
       font-size: 0.75rem;
       color: var(--accent-cyan);
       background: rgba(0, 243, 255, 0.1);
-      padding: 3px 8px;
+      padding: 3px 10px;
       border-radius: 4px;
       text-transform: uppercase;
       font-weight: 600;
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 1.15rem;
       font-weight: 600;
       line-height: 1.3;
       color: var(--text-white);
     }
 
     .card-desc {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -346,7 +270,6 @@
     }
 
     .status-msg {
-      grid-column: 1 / -1;
       text-align: center;
       padding: 60px 20px;
       color: var(--text-muted);
@@ -354,7 +277,24 @@
       width: 100%;
     }
 
-    /* Modal Overlay (Glowing Window) */
+    @media (max-width: 768px) {
+      .card {
+        flex-direction: column;
+      }
+      .collage-thumbnail-wrapper {
+        flex: 0 0 200px;
+        max-width: 100%;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .card-info {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+
+    /* Modal Overlay (Full Glowing Screen Video / Content) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -383,7 +323,7 @@
       border-radius: 12px;
       overflow-y: auto;
       border: 2px solid var(--accent-cyan);
-      box-shadow: 0 0 50px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
+      box-shadow: 0 0 60px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
       padding: 40px;
       display: flex;
       flex-direction: column;
@@ -423,64 +363,40 @@
       line-height: 1.5;
     }
 
-    /* Side-by-Side Modal Layout: Left Media, Right Text (3/4th space) */
-    .modal-split-container {
-      display: flex;
-      gap: 30px;
-      flex: 1;
+    .modal-media-container {
       width: 100%;
-      overflow: hidden;
-    }
-
-    .modal-left-media {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 25px;
       overflow-y: auto;
-    }
-
-    .modal-right-text {
-      flex: 3; /* Right side taking up the 3/4th proportion */
-      background: rgba(20, 19, 34, 0.6);
-      border: 1px solid var(--border-color);
-      padding: 30px;
-      border-radius: 8px;
-      font-family: var(--font-notes); /* Shantell Sans font */
-      font-size: 1.15rem;
-      line-height: 1.8;
-      color: #ffffff; /* White text color */
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-y: auto;
+      align-items: center;
+      justify-content: center;
     }
 
     .modal-media-item {
       width: 100%;
-      max-height: 450px;
+      height: 100%;
+      max-height: 70vh;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.8);
       object-fit: contain;
       background: #000;
     }
 
-    .modal-iframe-item {
+    .modal-text-view {
       width: 100%;
-      height: 350px;
-      border-radius: 8px;
+      max-width: 1100px;
+      background: rgba(20, 19, 34, 0.6);
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-      background: #000;
-    }
-
-    @media (max-width: 900px) {
-      .modal-split-container {
-        flex-direction: column;
-      }
-      .modal-right-text {
-        flex: auto;
-      }
+      padding: 25px;
+      border-radius: 8px;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-white);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -536,7 +452,7 @@
     </div>
   </div>
 
-  <script[cite: 1]>
+  <script>
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4PJ4JdrGEdXtLeoghYJBSeScn9pH9V1l2FFCRSy8w8D4oKA1IJYZIAXT2E1_94MTG4yEUKRFdFZ-f/pub?output=csv';
 
     let allItems = [];
@@ -718,38 +634,6 @@
       return (match && match[1]) ? match[1] : null;
     }
 
-    function extractYouTubeID(url) {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function renderSingleMedia(url) {
-      if (!url) return '';
-      const trimmed = url.trim();
-
-      // Check YouTube
-      const ytId = extractYouTubeID(trimmed);
-      if (ytId) {
-        return `<iframe class="modal-iframe-item" src="https://www.youtube.com/embed/${ytId}" allowfullscreen title="YouTube video"></iframe>`;
-      }
-
-      // Check Google Drive Video/File
-      const driveId = extractGoogleDriveID(trimmed);
-      if (driveId && (trimmed.includes('/file/d/') || trimmed.includes('id='))) {
-        return `<iframe class="modal-iframe-item" src="https://drive.google.com/file/d/${driveId}/preview" allowfullscreen title="Google Drive File"></iframe>`;
-      }
-
-      // Check standard video file
-      if (trimmed.match(/\.(mp4|webm|ogg|mov)$/i)) {
-        return `<video class="modal-media-item" controls src="${trimmed}"></video>`;
-      }
-
-      // Default Image
-      return `<img class="modal-media-item" src="${trimmed}" alt="Media" loading="lazy" onerror="this.style.display='none'">`;
-    }
-
     /* --- ACHIEVEMENTS VIEW --- */
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
@@ -806,39 +690,25 @@
         const headerRow = document.createElement('div');
         headerRow.className = 'section-header-row';
         headerRow.innerHTML = `<h3 class="section-title">${sec.title}</h3>`;
-
-        if (sec.type === 'scroll-row') {
-          headerRow.innerHTML += `
-            <div class="scroll-controls">
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
-            </div>
-          `;
-        }
         wrapper.appendChild(headerRow);
 
         const contentDiv = document.createElement('div');
-        if (sec.type === 'collage') {
-          contentDiv.className = 'collage-grid';
-        } else {
-          contentDiv.className = 'horizontal-scroll-row';
-          contentDiv.id = `${sec.key}-row`;
-        }
+        contentDiv.className = 'collage-grid';
 
         if (sectionItems.length === 0) {
           contentDiv.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No items in ${sec.title} yet.</div>`;
         } else {
           sectionItems.forEach(item => {
-            const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+            card.className = `card`;
             card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
+            const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
             card.innerHTML = `
               <div class="collage-thumbnail-wrapper">
-                <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
+                ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">`}
               </div>
               <div class="card-info">
                 <span class="category-tag">${item.Category || sec.title}</span>
@@ -902,15 +772,15 @@
       grid.className = 'collage-grid';
 
       filtered.forEach(item => {
-        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
         const card = document.createElement('div');
-        card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+        card.className = `card`;
         card.onclick = () => openModal(item);
         const thumb = getThumbnail(item);
+        const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
         card.innerHTML = `
           <div class="collage-thumbnail-wrapper">
-            <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
+            ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">`}
           </div>
           <div class="card-info">
             <span class="category-tag">${item.Category || 'Moment'}</span>
@@ -968,19 +838,19 @@
       grid.className = 'collage-grid';
 
       filtered.forEach(item => {
-        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
         const card = document.createElement('div');
-        card.className = `card diary-card ${isLandscape ? 'landscape-card' : ''}`;
+        card.className = `card`;
         card.onclick = () => openModal(item);
         const thumb = getThumbnail(item);
+        const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
         card.innerHTML = `
           ${thumb !== FALLBACK_SVG ? `
             <div class="collage-thumbnail-wrapper">
-              <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+              ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`}
             </div>
           ` : ''}
-          <div class="card-info">
+          <div class="card-info" ${thumb === FALLBACK_SVG ? 'style="max-width:100%; flex:0 0 100%;"' : ''}>
             <span class="category-tag">${item.Category || 'Diary'}</span>
             <div class="card-title">${item.Title}</div>
             <div class="card-desc">${item.Notes || item.Description || ''}</div>
@@ -993,22 +863,29 @@
       container.appendChild(wrapper);
     }
 
-    function scrollRow(rowId, distance) {
-      const row = document.getElementById(rowId);
-      if (row) {
-        row.scrollBy({ left: distance, behavior: 'smooth' });
-      }
-    }
-
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
 
-      const rawURLs = item.VideoURL ? item.VideoURL.split(';').map(u => u.trim()).filter(u => u !== '') : [];
-      let mediaHTML = rawURLs.length > 0 ? rawURLs.map(url => renderSingleMedia(url)).join('') : '<div style="color:var(--text-muted);">No media attached.</div>';
+      const mediaURLs = getMediaURLs(item.VideoURL);
+      let mediaHTML = '';
 
-      let textContent = item.Notes && item.Notes.trim() !== '' ? item.Notes : (item.Description || '');
-      let textHTML = textContent !== '' ? `<div class="modal-right-text">${textContent}</div>` : '';
+      if (mediaURLs.length > 0) {
+        mediaHTML = mediaURLs.map(url => {
+          if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
+            return `<video class="modal-media-item" controls autoplay src="${url}"></video>`;
+          } else {
+            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+          }
+        }).join('');
+      }
+
+      let textHTML = '';
+      if (item.Notes && item.Notes.trim() !== '') {
+        textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
+      } else if (item.Description && item.Description.trim() !== '') {
+        textHTML = `<div class="modal-text-view">${item.Description}</div>`;
+      }
 
       body.innerHTML = `
         <div class="modal-header-info">
@@ -1017,10 +894,8 @@
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
 
-        <div class="modal-split-container">
-          <div class="modal-left-media">
-            ${mediaHTML}
-          </div>
+        <div class="modal-media-container">
+          ${mediaHTML}
           ${textHTML}
         </div>
       `;
