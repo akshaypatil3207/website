@@ -986,7 +986,7 @@
           if (ytId) {
             return `
               <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
-                <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
+                <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
               </div>
             `;
           } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
