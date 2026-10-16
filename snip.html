@@ -460,6 +460,30 @@
       background: #000;
     }
 
+    /* Specific Small-Sized Packed Collage Grid Style for Work Ex Modal Window */
+    .modal-collage-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .modal-collage-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .modal-collage-img:hover {
+      transform: scale(1.03);
+      border-color: var(--accent-cyan);
+    }
+
     .modal-text-view {
       width: 100%;
       max-width: 1100px;
@@ -680,6 +704,18 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
+    function getLinkedInEmbedURL(url) {
+      if (!url) return null;
+      if (url.includes('linkedin.com')) {
+        if (url.includes('<iframe')) {
+          const match = url.match(/src="([^"]+)"/);
+          return match ? match[1] : null;
+        }
+        return url.trim();
+      }
+      return null;
+    }
+
     function getThumbnail(item) {
       if (item.ThumbnailURL && item.ThumbnailURL.trim() !== '') {
         const urls = getMediaURLs(item.ThumbnailURL);
@@ -745,7 +781,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'scroll-row' } // Certificates set to scroll-row with 4 columns per view
+        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
       ];
 
       let activeSections = sectionsConfig;
@@ -978,23 +1014,46 @@
       const body = document.getElementById('modal-body');
 
       const mediaURLs = getMediaURLs(item.VideoURL);
+      const category = (item.Category || '').trim().toLowerCase();
+      const isWorkEx = category.includes('work ex') || category.includes('work experience');
+      
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        mediaHTML = mediaURLs.map(url => {
-          const ytId = extractYouTubeID(url);
-          if (ytId) {
-            return `
-              <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
-                <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
-              </div>
-            `;
-          } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
-            return `<video class="modal-media-item" controls src="${url}"></video>`;
-          } else {
-            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
-          }
-        }).join('');
+        if (isWorkEx) {
+          // Special small-sized packed collage grid layout inside modal for Work Ex items
+          mediaHTML = `
+            <div class="modal-collage-container">
+              ${mediaURLs.map(url => `
+                <img class="modal-collage-img" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+              `).join('')}
+            </div>
+          `;
+        } else {
+          // Standard layout for all other sections (Featured, Projects, etc.)
+          mediaHTML = mediaURLs.map(url => {
+            const ytId = extractYouTubeID(url);
+            const linkedinUrl = getLinkedInEmbedURL(url);
+
+            if (ytId) {
+              return `
+                <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
+                  <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
+                </div>
+              `;
+            } else if (linkedinUrl) {
+              return `
+                <div style="width: 100%; max-width: 600px; display: flex; justify-content: center;">
+                  <iframe src="${linkedinUrl}" height="560" width="100%" frameborder="0" allowfullscreen="" title="Embedded LinkedIn Post" style="border-radius: 8px; background: #fff;"></iframe>
+                </div>
+              `;
+            } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
+              return `<video class="modal-media-item" controls src="${url}"></video>`;
+            } else {
+              return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+            }
+          }).join('');
+        }
       }
 
       let textHTML = '';
