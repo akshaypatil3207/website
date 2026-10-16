@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Achievement Showcase</title>
+  <title>My Archive Showcase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -156,9 +156,9 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Achievement Sections Styling */
+    /* Increased gap between sections */
     .achievement-category-wrapper {
-      margin-bottom: 40px;
+      margin-bottom: 60px;
     }
 
     .section-header-row {
@@ -173,6 +173,11 @@
       font-weight: 700;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
+    }
+
+    .scroll-controls {
+      display: flex;
+      gap: 8px;
     }
 
     .scroll-arrow-btn {
@@ -196,18 +201,24 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Pinterest-style Masonry Collage Grid */
+    /* Natural Collage Grid (Left-aligned, no forced stretching) */
     .collage-grid {
-      column-count: 4;
-      column-gap: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 20px;
       width: 100%;
     }
 
     .collage-grid .card {
-      break-inside: avoid;
-      margin-bottom: 20px;
-      display: inline-block;
-      width: 100%;
+      width: calc(25% - 15px);
+      margin-bottom: 0;
+      flex-grow: 0;
+    }
+
+    .collage-grid .card.landscape-card {
+      width: calc(33.333% - 14px);
+      flex-grow: 0;
     }
 
     /* Horizontal Scrolling Rows */
@@ -228,21 +239,30 @@
       flex: 0 0 calc(25% - 15px);
     }
 
+    .horizontal-scroll-row .card.landscape-card {
+      min-width: calc(33.333% - 14px);
+      flex: 0 0 calc(33.333% - 14px);
+    }
+
     @media (max-width: 1024px) {
-      .collage-grid {
-        column-count: 2;
+      .collage-grid .card,
+      .collage-grid .card.landscape-card {
+        width: calc(50% - 10px);
       }
-      .horizontal-scroll-row .card {
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.landscape-card {
         min-width: calc(50% - 10px);
         flex: 0 0 calc(50% - 10px);
       }
     }
 
     @media (max-width: 600px) {
-      .collage-grid {
-        column-count: 1;
+      .collage-grid .card,
+      .collage-grid .card.landscape-card {
+        width: 85%;
       }
-      .horizontal-scroll-row .card {
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.landscape-card {
         min-width: 85%;
         flex: 0 0 85%;
       }
@@ -265,19 +285,30 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Natural Collage Thumbnail Wrapper */
+    /* Diary Card Specific Styling */
+    .card.diary-card .card-info {
+      font-family: var(--font-notes);
+    }
+    .card.diary-card .card-title {
+      font-family: var(--font-notes);
+      font-size: 1.15rem;
+    }
+
+    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
       width: 100%;
       background-color: #0c0b13;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .collage-thumbnail-wrapper img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
       transition: transform 0.4s ease;
     }
 
@@ -326,9 +357,10 @@
       padding: 60px 20px;
       color: var(--text-muted);
       font-size: 1.1rem;
+      width: 100%;
     }
 
-    /* Modal Overlay (85% Screen Glowing Window) */
+    /* Modal Overlay (Enlarged Glowing Window Size) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -341,7 +373,7 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
-      padding: 20px;
+      padding: 15px;
     }
 
     .modal-overlay.active {
@@ -350,15 +382,15 @@
 
     .modal-content {
       position: relative;
-      width: 85vw;
-      height: 85vh;
+      width: 94vw;
+      height: 94vh;
       background: #111018;
       background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
       border-radius: 12px;
       overflow-y: auto;
       border: 2px solid var(--accent-cyan);
-      box-shadow: 0 0 45px var(--accent-glow), inset 0 0 35px rgba(0, 243, 255, 0.1);
-      padding: 35px;
+      box-shadow: 0 0 50px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
+      padding: 40px;
       display: flex;
       flex-direction: column;
     }
@@ -409,7 +441,7 @@
 
     .modal-media-item {
       width: 100%;
-      max-width: 950px;
+      max-width: 1100px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
@@ -419,15 +451,15 @@
 
     .modal-text-view {
       width: 100%;
-      max-width: 950px;
+      max-width: 1100px;
       background: rgba(20, 19, 34, 0.6);
       border: 1px solid var(--border-color);
-      padding: 20px;
+      padding: 25px;
       border-radius: 8px;
       font-family: var(--font-notes);
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.85);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -462,18 +494,22 @@
 
     <!-- MOMENTS SECTION -->
     <section id="moments-section" class="page-section">
-      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Moments</h2>
-      <p style="color: var(--text-muted);">This section will be populated with your special moments.</p>
+      <div id="category-filter-moments" class="category-filter"></div>
+      <div id="moments-container">
+        <div class="status-msg">Loading moments from DB...</div>
+      </div>
     </section>
 
     <!-- DIARIES SECTION -->
     <section id="diaries-section" class="page-section">
-      <h2 style="color: var(--accent-cyan); margin-bottom: 10px;">Diaries</h2>
-      <p style="color: var(--text-muted);">This section will be populated with your diary entries.</p>
+      <div id="category-filter-diaries" class="category-filter"></div>
+      <div id="diaries-container">
+        <div class="status-msg">Loading diaries from DB...</div>
+      </div>
     </section>
   </main>
 
-  <!-- Glowing Modal Window (85% Screen) -->
+  <!-- Glowing Modal Window (Enlarged Size) -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -495,10 +531,15 @@
     }
 
     async function loadContent() {
-      const container = document.getElementById('achievements-container');
+      const achContainer = document.getElementById('achievements-container');
+      const momContainer = document.getElementById('moments-container');
+      const diaContainer = document.getElementById('diaries-container');
 
       if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes('PASTE_YOUR_PUBLISHED_CSV_URL_HERE')) {
-        container.innerHTML = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
+        const errMsg = `<div class="status-msg">⚠️ Please replace <b>GOOGLE_SHEET_CSV_URL</b> with your published Google Sheet CSV link.</div>`;
+        achContainer.innerHTML = errMsg;
+        momContainer.innerHTML = errMsg;
+        diaContainer.innerHTML = errMsg;
         return;
       }
 
@@ -508,15 +549,23 @@
         allItems = parseCSV(csvText);
 
         if (allItems.length === 0) {
-          container.innerHTML = `<div class="status-msg">No achievement records found in DB.</div>`;
+          const emptyMsg = `<div class="status-msg">No records found in DB.</div>`;
+          achContainer.innerHTML = emptyMsg;
+          momContainer.innerHTML = emptyMsg;
+          diaContainer.innerHTML = emptyMsg;
           return;
         }
 
         renderAchievementsView('All');
+        renderMomentsView('All');
+        renderDiariesView('All');
 
       } catch (err) {
         console.error('Fetch error:', err);
-        container.innerHTML = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        const errLoadMsg = `<div class="status-msg">Error loading content from DB.<br>Verify your sheet is Published to Web as CSV.</div>`;
+        achContainer.innerHTML = errLoadMsg;
+        momContainer.innerHTML = errLoadMsg;
+        diaContainer.innerHTML = errLoadMsg;
       }
     }
 
@@ -589,10 +638,16 @@
           if (['description', 'desc', 'author', 'summary'].includes(cleanHeader)) row.Description = val;
           if (['type'].includes(cleanHeader)) row.Type = val;
           if (['notes', 'highlights', 'quote', 'quotes', 'text'].includes(cleanHeader)) row.Notes = val;
+          if (['layout', 'orientation', 'size', 'format'].includes(cleanHeader)) row.Layout = val;
         });
 
         if (!row.Notes && values[6]) {
           row.Notes = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+        }
+
+        // Column H check (index 7)
+        if (!row.Layout && values[7]) {
+          row.Layout = values[7].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
 
         if (row.Type && row.Type.toLowerCase() === 'private') {
@@ -645,6 +700,7 @@
       return (match && match[1]) ? match[1] : null;
     }
 
+    /* --- ACHIEVEMENTS VIEW --- */
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
       const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates'];
@@ -667,7 +723,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
+        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
       ];
 
       let activeSections = sectionsConfig;
@@ -691,13 +747,6 @@
           }
         });
 
-        if (selectedCategory !== 'All' && sectionItems.length === 0) {
-          const looseMatch = allItems.filter(item => (item.Category || '').trim().toLowerCase().includes(selectedCategory.toLowerCase()));
-          if (looseMatch.length > 0 && sec === activeSections[0]) {
-            sectionItems.push(...looseMatch);
-          }
-        }
-
         if (selectedCategory === 'All' && sectionItems.length === 0) return;
 
         renderedCount++;
@@ -710,7 +759,10 @@
 
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
-            <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+            <div class="scroll-controls">
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+            </div>
           `;
         }
         wrapper.appendChild(headerRow);
@@ -727,9 +779,10 @@
           contentDiv.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No items in ${sec.title} yet.</div>`;
         } else {
           sectionItems.forEach(item => {
+            const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const card = document.createElement('div');
-            card.className = 'card';
-            card.onclick = () => openAchievementModal(item);
+            card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+            card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
 
@@ -756,6 +809,140 @@
       }
     }
 
+    /* --- MOMENTS VIEW --- */
+    function renderMomentsView(selectedCategory = 'All') {
+      const momentItems = allItems.filter(item => {
+        const cat = (item.Category || '').trim().toLowerCase();
+        return cat.includes('moment') || cat.includes('travel') || cat.includes('memory') || cat.includes('photo');
+      });
+
+      const categories = ['All', ...new Set(momentItems.map(i => i.Category || 'Moments'))];
+      const filterContainer = document.getElementById('category-filter-moments');
+      filterContainer.innerHTML = '';
+
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${category.toLowerCase() === selectedCategory.toLowerCase() ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => renderMomentsView(category);
+        filterContainer.appendChild(btn);
+      });
+
+      const container = document.getElementById('moments-container');
+      container.innerHTML = '';
+
+      const filtered = selectedCategory === 'All' 
+        ? momentItems 
+        : momentItems.filter(i => (i.Category || '').trim().toLowerCase() === selectedCategory.toLowerCase());
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="status-msg">No moments found. Add items tagged with "Moments" or "Travel" in your sheet.</div>`;
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'achievement-category-wrapper';
+      wrapper.innerHTML = `
+        <div class="section-header-row">
+          <h3 class="section-title">Visual Memories</h3>
+        </div>
+      `;
+
+      const grid = document.createElement('div');
+      grid.className = 'collage-grid';
+
+      filtered.forEach(item => {
+        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
+        const card = document.createElement('div');
+        card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+        card.onclick = () => openModal(item);
+        const thumb = getThumbnail(item);
+
+        card.innerHTML = `
+          <div class="collage-thumbnail-wrapper">
+            <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
+          </div>
+          <div class="card-info">
+            <span class="category-tag">${item.Category || 'Moment'}</span>
+            <div class="card-title">${item.Title}</div>
+            <div class="card-desc">${item.Description || ''}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      wrapper.appendChild(grid);
+      container.appendChild(wrapper);
+    }
+
+    /* --- DIARIES VIEW --- */
+    function renderDiariesView(selectedCategory = 'All') {
+      const diaryItems = allItems.filter(item => {
+        const cat = (item.Category || '').trim().toLowerCase();
+        return cat.includes('diary') || cat.includes('journal') || cat.includes('note') || cat.includes('reflection');
+      });
+
+      const categories = ['All', ...new Set(diaryItems.map(i => i.Category || 'Diaries'))];
+      const filterContainer = document.getElementById('category-filter-diaries');
+      filterContainer.innerHTML = '';
+
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${category.toLowerCase() === selectedCategory.toLowerCase() ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => renderDiariesView(category);
+        filterContainer.appendChild(btn);
+      });
+
+      const container = document.getElementById('diaries-container');
+      container.innerHTML = '';
+
+      const filtered = selectedCategory === 'All' 
+        ? diaryItems 
+        : diaryItems.filter(i => (i.Category || '').trim().toLowerCase() === selectedCategory.toLowerCase());
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="status-msg">No diary entries found. Add items tagged with "Diaries" or "Journal" in your sheet.</div>`;
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'achievement-category-wrapper';
+      wrapper.innerHTML = `
+        <div class="section-header-row">
+          <h3 class="section-title">Journal & Notes</h3>
+        </div>
+      `;
+
+      const grid = document.createElement('div');
+      grid.className = 'collage-grid';
+
+      filtered.forEach(item => {
+        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
+        const card = document.createElement('div');
+        card.className = `card diary-card ${isLandscape ? 'landscape-card' : ''}`;
+        card.onclick = () => openModal(item);
+        const thumb = getThumbnail(item);
+
+        card.innerHTML = `
+          ${thumb !== FALLBACK_SVG ? `
+            <div class="collage-thumbnail-wrapper">
+              <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+            </div>
+          ` : ''}
+          <div class="card-info">
+            <span class="category-tag">${item.Category || 'Diary'}</span>
+            <div class="card-title">${item.Title}</div>
+            <div class="card-desc">${item.Notes || item.Description || ''}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      wrapper.appendChild(grid);
+      container.appendChild(wrapper);
+    }
+
     function scrollRow(rowId, distance) {
       const row = document.getElementById(rowId);
       if (row) {
@@ -763,7 +950,7 @@
       }
     }
 
-    function openAchievementModal(item) {
+    function openModal(item) {
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
 
@@ -778,11 +965,6 @@
             return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
           }
         }).join('');
-      } else {
-        const thumb = getThumbnail(item);
-        if (thumb && thumb !== FALLBACK_SVG) {
-          mediaHTML = `<img class="modal-media-item" src="${thumb}" alt="${item.Title}" loading="lazy">`;
-        }
       }
 
       let textHTML = '';
@@ -794,7 +976,7 @@
 
       body.innerHTML = `
         <div class="modal-header-info">
-          <span class="category-tag">${item.Category || 'Achievement'}</span>
+          <span class="category-tag">${item.Category || 'Archive Item'}</span>
           <h1 class="modal-header-title">${item.Title}</h1>
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
