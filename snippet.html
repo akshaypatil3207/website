@@ -156,9 +156,9 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Increased gap between sections */
+    /* Gap between sections set to 1/4th of screen height (25vh) */
     .achievement-category-wrapper {
-      margin-bottom: 60px;
+      margin-bottom: 25vh;
     }
 
     .section-header-row {
@@ -310,6 +310,17 @@
       height: auto;
       display: block;
       transition: transform 0.4s ease;
+    }
+
+    /* Fixed height & containment for certificates so portrait images don't expand the grid */
+    .card.certificate-card .collage-thumbnail-wrapper {
+      height: 200px;
+    }
+
+    .card.certificate-card .collage-thumbnail-wrapper img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
     }
 
     .card:hover .collage-thumbnail-wrapper img {
@@ -662,12 +673,35 @@
       return results;
     }
 
+    function extractYouTubeID(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function getLinkedInEmbedURL(url) {
+      if (!url) return null;
+      if (url.includes('linkedin.com')) {
+        if (url.includes('<iframe')) {
+          const match = url.match(/src="([^"]+)"/);
+          return match ? match[1] : null;
+        }
+        return url.trim();
+      }
+      return null;
+    }
+
     function getThumbnail(item) {
       if (item.ThumbnailURL && item.ThumbnailURL.trim() !== '') {
         const urls = getMediaURLs(item.ThumbnailURL);
         if (urls.length > 0) return urls[0];
       }
       if (item.VideoURL && item.VideoURL.trim() !== '') {
+        const ytId = extractYouTubeID(item.VideoURL);
+        if (ytId) {
+          return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+        }
         const urls = getMediaURLs(item.VideoURL);
         if (urls.length > 0) return urls[0];
       }
@@ -723,7 +757,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
+        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
       ];
 
       let activeSections = sectionsConfig;
@@ -780,8 +814,9 @@
         } else {
           sectionItems.forEach(item => {
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
+            const isCertificate = sec.key === 'certificates';
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''}`;
             card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
@@ -959,7 +994,22 @@
 
       if (mediaURLs.length > 0) {
         mediaHTML = mediaURLs.map(url => {
-          if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
+          const ytId = extractYouTubeID(url);
+          const linkedinUrl = getLinkedInEmbedURL(url);
+
+          if (ytId) {
+            return `
+              <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
+                <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
+              </div>
+            `;
+          } else if (linkedinUrl) {
+            return `
+              <div style="width: 100%; max-width: 600px; display: flex; justify-content: center;">
+                <iframe src="${linkedinUrl}" height="560" width="100%" frameborder="0" allowfullscreen="" title="Embedded LinkedIn Post" style="border-radius: 8px; background: #fff;"></iframe>
+              </div>
+            `;
+          } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
             return `<video class="modal-media-item" controls src="${url}"></video>`;
           } else {
             return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
