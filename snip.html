@@ -156,9 +156,8 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Increased gap between sections */
+    /* Gap between sections set to 1/4th of screen height (25vh) */
     .achievement-category-wrapper {
-      /* One quarter of the viewport height between category sections. */
       margin-bottom: 25vh;
     }
 
@@ -313,6 +312,17 @@
       transition: transform 0.4s ease;
     }
 
+    /* Fixed height & containment for certificates so portrait images don't expand the grid */
+    .card.certificate-card .collage-thumbnail-wrapper {
+      height: 200px;
+    }
+
+    .card.certificate-card .collage-thumbnail-wrapper img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+
     .card:hover .collage-thumbnail-wrapper img {
       transform: scale(1.04);
     }
@@ -383,15 +393,15 @@
 
     .modal-content {
       position: relative;
-      width: 98vw;
-      height: 96vh;
+      width: 94vw;
+      height: 94vh;
       background: #111018;
       background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
       border-radius: 12px;
       overflow-y: auto;
       border: 2px solid var(--accent-cyan);
       box-shadow: 0 0 50px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
-      padding: 28px;
+      padding: 40px;
       display: flex;
       flex-direction: column;
     }
@@ -448,77 +458,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       object-fit: contain;
       background: #000;
-    }
-
-    /* Video playback uses nearly the entire glowing modal. */
-    .modal-content.video-mode {
-      padding: 18px;
-      overflow: hidden;
-    }
-    .modal-content.video-mode #modal-body {
-      min-height: 0;
-    }
-    .modal-content.video-mode .modal-header-info {
-      flex: 0 0 auto;
-      margin: 0 54px 12px 0;
-    }
-    .modal-content.video-mode .modal-header-title {
-      font-size: clamp(1.1rem, 2vw, 1.7rem);
-      margin: 2px 0 4px;
-    }
-    .modal-content.video-mode .modal-header-desc {
-      display: none;
-    }
-    .modal-content.video-mode .modal-media-container {
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-      gap: 0;
-    }
-    .modal-content.video-mode .video-player-frame {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      max-width: none;
-      flex: 1;
-      border: 1px solid var(--accent-cyan);
-      border-radius: 10px;
-      background: #000;
-      box-shadow: 0 0 28px var(--accent-glow), inset 0 0 18px rgba(0,243,255,.12);
-    }
-    .modal-content.video-mode .video-player-frame video,
-    .modal-content.video-mode .video-player-frame iframe {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #000;
-      object-fit: contain;
-    }
-    .modal-content.video-mode .video-link-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding-top: 10px;
-      max-height: 64px;
-      overflow: auto;
-    }
-    .video-link-btn {
-      color: var(--accent-cyan);
-      background: var(--card-bg);
-      border: 1px solid var(--accent-cyan);
-      border-radius: 7px;
-      padding: 7px 12px;
-      cursor: pointer;
-    }
-    .video-link-btn:hover {
-      color: #000;
-      background: var(--accent-cyan);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-    @media (max-width: 600px) {
-      .modal-content.video-mode { padding: 12px; }
-      .modal-overlay { padding: 6px; }
     }
 
     .modal-text-view {
@@ -746,52 +685,9 @@
       return FALLBACK_SVG;
     }
 
-    function isVideoField(urlStr) {
-      return /\[\s*video\s*\]\s*$/i.test(urlStr || '');
-    }
-
     function getMediaURLs(urlStr) {
       if (!urlStr) return [];
-      // [Video] marks the whole semicolon-separated field; it is not part of the last URL.
-      const cleaned = String(urlStr).replace(/\s*\[\s*video\s*\]\s*$/i, '').trim();
-      return cleaned.split(';')
-        .map(u => formatCustomImageURL(u.trim()))
-        .filter(u => u !== '');
-    }
-
-    function getVideoEmbedURL(url) {
-      try {
-        const parsed = new URL(url);
-        const host = parsed.hostname.replace(/^www\./i, '').toLowerCase();
-
-        if (host === 'youtu.be') {
-          const id = parsed.pathname.split('/').filter(Boolean)[0];
-          return id ? `https://www.youtube-nocookie.com/embed/${id}` : '';
-        }
-        if (host.endsWith('youtube.com')) {
-          const id = parsed.searchParams.get('v');
-          if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
-          const match = parsed.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/);
-          if (match) return `https://www.youtube-nocookie.com/embed/${match[1]}`;
-        }
-        if (host.endsWith('vimeo.com')) {
-          const match = parsed.pathname.match(/\/(\d+)/);
-          if (match) return `https://player.vimeo.com/video/${match[1]}`;
-        }
-        if (host === 'drive.google.com') {
-          const id = extractGoogleDriveID(url);
-          if (id && /\/file\/d\//i.test(parsed.pathname)) {
-            return `https://drive.google.com/file/d/${id}/preview`;
-          }
-        }
-      } catch (e) {
-        return '';
-      }
-      return '';
-    }
-
-    function isDirectVideoURL(url) {
-      return /\.(mp4|webm|ogg|m4v|mov)(?:$|[?#])/i.test(url || '');
+      return urlStr.split(';').map(u => formatCustomImageURL(u.trim())).filter(u => u !== '');
     }
 
     function formatCustomImageURL(url) {
@@ -838,7 +734,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
+        { key: 'certificates', title: 'Certificates', type: 'scroll-row' } // Certificates set to scroll-row with 4 columns per view
       ];
 
       let activeSections = sectionsConfig;
@@ -895,8 +791,9 @@
         } else {
           sectionItems.forEach(item => {
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
+            const isCertificate = sec.key === 'certificates';
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
+            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''}`;
             card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
@@ -1067,100 +964,40 @@
 
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
-      const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
-      const rawVideoField = item.VideoURL || '';
-      const videoMarked = isVideoField(rawVideoField);
-      const mediaURLs = getMediaURLs(rawVideoField);
-      const isVideoItem = videoMarked || mediaURLs.some(url =>
-        isDirectVideoURL(url) || !!getVideoEmbedURL(url)
-      );
-
+      const mediaURLs = getMediaURLs(item.VideoURL);
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        if (isVideoItem) {
-          const firstURL = mediaURLs[0];
-          const embedURL = getVideoEmbedURL(firstURL);
-          let playerHTML = '';
-
-          if (embedURL) {
-            playerHTML = `<iframe class="video-player-frame" src="${embedURL}" title="${item.Title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
-          } else if (isDirectVideoURL(firstURL) || videoMarked) {
-            playerHTML = `<video class="video-player-frame" controls autoplay playsinline src="${firstURL}">Your browser cannot play this video format.</video>`;
+        mediaHTML = mediaURLs.map(url => {
+          if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
+            return `<video class="modal-media-item" controls src="${url}"></video>`;
           } else {
-            playerHTML = `<div class="video-player-frame" style="display:grid;place-items:center;color:var(--text-muted);padding:24px;text-align:center;">This link is marked [Video], but its provider cannot be embedded automatically. <a href="${firstURL}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-cyan)">Open video link</a></div>`;
-          }
-
-          const linkButtons = mediaURLs.length > 1
-            ? `<div class="video-link-list">${mediaURLs.map((url, index) =>
-                `<button class="video-link-btn" type="button" data-video-index="${index}">Video ${index + 1}</button>`
-              ).join('')}</div>`
-            : '';
-
-          mediaHTML = `${playerHTML}${linkButtons}`;
-        } else {
-          mediaHTML = mediaURLs.map(url => {
-            if (isDirectVideoURL(url) || url.includes('video')) {
-              return `<video class="modal-media-item" controls src="${url}"></video>`;
-            }
             return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
-          }).join('');
-        }
+          }
+        }).join('');
       }
 
       let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
         textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '' && !isVideoItem) {
+      } else if (item.Description && item.Description.trim() !== '') {
         textHTML = `<div class="modal-text-view">${item.Description}</div>`;
       }
 
       body.innerHTML = `
         <div class="modal-header-info">
-          <span class="category-tag">${item.Category || 'Archive Item'}${isVideoItem ? ' · VIDEO' : ''}</span>
+          <span class="category-tag">${item.Category || 'Archive Item'}</span>
           <h1 class="modal-header-title">${item.Title}</h1>
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
+
         <div class="modal-media-container">
           ${mediaHTML}
           ${textHTML}
         </div>
       `;
-
-      modalContent.classList.toggle('video-mode', isVideoItem);
-
-      // Multiple URLs in one Column B cell can be switched without closing the viewer.
-      if (isVideoItem && mediaURLs.length > 1) {
-        body.querySelectorAll('[data-video-index]').forEach(button => {
-          button.addEventListener('click', () => {
-            const url = mediaURLs[Number(button.dataset.videoIndex)];
-            const embed = getVideoEmbedURL(url);
-            const currentPlayer = body.querySelector('.video-player-frame');
-            if (!currentPlayer) return;
-
-            if (embed) {
-              const frame = document.createElement('iframe');
-              frame.className = 'video-player-frame';
-              frame.src = embed;
-              frame.title = item.Title;
-              frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-              frame.allowFullscreen = true;
-              frame.referrerPolicy = 'strict-origin-when-cross-origin';
-              currentPlayer.replaceWith(frame);
-            } else {
-              const video = document.createElement('video');
-              video.className = 'video-player-frame';
-              video.controls = true;
-              video.autoplay = true;
-              video.playsInline = true;
-              video.src = url;
-              currentPlayer.replaceWith(video);
-            }
-          });
-        });
-      }
 
       modal.classList.add('active');
     }
@@ -1169,9 +1006,7 @@
       if (event && event.stopPropagation) event.stopPropagation();
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
-      const modalContent = document.getElementById('modal-content');
       modal.classList.remove('active');
-      modalContent.classList.remove('video-mode');
       body.innerHTML = '';
     }
 
