@@ -6,7 +6,7 @@
   <title>My Archive Showcase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #0a0a12;
@@ -18,6 +18,7 @@
       --text-muted: #a0a0c0;
       --border-color: #272545;
       --font-notes: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif;
+      --font-achievement: 'Oswald', sans-serif;
     }
 
     * {
@@ -156,9 +157,9 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Increased gap between sections */
+    /* Exactly 1/4th of entire viewport height gap between sections */
     .achievement-category-wrapper {
-      margin-bottom: 60px;
+      margin-bottom: 25vh;
     }
 
     .section-header-row {
@@ -201,7 +202,7 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Natural Collage Grid (Left-aligned, no forced stretching) */
+    /* Natural Collage Grid */
     .collage-grid {
       display: flex;
       flex-wrap: wrap;
@@ -285,7 +286,6 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Diary Card Specific Styling */
     .card.diary-card .card-info {
       font-family: var(--font-notes);
     }
@@ -294,7 +294,6 @@
       font-size: 1.15rem;
     }
 
-    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
       width: 100%;
@@ -360,7 +359,7 @@
       width: 100%;
     }
 
-    /* Modal Overlay (Enlarged Glowing Window Size) */
+    /* Modal Overlay (Glowing Screen) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -411,7 +410,7 @@
     }
 
     .modal-header-info {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       padding-right: 50px;
     }
 
@@ -429,29 +428,63 @@
       line-height: 1.5;
     }
 
-    .modal-media-container {
+    /* Achievement Importance Text Box placed at the top */
+    .modal-achievement-text {
       width: 100%;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      overflow-y: auto;
-      align-items: center;
+      background: rgba(20, 19, 34, 0.85);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 20px 25px;
+      border-radius: 6px;
+      font-family: var(--font-achievement);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
-    .modal-media-item {
+    /* Magazine Grid for Photos & Videos with Hover-to-Enlarge Effect */
+    .modal-magazine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
       width: 100%;
-      max-width: 1100px;
-      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .magazine-media-card {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-      object-fit: contain;
       background: #000;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+    }
+
+    .magazine-media-card:hover {
+      transform: scale(1.04);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 12px 35px var(--accent-glow);
+      z-index: 10;
+    }
+
+    .magazine-media-card img,
+    .magazine-media-card video,
+    .magazine-media-card iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+      max-height: 420px;
+      object-fit: cover;
+      display: block;
+      border: none;
     }
 
     .modal-text-view {
       width: 100%;
-      max-width: 1100px;
       background: rgba(20, 19, 34, 0.6);
       border: 1px solid var(--border-color);
       padding: 25px;
@@ -462,6 +495,7 @@
       color: rgba(255, 255, 255, 0.9);
       white-space: pre-wrap;
       word-break: break-word;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -509,7 +543,7 @@
     </section>
   </main>
 
-  <!-- Glowing Modal Window (Enlarged Size) -->
+  <!-- Glowing Modal Window -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -645,7 +679,6 @@
           row.Notes = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
 
-        // Column H check (index 7)
         if (!row.Layout && values[7]) {
           row.Layout = values[7].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
@@ -676,7 +709,7 @@
 
     function getMediaURLs(urlStr) {
       if (!urlStr) return [];
-      return urlStr.split(';').map(u => formatCustomImageURL(u.trim())).filter(u => u !== '');
+      return urlStr.split(';').map(u => u.trim()).filter(u => u !== '');
     }
 
     function formatCustomImageURL(url) {
@@ -698,6 +731,73 @@
                     cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || 
                     cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       return (match && match[1]) ? match[1] : null;
+    }
+
+    function extractYouTubeID(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function renderSingleMedia(url) {
+      if (!url) return '';
+      const trimmed = url.trim();
+
+      // Check YouTube
+      const ytId = extractYouTubeID(trimmed);
+      if (ytId) {
+        return `
+          <div class="magazine-media-card">
+            <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen title="YouTube video"></iframe>
+          </div>
+        `;
+      }
+
+      // Check Google Drive
+      const driveId = extractGoogleDriveID(trimmed);
+      if (driveId) {
+        // If it's a Drive video link or generic Drive link, iframe preview works wonderfully
+        if (trimmed.includes('/file/d/') || trimmed.includes('id=')) {
+          return `
+            <div class="magazine-media-card">
+              <iframe src="https://drive.google.com/file/d/${driveId}/preview" allowfullscreen title="Google Drive File"></iframe>
+            </div>
+          `;
+        }
+      }
+
+      // Check standard video file
+      if (trimmed.match(/\.(mp4|webm|ogg|mov)$/i)) {
+        return `
+          <div class="magazine-media-card">
+            <video controls src="${trimmed}"></video>
+          </div>
+        `;
+      }
+
+      // Default to Image
+      const formattedImg = formatCustomImageURL(trimmed);
+      return `
+        <div class="magazine-media-card">
+          <img src="${formattedImg}" alt="Achievement Media" loading="lazy" onerror="this.style.display='none'">
+        </div>
+      `;
+    }
+
+    function parseAchievementText(text) {
+      if (!text) return { text: '', color: 'var(--accent-cyan)' };
+      let cleanText = text.trim();
+      let color = 'var(--accent-cyan)';
+
+      // Supports custom hex color tagging at the end of the text e.g. [#ffd700]
+      const colorMatch = cleanText.match(/\[#([a-fA-F0-9]{3,8})\]$/);
+      if (colorMatch) {
+        color = '#' + colorMatch[1];
+        cleanText = cleanText.replace(/\[#([a-fA-F0-9]{3,8})\]$/, '').trim();
+      }
+
+      return { text: cleanText, color: color };
     }
 
     /* --- ACHIEVEMENTS VIEW --- */
@@ -723,7 +823,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
+        { key: 'certificates', title: 'Certificates', type: 'collage' }
       ];
 
       let activeSections = sectionsConfig;
@@ -958,20 +1058,24 @@
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        mediaHTML = mediaURLs.map(url => {
-          if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
-            return `<video class="modal-media-item" controls src="${url}"></video>`;
-          } else {
-            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
-          }
-        }).join('');
+        mediaHTML = `
+          <div class="modal-magazine-grid">
+            ${mediaURLs.map(url => renderSingleMedia(url)).join('')}
+          </div>
+        `;
       }
 
+      // Achievement text placed prominently at the top
+      const rawText = item.Notes || item.Description || '';
+      const parsedText = parseAchievementText(rawText);
+
       let textHTML = '';
-      if (item.Notes && item.Notes.trim() !== '') {
-        textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '') {
-        textHTML = `<div class="modal-text-view">${item.Description}</div>`;
+      if (parsedText.text !== '') {
+        textHTML = `
+          <div class="modal-achievement-text" style="color: ${parsedText.color};">
+            ${parsedText.text}
+          </div>
+        `;
       }
 
       body.innerHTML = `
@@ -981,9 +1085,11 @@
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
 
+        <!-- Importance text placed right at the top -->
+        ${textHTML}
+
         <div class="modal-media-container">
           ${mediaHTML}
-          ${textHTML}
         </div>
       `;
 
