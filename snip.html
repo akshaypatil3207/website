@@ -6,7 +6,7 @@
   <title>My Archive Showcase</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Shantell+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #0a0a12;
@@ -15,17 +15,16 @@
       --accent-cyan: #00f3ff;
       --accent-glow: rgba(0, 243, 255, 0.35);
       --text-white: #ffffff;
-      --text-muted: #d0d0e0;
+      --text-muted: #a0a0c0;
       --border-color: #272545;
-      --font-main: 'Shantell Sans', cursive, sans-serif;
+      --font-notes: 'Shantell Sans', 'Noto Sans Devanagari', cursive, sans-serif;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: var(--font-main);
-      color: var(--text-white);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     /* Custom Consistent Scrollbars */
@@ -157,38 +156,117 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Increased gap between sections by 220% more (192px) */
+    /* Increased gap between sections */
     .achievement-category-wrapper {
-      margin-bottom: 192px;
+      /* One quarter of the viewport height between category sections. */
+      margin-bottom: 25vh;
     }
 
     .section-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .section-title {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 700;
       color: var(--accent-cyan);
       letter-spacing: 0.5px;
     }
 
-    /* Card List Layout: Left side photo/video, Right side 3/4th text */
+    .scroll-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .scroll-arrow-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .scroll-arrow-btn:hover {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Natural Collage Grid (Left-aligned, no forced stretching) */
     .collage-grid {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: flex-start;
       gap: 20px;
       width: 100%;
     }
 
+    .collage-grid .card {
+      width: calc(25% - 15px);
+      margin-bottom: 0;
+      flex-grow: 0;
+    }
+
+    .collage-grid .card.landscape-card {
+      width: calc(33.333% - 14px);
+      flex-grow: 0;
+    }
+
+    /* Horizontal Scrolling Rows */
     .horizontal-scroll-row {
       display: flex;
-      flex-direction: column;
       gap: 20px;
-      width: 100%;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 10px;
+    }
+
+    .horizontal-scroll-row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .horizontal-scroll-row .card {
+      min-width: calc(25% - 15px);
+      flex: 0 0 calc(25% - 15px);
+    }
+
+    .horizontal-scroll-row .card.landscape-card {
+      min-width: calc(33.333% - 14px);
+      flex: 0 0 calc(33.333% - 14px);
+    }
+
+    @media (max-width: 1024px) {
+      .collage-grid .card,
+      .collage-grid .card.landscape-card {
+        width: calc(50% - 10px);
+      }
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.landscape-card {
+        min-width: calc(50% - 10px);
+        flex: 0 0 calc(50% - 10px);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .collage-grid .card,
+      .collage-grid .card.landscape-card {
+        width: 85%;
+      }
+      .horizontal-scroll-row .card,
+      .horizontal-scroll-row .card.landscape-card {
+        min-width: 85%;
+        flex: 0 0 85%;
+      }
     }
 
     .card {
@@ -197,49 +275,54 @@
       border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
       display: flex;
-      flex-direction: row;
-      width: 100%;
-      min-height: 180px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      flex-direction: column;
     }
 
-    /* No hover zoom or transform effects */
     .card:hover {
+      transform: translateY(-6px);
       border-color: var(--accent-cyan);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Left side photo/video wrapper (1/4th width) */
+    /* Diary Card Specific Styling */
+    .card.diary-card .card-info {
+      font-family: var(--font-notes);
+    }
+    .card.diary-card .card-title {
+      font-family: var(--font-notes);
+      font-size: 1.15rem;
+    }
+
+    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
-      flex: 0 0 25%;
-      max-width: 25%;
+      width: 100%;
       background-color: #0c0b13;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-right: 1px solid var(--border-color);
     }
 
-    .collage-thumbnail-wrapper img,
-    .collage-thumbnail-wrapper video {
+    .collage-thumbnail-wrapper img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
+      transition: transform 0.4s ease;
     }
 
-    /* Right side text area (3/4th width) */
+    .card:hover .collage-thumbnail-wrapper img {
+      transform: scale(1.04);
+    }
+
     .card-info {
-      flex: 0 0 75%;
-      max-width: 75%;
-      padding: 20px 25px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: 10px;
+      gap: 8px;
+      flex: 1;
     }
 
     .category-tag {
@@ -247,21 +330,21 @@
       font-size: 0.75rem;
       color: var(--accent-cyan);
       background: rgba(0, 243, 255, 0.1);
-      padding: 3px 10px;
+      padding: 3px 8px;
       border-radius: 4px;
       text-transform: uppercase;
       font-weight: 600;
     }
 
     .card-title {
-      font-size: 1.15rem;
+      font-size: 1rem;
       font-weight: 600;
       line-height: 1.3;
       color: var(--text-white);
     }
 
     .card-desc {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -270,6 +353,7 @@
     }
 
     .status-msg {
+      grid-column: 1 / -1;
       text-align: center;
       padding: 60px 20px;
       color: var(--text-muted);
@@ -277,24 +361,7 @@
       width: 100%;
     }
 
-    @media (max-width: 768px) {
-      .card {
-        flex-direction: column;
-      }
-      .collage-thumbnail-wrapper {
-        flex: 0 0 200px;
-        max-width: 100%;
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-      }
-      .card-info {
-        flex: 0 0 100%;
-        max-width: 100%;
-      }
-    }
-
-    /* Modal Overlay (Full Glowing Screen Video / Content) */
+    /* Modal Overlay (Enlarged Glowing Window Size) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -316,15 +383,15 @@
 
     .modal-content {
       position: relative;
-      width: 94vw;
-      height: 94vh;
+      width: 98vw;
+      height: 96vh;
       background: #111018;
       background-image: radial-gradient(circle at center, #1b192c 0%, #0c0b13 100%);
       border-radius: 12px;
       overflow-y: auto;
       border: 2px solid var(--accent-cyan);
-      box-shadow: 0 0 60px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
-      padding: 40px;
+      box-shadow: 0 0 50px var(--accent-glow), inset 0 0 40px rgba(0, 243, 255, 0.1);
+      padding: 28px;
       display: flex;
       flex-direction: column;
     }
@@ -371,18 +438,87 @@
       gap: 25px;
       overflow-y: auto;
       align-items: center;
-      justify-content: center;
     }
 
     .modal-media-item {
       width: 100%;
-      height: 100%;
-      max-height: 70vh;
+      max-width: 1100px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       object-fit: contain;
       background: #000;
+    }
+
+    /* Video playback uses nearly the entire glowing modal. */
+    .modal-content.video-mode {
+      padding: 18px;
+      overflow: hidden;
+    }
+    .modal-content.video-mode #modal-body {
+      min-height: 0;
+    }
+    .modal-content.video-mode .modal-header-info {
+      flex: 0 0 auto;
+      margin: 0 54px 12px 0;
+    }
+    .modal-content.video-mode .modal-header-title {
+      font-size: clamp(1.1rem, 2vw, 1.7rem);
+      margin: 2px 0 4px;
+    }
+    .modal-content.video-mode .modal-header-desc {
+      display: none;
+    }
+    .modal-content.video-mode .modal-media-container {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      gap: 0;
+    }
+    .modal-content.video-mode .video-player-frame {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      max-width: none;
+      flex: 1;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 10px;
+      background: #000;
+      box-shadow: 0 0 28px var(--accent-glow), inset 0 0 18px rgba(0,243,255,.12);
+    }
+    .modal-content.video-mode .video-player-frame video,
+    .modal-content.video-mode .video-player-frame iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+      object-fit: contain;
+    }
+    .modal-content.video-mode .video-link-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      max-height: 64px;
+      overflow: auto;
+    }
+    .video-link-btn {
+      color: var(--accent-cyan);
+      background: var(--card-bg);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 7px;
+      padding: 7px 12px;
+      cursor: pointer;
+    }
+    .video-link-btn:hover {
+      color: #000;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    @media (max-width: 600px) {
+      .modal-content.video-mode { padding: 12px; }
+      .modal-overlay { padding: 6px; }
     }
 
     .modal-text-view {
@@ -392,9 +528,10 @@
       border: 1px solid var(--border-color);
       padding: 25px;
       border-radius: 8px;
+      font-family: var(--font-notes);
       font-size: 1.15rem;
       line-height: 1.7;
-      color: var(--text-white);
+      color: rgba(255, 255, 255, 0.9);
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -444,7 +581,7 @@
     </section>
   </main>
 
-  <!-- Glowing Modal Window -->
+  <!-- Glowing Modal Window (Enlarged Size) -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -580,6 +717,7 @@
           row.Notes = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
 
+        // Column H check (index 7)
         if (!row.Layout && values[7]) {
           row.Layout = values[7].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
@@ -608,9 +746,52 @@
       return FALLBACK_SVG;
     }
 
+    function isVideoField(urlStr) {
+      return /\[\s*video\s*\]\s*$/i.test(urlStr || '');
+    }
+
     function getMediaURLs(urlStr) {
       if (!urlStr) return [];
-      return urlStr.split(';').map(u => formatCustomImageURL(u.trim())).filter(u => u !== '');
+      // [Video] marks the whole semicolon-separated field; it is not part of the last URL.
+      const cleaned = String(urlStr).replace(/\s*\[\s*video\s*\]\s*$/i, '').trim();
+      return cleaned.split(';')
+        .map(u => formatCustomImageURL(u.trim()))
+        .filter(u => u !== '');
+    }
+
+    function getVideoEmbedURL(url) {
+      try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace(/^www\./i, '').toLowerCase();
+
+        if (host === 'youtu.be') {
+          const id = parsed.pathname.split('/').filter(Boolean)[0];
+          return id ? `https://www.youtube-nocookie.com/embed/${id}` : '';
+        }
+        if (host.endsWith('youtube.com')) {
+          const id = parsed.searchParams.get('v');
+          if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
+          const match = parsed.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/);
+          if (match) return `https://www.youtube-nocookie.com/embed/${match[1]}`;
+        }
+        if (host.endsWith('vimeo.com')) {
+          const match = parsed.pathname.match(/\/(\d+)/);
+          if (match) return `https://player.vimeo.com/video/${match[1]}`;
+        }
+        if (host === 'drive.google.com') {
+          const id = extractGoogleDriveID(url);
+          if (id && /\/file\/d\//i.test(parsed.pathname)) {
+            return `https://drive.google.com/file/d/${id}/preview`;
+          }
+        }
+      } catch (e) {
+        return '';
+      }
+      return '';
+    }
+
+    function isDirectVideoURL(url) {
+      return /\.(mp4|webm|ogg|m4v|mov)(?:$|[?#])/i.test(url || '');
     }
 
     function formatCustomImageURL(url) {
@@ -657,7 +838,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'collage' }
+        { key: 'certificates', title: 'Certificates', type: 'collage' } // Certificates set to collage (multi-row 4-column)
       ];
 
       let activeSections = sectionsConfig;
@@ -690,25 +871,39 @@
         const headerRow = document.createElement('div');
         headerRow.className = 'section-header-row';
         headerRow.innerHTML = `<h3 class="section-title">${sec.title}</h3>`;
+
+        if (sec.type === 'scroll-row') {
+          headerRow.innerHTML += `
+            <div class="scroll-controls">
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
+              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+            </div>
+          `;
+        }
         wrapper.appendChild(headerRow);
 
         const contentDiv = document.createElement('div');
-        contentDiv.className = 'collage-grid';
+        if (sec.type === 'collage') {
+          contentDiv.className = 'collage-grid';
+        } else {
+          contentDiv.className = 'horizontal-scroll-row';
+          contentDiv.id = `${sec.key}-row`;
+        }
 
         if (sectionItems.length === 0) {
           contentDiv.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No items in ${sec.title} yet.</div>`;
         } else {
           sectionItems.forEach(item => {
+            const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const card = document.createElement('div');
-            card.className = `card`;
+            card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
             card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
-            const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
             card.innerHTML = `
               <div class="collage-thumbnail-wrapper">
-                ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">`}
+                <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
               </div>
               <div class="card-info">
                 <span class="category-tag">${item.Category || sec.title}</span>
@@ -772,15 +967,15 @@
       grid.className = 'collage-grid';
 
       filtered.forEach(item => {
+        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
         const card = document.createElement('div');
-        card.className = `card`;
+        card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
         card.onclick = () => openModal(item);
         const thumb = getThumbnail(item);
-        const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
         card.innerHTML = `
           <div class="collage-thumbnail-wrapper">
-            ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">`}
+            <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
           </div>
           <div class="card-info">
             <span class="category-tag">${item.Category || 'Moment'}</span>
@@ -838,19 +1033,19 @@
       grid.className = 'collage-grid';
 
       filtered.forEach(item => {
+        const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
         const card = document.createElement('div');
-        card.className = `card`;
+        card.className = `card diary-card ${isLandscape ? 'landscape-card' : ''}`;
         card.onclick = () => openModal(item);
         const thumb = getThumbnail(item);
-        const isVideo = thumb.match(/\.(mp4|webm|ogg)$/i) || item.VideoURL?.includes('video');
 
         card.innerHTML = `
           ${thumb !== FALLBACK_SVG ? `
             <div class="collage-thumbnail-wrapper">
-              ${isVideo ? `<video src="${thumb}" muted autoplay loop></video>` : `<img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`}
+              <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
             </div>
           ` : ''}
-          <div class="card-info" ${thumb === FALLBACK_SVG ? 'style="max-width:100%; flex:0 0 100%;"' : ''}>
+          <div class="card-info">
             <span class="category-tag">${item.Category || 'Diary'}</span>
             <div class="card-title">${item.Title}</div>
             <div class="card-desc">${item.Notes || item.Description || ''}</div>
@@ -863,42 +1058,109 @@
       container.appendChild(wrapper);
     }
 
+    function scrollRow(rowId, distance) {
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.scrollBy({ left: distance, behavior: 'smooth' });
+      }
+    }
+
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
+      const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
-      const mediaURLs = getMediaURLs(item.VideoURL);
+      const rawVideoField = item.VideoURL || '';
+      const videoMarked = isVideoField(rawVideoField);
+      const mediaURLs = getMediaURLs(rawVideoField);
+      const isVideoItem = videoMarked || mediaURLs.some(url =>
+        isDirectVideoURL(url) || !!getVideoEmbedURL(url)
+      );
+
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        mediaHTML = mediaURLs.map(url => {
-          if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
-            return `<video class="modal-media-item" controls autoplay src="${url}"></video>`;
+        if (isVideoItem) {
+          const firstURL = mediaURLs[0];
+          const embedURL = getVideoEmbedURL(firstURL);
+          let playerHTML = '';
+
+          if (embedURL) {
+            playerHTML = `<iframe class="video-player-frame" src="${embedURL}" title="${item.Title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+          } else if (isDirectVideoURL(firstURL) || videoMarked) {
+            playerHTML = `<video class="video-player-frame" controls autoplay playsinline src="${firstURL}">Your browser cannot play this video format.</video>`;
           } else {
-            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+            playerHTML = `<div class="video-player-frame" style="display:grid;place-items:center;color:var(--text-muted);padding:24px;text-align:center;">This link is marked [Video], but its provider cannot be embedded automatically. <a href="${firstURL}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-cyan)">Open video link</a></div>`;
           }
-        }).join('');
+
+          const linkButtons = mediaURLs.length > 1
+            ? `<div class="video-link-list">${mediaURLs.map((url, index) =>
+                `<button class="video-link-btn" type="button" data-video-index="${index}">Video ${index + 1}</button>`
+              ).join('')}</div>`
+            : '';
+
+          mediaHTML = `${playerHTML}${linkButtons}`;
+        } else {
+          mediaHTML = mediaURLs.map(url => {
+            if (isDirectVideoURL(url) || url.includes('video')) {
+              return `<video class="modal-media-item" controls src="${url}"></video>`;
+            }
+            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+          }).join('');
+        }
       }
 
       let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
         textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '') {
+      } else if (item.Description && item.Description.trim() !== '' && !isVideoItem) {
         textHTML = `<div class="modal-text-view">${item.Description}</div>`;
       }
 
       body.innerHTML = `
         <div class="modal-header-info">
-          <span class="category-tag">${item.Category || 'Archive Item'}</span>
+          <span class="category-tag">${item.Category || 'Archive Item'}${isVideoItem ? ' · VIDEO' : ''}</span>
           <h1 class="modal-header-title">${item.Title}</h1>
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
-
         <div class="modal-media-container">
           ${mediaHTML}
           ${textHTML}
         </div>
       `;
+
+      modalContent.classList.toggle('video-mode', isVideoItem);
+
+      // Multiple URLs in one Column B cell can be switched without closing the viewer.
+      if (isVideoItem && mediaURLs.length > 1) {
+        body.querySelectorAll('[data-video-index]').forEach(button => {
+          button.addEventListener('click', () => {
+            const url = mediaURLs[Number(button.dataset.videoIndex)];
+            const embed = getVideoEmbedURL(url);
+            const currentPlayer = body.querySelector('.video-player-frame');
+            if (!currentPlayer) return;
+
+            if (embed) {
+              const frame = document.createElement('iframe');
+              frame.className = 'video-player-frame';
+              frame.src = embed;
+              frame.title = item.Title;
+              frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+              frame.allowFullscreen = true;
+              frame.referrerPolicy = 'strict-origin-when-cross-origin';
+              currentPlayer.replaceWith(frame);
+            } else {
+              const video = document.createElement('video');
+              video.className = 'video-player-frame';
+              video.controls = true;
+              video.autoplay = true;
+              video.playsInline = true;
+              video.src = url;
+              currentPlayer.replaceWith(video);
+            }
+          });
+        });
+      }
 
       modal.classList.add('active');
     }
@@ -907,7 +1169,9 @@
       if (event && event.stopPropagation) event.stopPropagation();
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
+      const modalContent = document.getElementById('modal-content');
       modal.classList.remove('active');
+      modalContent.classList.remove('video-mode');
       body.innerHTML = '';
     }
 
