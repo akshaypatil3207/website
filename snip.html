@@ -156,7 +156,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Gap between sections set to 1/4th of screen height (25vh) */
     .achievement-category-wrapper {
       margin-bottom: 25vh;
     }
@@ -201,7 +200,6 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Natural Collage Grid (Left-aligned, no forced stretching) */
     .collage-grid {
       display: flex;
       flex-wrap: wrap;
@@ -221,7 +219,6 @@
       flex-grow: 0;
     }
 
-    /* Horizontal Scrolling Rows */
     .horizontal-scroll-row {
       display: flex;
       gap: 20px;
@@ -285,7 +282,6 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Diary Card Specific Styling */
     .card.diary-card .card-info {
       font-family: var(--font-notes);
     }
@@ -294,7 +290,6 @@
       font-size: 1.15rem;
     }
 
-    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
       width: 100%;
@@ -312,12 +307,13 @@
       transition: transform 0.4s ease;
     }
 
-    /* Fixed height & containment for certificates so portrait images don't expand the grid */
-    .card.certificate-card .collage-thumbnail-wrapper {
+    .card.certificate-card .collage-thumbnail-wrapper,
+    .card.extracurricular-card .collage-thumbnail-wrapper {
       height: 200px;
     }
 
-    .card.certificate-card .collage-thumbnail-wrapper img {
+    .card.certificate-card .collage-thumbnail-wrapper img,
+    .card.extracurricular-card .collage-thumbnail-wrapper img {
       height: 100%;
       width: 100%;
       object-fit: contain;
@@ -371,7 +367,6 @@
       width: 100%;
     }
 
-    /* Modal Overlay (Enlarged Glowing Window Size) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -460,28 +455,29 @@
       background: #000;
     }
 
-    /* Specific Small-Sized Packed Collage Grid Style for Work Ex Modal Window */
-    .modal-collage-container {
+    /* 2-Column Side-by-Side Layout for Work Ex & Education */
+    .modal-two-col-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
       width: 100%;
-      max-width: 1100px;
+      max-width: 1200px;
     }
 
-    .modal-collage-img {
+    .modal-two-col-item {
       width: 100%;
-      height: 160px;
-      object-fit: cover;
       border-radius: 8px;
       border: 1px solid var(--border-color);
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      object-fit: cover;
+      max-height: 480px;
+      background: #000;
     }
 
-    .modal-collage-img:hover {
-      transform: scale(1.03);
-      border-color: var(--accent-cyan);
+    @media (max-width: 768px) {
+      .modal-two-col-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .modal-text-view {
@@ -544,7 +540,7 @@
     </section>
   </main>
 
-  <!-- Glowing Modal Window (Enlarged Size) -->
+  <!-- Glowing Modal Window -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -680,7 +676,6 @@
           row.Notes = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
 
-        // Column H check (index 7)
         if (!row.Layout && values[7]) {
           row.Layout = values[7].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
@@ -761,7 +756,7 @@
     /* --- ACHIEVEMENTS VIEW --- */
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
-      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates'];
+      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates', 'Extracurricular'];
 
       filterContainer.innerHTML = '';
       standardCategories.forEach(category => {
@@ -781,7 +776,8 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
+        { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
+        { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
 
       let activeSections = sectionsConfig;
@@ -799,7 +795,9 @@
         const sectionItems = allItems.filter(item => {
           const cat = (item.Category || '').trim().toLowerCase();
           if (selectedCategory === 'All') {
-            return cat === sec.key || (sec.key === 'featured' && (cat === 'feature' || cat === 'featured'));
+            return cat === sec.key || 
+                   (sec.key === 'featured' && (cat === 'feature' || cat === 'featured')) ||
+                   (sec.key === 'extracurricular' && (cat.includes('extra') || cat.includes('activities')));
           } else {
             return cat.includes(sec.key);
           }
@@ -839,8 +837,10 @@
           sectionItems.forEach(item => {
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const isCertificate = sec.key === 'certificates';
+            const isExtra = sec.key === 'extracurricular';
+            
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''}`;
+            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''} ${isExtra ? 'extracurricular-card' : ''}`;
             card.onclick = () => openModal(item);
 
             const thumb = getThumbnail(item);
@@ -1015,61 +1015,59 @@
 
       const mediaURLs = getMediaURLs(item.VideoURL);
       const category = (item.Category || '').trim().toLowerCase();
-      const isWorkEx = category.includes('work ex') || category.includes('work experience');
+      const isTwoColumnGrid = category.includes('work ex') || category.includes('work experience') || category.includes('education');
       
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        if (isWorkEx) {
-          // Special small-sized packed collage grid layout inside modal for Work Ex items
-          mediaHTML = `
-            <div class="modal-collage-container">
-              ${mediaURLs.map(url => `
-                <img class="modal-collage-img" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
-              `).join('')}
-            </div>
-          `;
-        } else {
-          // Standard layout for all other sections (Featured, Projects, etc.)
-          mediaHTML = mediaURLs.map(url => {
+        if (isTwoColumnGrid) {
+          // 2 Column Side-by-Side Layout for Work Ex and Education
+          mediaHTML = `<div class="modal-two-col-grid">`;
+          mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
-            const linkedinUrl = getLinkedInEmbedURL(url);
-
             if (ytId) {
-              return `
-                <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
-                  <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
-                </div>
-              `;
-            } else if (linkedinUrl) {
-              return `
-                <div style="width: 100%; max-width: 600px; display: flex; justify-content: center;">
-                  <iframe src="${linkedinUrl}" height="560" width="100%" frameborder="0" allowfullscreen="" title="Embedded LinkedIn Post" style="border-radius: 8px; background: #fff;"></iframe>
-                </div>
-              `;
-            } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
-              return `<video class="modal-media-item" controls src="${url}"></video>`;
+              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else {
-              return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+              mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
             }
-          }).join('');
+          });
+          mediaHTML += `</div>`;
+        } else {
+          // Standard full-width media layout
+          mediaURLs.forEach(url => {
+            const ytId = extractYouTubeID(url);
+            const liEmbed = getLinkedInEmbedURL(url);
+            if (ytId) {
+              mediaHTML += `<div style="position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+            } else if (liEmbed && liEmbed.includes('iframe')) {
+              mediaHTML += `<div style="width:100%;max-width:1100px;">${liEmbed}</div>`;
+            } else if (liEmbed && !liEmbed.includes('<')) {
+              mediaHTML += `<iframe src="${liEmbed}" style="width:100%;height:500px;border:0;border-radius:8px;" allowfullscreen></iframe>`;
+            } else {
+              mediaHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onerror="this.style.display='none'">`;
+            }
+          });
+        }
+      } else {
+        const ytId = extractYouTubeID(item.VideoURL);
+        if (ytId) {
+          mediaHTML = `<div style="position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
         }
       }
 
       let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
         textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '') {
+      } else if (item.Description && item.Description.trim() !== '' && mediaURLs.length === 0) {
         textHTML = `<div class="modal-text-view">${item.Description}</div>`;
       }
 
       body.innerHTML = `
         <div class="modal-header-info">
-          <span class="category-tag">${item.Category || 'Archive Item'}</span>
-          <h1 class="modal-header-title">${item.Title}</h1>
+          <span class="category-tag">${item.Category || 'Archive'}</span>
+          <div class="modal-header-title">${item.Title}</div>
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
-
         <div class="modal-media-container">
           ${mediaHTML}
           ${textHTML}
@@ -1077,19 +1075,20 @@
       `;
 
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
     function closeModal(event) {
-      if (event && event.stopPropagation) event.stopPropagation();
-      const modal = document.getElementById('modal-overlay');
-      const body = document.getElementById('modal-body');
-      modal.classList.remove('active');
-      body.innerHTML = '';
+      if (!event || event.target.id === 'modal-overlay' || event.target.classList.contains('close-modal-btn')) {
+        const modal = document.getElementById('modal-overlay');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('modal-body').innerHTML = '';
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadContent();
-    });
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', loadContent);
   </script>
 </body>
 </html>
