@@ -156,7 +156,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Gap between sections set to 1/4th of screen height (25vh) */
     .achievement-category-wrapper {
       margin-bottom: 25vh;
     }
@@ -192,6 +191,14 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-arrow-btn.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .scroll-arrow-btn:hover {
@@ -201,7 +208,6 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Natural Collage Grid (Left-aligned, no forced stretching) */
     .collage-grid {
       display: flex;
       flex-wrap: wrap;
@@ -221,7 +227,6 @@
       flex-grow: 0;
     }
 
-    /* Horizontal Scrolling Rows */
     .horizontal-scroll-row {
       display: flex;
       gap: 20px;
@@ -285,7 +290,39 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Diary Card Specific Styling */
+    /* Experiments Card & Inline Player Styling */
+    .card.experiment-card {
+      flex: 0 0 auto;
+      cursor: default;
+    }
+    .card.experiment-card:hover {
+      transform: translateY(-4px);
+    }
+    .experiment-media-container {
+      height: 320px; /* Shorts level fixed height */
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .experiment-media-container.portrait {
+      aspect-ratio: 9/16;
+      width: 180px;
+      flex: 0 0 180px;
+    }
+    .experiment-media-container.landscape {
+      aspect-ratio: 16/9;
+      width: 568px;
+      flex: 0 0 568px;
+    }
+    .experiment-media-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .card.diary-card .card-info {
       font-family: var(--font-notes);
     }
@@ -294,7 +331,6 @@
       font-size: 1.15rem;
     }
 
-    /* Natural Thumbnail Wrapper */
     .collage-thumbnail-wrapper {
       position: relative;
       width: 100%;
@@ -312,12 +348,13 @@
       transition: transform 0.4s ease;
     }
 
-    /* Fixed height & containment for certificates so portrait images don't expand the grid */
-    .card.certificate-card .collage-thumbnail-wrapper {
+    .card.certificate-card .collage-thumbnail-wrapper,
+    .card.extracurricular-card .collage-thumbnail-wrapper {
       height: 200px;
     }
 
-    .card.certificate-card .collage-thumbnail-wrapper img {
+    .card.certificate-card .collage-thumbnail-wrapper img,
+    .card.extracurricular-card .collage-thumbnail-wrapper img {
       height: 100%;
       width: 100%;
       object-fit: contain;
@@ -371,7 +408,6 @@
       width: 100%;
     }
 
-    /* Modal Overlay (Enlarged Glowing Window Size) */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -460,6 +496,31 @@
       background: #000;
     }
 
+    /* 2-Column Side-by-Side Layout for Work Ex & Education */
+    .modal-two-col-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .modal-two-col-item {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      object-fit: cover;
+      max-height: 480px;
+      background: #000;
+    }
+
+    @media (max-width: 768px) {
+      .modal-two-col-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .modal-text-view {
       width: 100%;
       max-width: 1100px;
@@ -520,7 +581,7 @@
     </section>
   </main>
 
-  <!-- Glowing Modal Window (Enlarged Size) -->
+  <!-- Glowing Modal Window -->
   <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
     <div id="modal-content" class="modal-content" onclick="event.stopPropagation()">
       <span class="close-modal-btn" onclick="closeModal()">&times;</span>
@@ -533,6 +594,43 @@
 
     let allItems = [];
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
+
+    // Load YouTube IFrame API for quality and volume control
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = function() {
+      initAllYouTubePlayers();
+    };
+
+    function initAllYouTubePlayers() {
+      document.querySelectorAll('iframe[src*="youtube.com/embed"]').forEach((iframe) => {
+        if (!iframe.id) {
+          iframe.id = 'yt-player-' + Math.random().toString(36).substring(2, 9);
+        }
+        if (!iframe.dataset.initialized) {
+          iframe.dataset.initialized = 'true';
+          try {
+            new YT.Player(iframe.id, {
+              events: {
+                'onReady': (event) => {
+                  try {
+                    event.target.setVolume(80);
+                    event.target.setPlaybackQuality('hd1080');
+                  } catch (e) {
+                    console.log('Player configuration error:', e);
+                  }
+                }
+              }
+            });
+          } catch (err) {
+            console.log('YT init error:', err);
+          }
+        }
+      });
+    }
 
     function switchSection(sectionId, btnElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -656,7 +754,6 @@
           row.Notes = values[6].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
 
-        // Column H check (index 7)
         if (!row.Layout && values[7]) {
           row.Layout = values[7].trim().replace(/^"|"$/g, '').replace(/""/g, '"').trim();
         }
@@ -675,9 +772,13 @@
 
     function extractYouTubeID(url) {
       if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
       const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+      return (match && match[2] && match[2].length >= 10) ? match[2].split('?')[0].split('&')[0] : null;
+    }
+
+    function isYouTubeShort(url) {
+      return url && url.includes('/shorts/');
     }
 
     function getLinkedInEmbedURL(url) {
@@ -737,7 +838,7 @@
     /* --- ACHIEVEMENTS VIEW --- */
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
-      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates'];
+      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Experiments', 'Certificates', 'Extracurricular'];
 
       filterContainer.innerHTML = '';
       standardCategories.forEach(category => {
@@ -757,7 +858,9 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'certificates', title: 'Certificates', type: 'scroll-row' }
+        { key: 'experiments', title: 'Experiments', type: 'scroll-row' },
+        { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
+        { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
 
       let activeSections = sectionsConfig;
@@ -775,7 +878,9 @@
         const sectionItems = allItems.filter(item => {
           const cat = (item.Category || '').trim().toLowerCase();
           if (selectedCategory === 'All') {
-            return cat === sec.key || (sec.key === 'featured' && (cat === 'feature' || cat === 'featured'));
+            return cat === sec.key || 
+                   (sec.key === 'featured' && (cat === 'feature' || cat === 'featured')) ||
+                   (sec.key === 'extracurricular' && (cat.includes('extra') || cat.includes('activities')));
           } else {
             return cat.includes(sec.key);
           }
@@ -791,11 +896,13 @@
         headerRow.className = 'section-header-row';
         headerRow.innerHTML = `<h3 class="section-title">${sec.title}</h3>`;
 
+        const rowId = `${sec.key.replace(/\s+/g, '-')}-row`;
+
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
             <div class="scroll-controls">
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', -300)">&#10094;</button>
+              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', 300)">&#10095;</button>
             </div>
           `;
         }
@@ -806,7 +913,7 @@
           contentDiv.className = 'collage-grid';
         } else {
           contentDiv.className = 'horizontal-scroll-row';
-          contentDiv.id = `${sec.key}-row`;
+          contentDiv.id = rowId;
         }
 
         if (sectionItems.length === 0) {
@@ -815,33 +922,67 @@
           sectionItems.forEach(item => {
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const isCertificate = sec.key === 'certificates';
+            const isExtra = sec.key === 'extracurricular';
+            const isExperiment = sec.key === 'experiments';
+            
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''}`;
-            card.onclick = () => openModal(item);
 
-            const thumb = getThumbnail(item);
+            if (isExperiment) {
+              // Direct Inline Video Player Card for Experiments
+              card.className = `card experiment-card`;
+              const ytId = extractYouTubeID(item.VideoURL);
+              const isShort = isYouTubeShort(item.VideoURL);
+              const orientClass = isShort ? 'portrait' : 'landscape';
 
-            card.innerHTML = `
-              <div class="collage-thumbnail-wrapper">
-                <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
-              </div>
-              <div class="card-info">
-                <span class="category-tag">${item.Category || sec.title}</span>
-                <div class="card-title">${item.Title}</div>
-                <div class="card-desc">${item.Description || ''}</div>
-              </div>
-            `;
+              card.innerHTML = `
+                <div class="experiment-media-container ${orientClass}">
+                  ${ytId ? `<iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<img src="${FALLBACK_SVG}" alt="${item.Title}">`}
+                </div>
+                <div class="card-info" style="cursor: pointer;" onclick="openModal(item)">
+                  <span class="category-tag">${item.Category || sec.title}</span>
+                  <div class="card-title">${item.Title}</div>
+                  <div class="card-desc">${item.Description || ''}</div>
+                </div>
+              `;
+            } else {
+              card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''} ${isExtra ? 'extracurricular-card' : ''}`;
+              card.onclick = () => openModal(item);
+
+              const thumb = getThumbnail(item);
+              card.innerHTML = `
+                <div class="collage-thumbnail-wrapper">
+                  <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
+                </div>
+                <div class="card-info">
+                  <span class="category-tag">${item.Category || sec.title}</span>
+                  <div class="card-title">${item.Title}</div>
+                  <div class="card-desc">${item.Description || ''}</div>
+                </div>
+              `;
+            }
+
             contentDiv.appendChild(card);
           });
         }
 
         wrapper.appendChild(contentDiv);
         container.appendChild(wrapper);
+
+        // Update scroll arrow visibility dynamically
+        if (sec.type === 'scroll-row') {
+          setTimeout(() => {
+            updateScrollArrows(rowId);
+            contentDiv.addEventListener('scroll', () => updateScrollArrows(rowId));
+          }, 50);
+        }
       });
 
       if (renderedCount === 0) {
         container.innerHTML = `<div class="status-msg">No items found for category "${selectedCategory}".</div>`;
       }
+
+      // Initialize any newly rendered YouTube players for quality/volume control
+      setTimeout(initAllYouTubePlayers, 100);
     }
 
     /* --- MOMENTS VIEW --- */
@@ -985,52 +1126,90 @@
       }
     }
 
+    function updateScrollArrows(rowId) {
+      const row = document.getElementById(rowId);
+      const leftBtn = document.getElementById(`${rowId}-left-btn`);
+      const rightBtn = document.getElementById(`${rowId}-right-btn`);
+
+      if (!row || !leftBtn || !rightBtn) return;
+
+      const scrollLeft = row.scrollLeft;
+      const maxScrollLeft = row.scrollWidth - row.clientWidth;
+
+      if (scrollLeft > 5) {
+        leftBtn.classList.remove('hidden');
+      } else {
+        leftBtn.classList.add('hidden');
+      }
+
+      if (maxScrollLeft - scrollLeft > 5) {
+        rightBtn.classList.remove('hidden');
+      } else {
+        rightBtn.classList.add('hidden');
+      }
+    }
+
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
 
       const mediaURLs = getMediaURLs(item.VideoURL);
+      const category = (item.Category || '').trim().toLowerCase();
+      const isTwoColumnGrid = category.includes('work ex') || category.includes('work experience') || category.includes('education');
+      
       let mediaHTML = '';
 
       if (mediaURLs.length > 0) {
-        mediaHTML = mediaURLs.map(url => {
-          const ytId = extractYouTubeID(url);
-          const linkedinUrl = getLinkedInEmbedURL(url);
-
-          if (ytId) {
-            return `
-              <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%; max-width: 1100px;">
-                <iframe src="https://www.youtube.com/embed/${ytId}?rel=0" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0; border-radius: 8px;" allowfullscreen scrolling="no" allow="accelerometer *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *;" referrerpolicy="strict-origin"></iframe>
-              </div>
-            `;
-          } else if (linkedinUrl) {
-            return `
-              <div style="width: 100%; max-width: 600px; display: flex; justify-content: center;">
-                <iframe src="${linkedinUrl}" height="560" width="100%" frameborder="0" allowfullscreen="" title="Embedded LinkedIn Post" style="border-radius: 8px; background: #fff;"></iframe>
-              </div>
-            `;
-          } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video')) {
-            return `<video class="modal-media-item" controls src="${url}"></video>`;
-          } else {
-            return `<img class="modal-media-item" src="${url}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
-          }
-        }).join('');
+        if (isTwoColumnGrid) {
+          mediaHTML = `<div class="modal-two-col-grid">`;
+          mediaURLs.forEach(url => {
+            const ytId = extractYouTubeID(url);
+            if (ytId) {
+              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+            } else {
+              mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
+            }
+          });
+          mediaHTML += `</div>`;
+        } else {
+          mediaURLs.forEach(url => {
+            const ytId = extractYouTubeID(url);
+            const liEmbed = getLinkedInEmbedURL(url);
+            if (ytId) {
+              const isShort = isYouTubeShort(url);
+              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+            } else if (liEmbed && liEmbed.includes('iframe')) {
+              mediaHTML += `<div style="width:100%;max-width:1100px;">${liEmbed}</div>`;
+            } else if (liEmbed && !liEmbed.includes('<')) {
+              mediaHTML += `<iframe src="${liEmbed}" style="width:100%;height:500px;border:0;border-radius:8px;" allowfullscreen></iframe>`;
+            } else {
+              mediaHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onerror="this.style.display='none'">`;
+            }
+          });
+        }
+      } else {
+        const ytId = extractYouTubeID(item.VideoURL);
+        if (ytId) {
+          const isShort = isYouTubeShort(item.VideoURL);
+          const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+        }
       }
 
       let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
         textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '') {
+      } else if (item.Description && item.Description.trim() !== '' && mediaURLs.length === 0) {
         textHTML = `<div class="modal-text-view">${item.Description}</div>`;
       }
 
       body.innerHTML = `
         <div class="modal-header-info">
-          <span class="category-tag">${item.Category || 'Archive Item'}</span>
-          <h1 class="modal-header-title">${item.Title}</h1>
+          <span class="category-tag">${item.Category || 'Archive'}</span>
+          <div class="modal-header-title">${item.Title}</div>
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
-
         <div class="modal-media-container">
           ${mediaHTML}
           ${textHTML}
@@ -1038,19 +1217,30 @@
       `;
 
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Initialize YT player inside modal
+      setTimeout(initAllYouTubePlayers, 100);
     }
 
     function closeModal(event) {
-      if (event && event.stopPropagation) event.stopPropagation();
-      const modal = document.getElementById('modal-overlay');
-      const body = document.getElementById('modal-body');
-      modal.classList.remove('active');
-      body.innerHTML = '';
+      if (!event || event.target.id === 'modal-overlay' || event.target.classList.contains('close-modal-btn')) {
+        const modal = document.getElementById('modal-overlay');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('modal-body').innerHTML = '';
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadContent();
+    // Recheck arrows if window is resized
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.horizontal-scroll-row').forEach(row => {
+        updateScrollArrows(row.id);
+      });
     });
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', loadContent);
   </script>
 </body>
 </html>
