@@ -191,6 +191,14 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scroll-arrow-btn.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .scroll-arrow-btn:hover {
@@ -756,7 +764,7 @@
     /* --- ACHIEVEMENTS VIEW --- */
     function renderAchievementsView(selectedCategory = 'All') {
       const filterContainer = document.getElementById('category-filter-achievements');
-      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Certificates', 'Extracurricular'];
+      const standardCategories = ['All', 'Featured', 'Work Ex', 'Education', 'Trophies', 'Projects', 'Experiments', 'Certificates', 'Extracurricular'];
 
       filterContainer.innerHTML = '';
       standardCategories.forEach(category => {
@@ -776,6 +784,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
+        { key: 'experiments', title: 'Experiments', type: 'scroll-row' },
         { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
         { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
@@ -813,11 +822,13 @@
         headerRow.className = 'section-header-row';
         headerRow.innerHTML = `<h3 class="section-title">${sec.title}</h3>`;
 
+        const rowId = `${sec.key.replace(/\s+/g, '-')}-row`;
+
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
             <div class="scroll-controls">
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', -300)">&#10094;</button>
-              <button class="scroll-arrow-btn" onclick="scrollRow('${sec.key}-row', 300)">&#10095;</button>
+              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', -300)">&#10094;</button>
+              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', 300)">&#10095;</button>
             </div>
           `;
         }
@@ -828,7 +839,7 @@
           contentDiv.className = 'collage-grid';
         } else {
           contentDiv.className = 'horizontal-scroll-row';
-          contentDiv.id = `${sec.key}-row`;
+          contentDiv.id = rowId;
         }
 
         if (sectionItems.length === 0) {
@@ -861,6 +872,14 @@
 
         wrapper.appendChild(contentDiv);
         container.appendChild(wrapper);
+
+        // Update arrow visibility after attaching elements
+        if (sec.type === 'scroll-row') {
+          setTimeout(() => {
+            updateScrollArrows(rowId);
+            contentDiv.addEventListener('scroll', () => updateScrollArrows(rowId));
+          }, 50);
+        }
       });
 
       if (renderedCount === 0) {
@@ -1009,6 +1028,31 @@
       }
     }
 
+    function updateScrollArrows(rowId) {
+      const row = document.getElementById(rowId);
+      const leftBtn = document.getElementById(`${rowId}-left-btn`);
+      const rightBtn = document.getElementById(`${rowId}-right-btn`);
+
+      if (!row || !leftBtn || !rightBtn) return;
+
+      const scrollLeft = row.scrollLeft;
+      const maxScrollLeft = row.scrollWidth - row.clientWidth;
+
+      // Show left arrow only if scrolled right
+      if (scrollLeft > 5) {
+        leftBtn.classList.remove('hidden');
+      } else {
+        leftBtn.classList.add('hidden');
+      }
+
+      // Show right arrow only if content extends beyond right boundary
+      if (maxScrollLeft - scrollLeft > 5) {
+        rightBtn.classList.remove('hidden');
+      } else {
+        rightBtn.classList.add('hidden');
+      }
+    }
+
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
@@ -1021,7 +1065,6 @@
 
       if (mediaURLs.length > 0) {
         if (isTwoColumnGrid) {
-          // 2 Column Side-by-Side Layout for Work Ex and Education
           mediaHTML = `<div class="modal-two-col-grid">`;
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
@@ -1033,7 +1076,6 @@
           });
           mediaHTML += `</div>`;
         } else {
-          // Standard full-width media layout
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
             const liEmbed = getLinkedInEmbedURL(url);
@@ -1086,6 +1128,13 @@
         document.getElementById('modal-body').innerHTML = '';
       }
     }
+
+    // Recheck arrows if window is resized
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.horizontal-scroll-row').forEach(row => {
+        updateScrollArrows(row.id);
+      });
+    });
 
     // Initialize on load
     window.addEventListener('DOMContentLoaded', loadContent);
