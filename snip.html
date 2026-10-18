@@ -702,9 +702,14 @@
 
     function extractYouTubeID(url) {
       if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      // Added support for shorts/ paths
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
       const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+      return (match && match[2] && match[2].length >= 10) ? match[2].split('?')[0].split('&')[0] : null;
+    }
+
+    function isYouTubeShort(url) {
+      return url && url.includes('/shorts/');
     }
 
     function getLinkedInEmbedURL(url) {
@@ -1069,7 +1074,10 @@
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
             if (ytId) {
-              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+              const isShort = isYouTubeShort(url);
+              const ytStyle = isShort ? 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;' : 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;';
+              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:9/16;' : 'position:relative;width:100%;aspect-ratio:16/9;';
+              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="${ytStyle}" allowfullscreen></iframe></div>`;
             } else {
               mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
             }
@@ -1080,7 +1088,9 @@
             const ytId = extractYouTubeID(url);
             const liEmbed = getLinkedInEmbedURL(url);
             if (ytId) {
-              mediaHTML += `<div style="position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+              const isShort = isYouTubeShort(url);
+              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else if (liEmbed && liEmbed.includes('iframe')) {
               mediaHTML += `<div style="width:100%;max-width:1100px;">${liEmbed}</div>`;
             } else if (liEmbed && !liEmbed.includes('<')) {
@@ -1093,7 +1103,9 @@
       } else {
         const ytId = extractYouTubeID(item.VideoURL);
         if (ytId) {
-          mediaHTML = `<div style="position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+          const isShort = isYouTubeShort(item.VideoURL);
+          const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
         }
       }
 
