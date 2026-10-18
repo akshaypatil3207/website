@@ -290,6 +290,39 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
+    /* Experiments Card & Inline Player Styling */
+    .card.experiment-card {
+      flex: 0 0 auto;
+      cursor: default;
+    }
+    .card.experiment-card:hover {
+      transform: translateY(-4px);
+    }
+    .experiment-media-container {
+      height: 320px; /* Shorts level fixed height */
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .experiment-media-container.portrait {
+      aspect-ratio: 9/16;
+      width: 180px;
+      flex: 0 0 180px;
+    }
+    .experiment-media-container.landscape {
+      aspect-ratio: 16/9;
+      width: 568px;
+      flex: 0 0 568px;
+    }
+    .experiment-media-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .card.diary-card .card-info {
       font-family: var(--font-notes);
     }
@@ -562,6 +595,43 @@
     let allItems = [];
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
 
+    // Load YouTube IFrame API for quality and volume control
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = function() {
+      initAllYouTubePlayers();
+    };
+
+    function initAllYouTubePlayers() {
+      document.querySelectorAll('iframe[src*="youtube.com/embed"]').forEach((iframe) => {
+        if (!iframe.id) {
+          iframe.id = 'yt-player-' + Math.random().toString(36).substring(2, 9);
+        }
+        if (!iframe.dataset.initialized) {
+          iframe.dataset.initialized = 'true';
+          try {
+            new YT.Player(iframe.id, {
+              events: {
+                'onReady': (event) => {
+                  try {
+                    event.target.setVolume(80);
+                    event.target.setPlaybackQuality('hd1080');
+                  } catch (e) {
+                    console.log('Player configuration error:', e);
+                  }
+                }
+              }
+            });
+          } catch (err) {
+            console.log('YT init error:', err);
+          }
+        }
+      });
+    }
+
     function switchSection(sectionId, btnElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -702,7 +772,6 @@
 
     function extractYouTubeID(url) {
       if (!url) return null;
-      // Added support for shorts/ paths
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
       const match = url.match(regExp);
       return (match && match[2] && match[2].length >= 10) ? match[2].split('?')[0].split('&')[0] : null;
@@ -854,23 +923,44 @@
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const isCertificate = sec.key === 'certificates';
             const isExtra = sec.key === 'extracurricular';
+            const isExperiment = sec.key === 'experiments';
             
             const card = document.createElement('div');
-            card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''} ${isExtra ? 'extracurricular-card' : ''}`;
-            card.onclick = () => openModal(item);
 
-            const thumb = getThumbnail(item);
+            if (isExperiment) {
+              // Direct Inline Video Player Card for Experiments
+              card.className = `card experiment-card`;
+              const ytId = extractYouTubeID(item.VideoURL);
+              const isShort = isYouTubeShort(item.VideoURL);
+              const orientClass = isShort ? 'portrait' : 'landscape';
 
-            card.innerHTML = `
-              <div class="collage-thumbnail-wrapper">
-                <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
-              </div>
-              <div class="card-info">
-                <span class="category-tag">${item.Category || sec.title}</span>
-                <div class="card-title">${item.Title}</div>
-                <div class="card-desc">${item.Description || ''}</div>
-              </div>
-            `;
+              card.innerHTML = `
+                <div class="experiment-media-container ${orientClass}">
+                  ${ytId ? `<iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<img src="${FALLBACK_SVG}" alt="${item.Title}">`}
+                </div>
+                <div class="card-info" style="cursor: pointer;" onclick="openModal(item)">
+                  <span class="category-tag">${item.Category || sec.title}</span>
+                  <div class="card-title">${item.Title}</div>
+                  <div class="card-desc">${item.Description || ''}</div>
+                </div>
+              `;
+            } else {
+              card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''} ${isExtra ? 'extracurricular-card' : ''}`;
+              card.onclick = () => openModal(item);
+
+              const thumb = getThumbnail(item);
+              card.innerHTML = `
+                <div class="collage-thumbnail-wrapper">
+                  <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
+                </div>
+                <div class="card-info">
+                  <span class="category-tag">${item.Category || sec.title}</span>
+                  <div class="card-title">${item.Title}</div>
+                  <div class="card-desc">${item.Description || ''}</div>
+                </div>
+              `;
+            }
+
             contentDiv.appendChild(card);
           });
         }
@@ -878,7 +968,7 @@
         wrapper.appendChild(contentDiv);
         container.appendChild(wrapper);
 
-        // Update arrow visibility after attaching elements
+        // Update scroll arrow visibility dynamically
         if (sec.type === 'scroll-row') {
           setTimeout(() => {
             updateScrollArrows(rowId);
@@ -890,6 +980,9 @@
       if (renderedCount === 0) {
         container.innerHTML = `<div class="status-msg">No items found for category "${selectedCategory}".</div>`;
       }
+
+      // Initialize any newly rendered YouTube players for quality/volume control
+      setTimeout(initAllYouTubePlayers, 100);
     }
 
     /* --- MOMENTS VIEW --- */
@@ -1043,14 +1136,12 @@
       const scrollLeft = row.scrollLeft;
       const maxScrollLeft = row.scrollWidth - row.clientWidth;
 
-      // Show left arrow only if scrolled right
       if (scrollLeft > 5) {
         leftBtn.classList.remove('hidden');
       } else {
         leftBtn.classList.add('hidden');
       }
 
-      // Show right arrow only if content extends beyond right boundary
       if (maxScrollLeft - scrollLeft > 5) {
         rightBtn.classList.remove('hidden');
       } else {
@@ -1074,10 +1165,7 @@
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
             if (ytId) {
-              const isShort = isYouTubeShort(url);
-              const ytStyle = isShort ? 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;' : 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;';
-              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:9/16;' : 'position:relative;width:100%;aspect-ratio:16/9;';
-              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="${ytStyle}" allowfullscreen></iframe></div>`;
+              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else {
               mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
             }
@@ -1090,7 +1178,7 @@
             if (ytId) {
               const isShort = isYouTubeShort(url);
               const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else if (liEmbed && liEmbed.includes('iframe')) {
               mediaHTML += `<div style="width:100%;max-width:1100px;">${liEmbed}</div>`;
             } else if (liEmbed && !liEmbed.includes('<')) {
@@ -1105,7 +1193,7 @@
         if (ytId) {
           const isShort = isYouTubeShort(item.VideoURL);
           const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
         }
       }
 
@@ -1130,6 +1218,9 @@
 
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
+
+      // Initialize YT player inside modal
+      setTimeout(initAllYouTubePlayers, 100);
     }
 
     function closeModal(event) {
