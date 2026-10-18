@@ -290,68 +290,72 @@
       box-shadow: 0 8px 25px var(--accent-glow);
     }
 
-    /* Experiments Shorts-Style Cards */
-    .card.experiment-card {
-      flex: 0 0 auto;
-      height: 380px;
-      position: relative;
+    /* Dedicated Shorts/Experiments Styling */
+    .horizontal-scroll-row .card.shorts-card {
+      min-width: 220px;
+      width: 220px;
+      flex: 0 0 220px;
       cursor: pointer;
-      overflow: hidden;
+      border-radius: 16px;
     }
-    .card.experiment-card.portrait {
-      width: 200px;
-      min-width: 200px;
-    }
-    .card.experiment-card.landscape,
-    .card.experiment-card.image-card {
-      width: 420px;
-      min-width: 420px;
-    }
-    .experiment-thumb-wrapper {
-      position: relative;
+
+    .shorts-media-container {
       width: 100%;
-      height: 100%;
-      background: #0c0b13;
+      aspect-ratio: 9 / 16;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px 16px 0 0;
     }
-    .experiment-thumb-wrapper img {
+
+    .shorts-media-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
+      transition: opacity 0.3s ease;
     }
-    .experiment-iframe-container {
+
+    .shorts-media-container iframe {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #000;
-      pointer-events: none;
-      z-index: 2;
-    }
-    .experiment-iframe-container iframe {
-      width: 100%;
-      height: 100%;
       border: 0;
       pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
-    .experiment-overlay-info {
+
+    .shorts-card:hover .shorts-media-container iframe {
+      opacity: 1;
+    }
+
+    .shorts-badge {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(to top, rgba(10,10,18,0.95) 0%, rgba(10,10,18,0.5) 75%, transparent 100%);
-      z-index: 3;
-      pointer-events: none;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 0, 0, 0.85);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
     }
-    .experiment-overlay-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-white);
-      white-space: nowrap;
+
+    .full-screen-shorts-container {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 9 / 16;
+      height: calc(90vh - 80px);
+      background: #000;
+      border-radius: 16px;
       overflow: hidden;
-      text-overflow: ellipsis;
+      box-shadow: 0 0 35px var(--accent-glow);
+      border: 2px solid var(--accent-cyan);
     }
 
     .card.diary-card .card-info {
@@ -527,7 +531,6 @@
       background: #000;
     }
 
-    /* 2-Column Side-by-Side Layout for Work Ex & Education */
     .modal-two-col-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -624,9 +627,10 @@
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4PJ4JdrGEdXtLeoghYJBSeScn9pH9V1l2FFCRSy8w8D4oKA1IJYZIAXT2E1_94MTG4yEUKRFdFZ-f/pub?output=csv';
 
     let allItems = [];
+    const ytPlayers = {};
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
 
-    // Load YouTube IFrame API for quality and volume control
+    // Load YouTube IFrame API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -637,30 +641,47 @@
     };
 
     function initAllYouTubePlayers() {
-      document.querySelectorAll('iframe[src*="youtube.com/embed"]').forEach((iframe) => {
-        if (!iframe.id) {
-          iframe.id = 'yt-player-' + Math.random().toString(36).substring(2, 9);
-        }
+      document.querySelectorAll('iframe[id^="yt-shorts-player-"]').forEach((iframe) => {
         if (!iframe.dataset.initialized) {
           iframe.dataset.initialized = 'true';
-          try {
-            new YT.Player(iframe.id, {
-              events: {
-                'onReady': (event) => {
-                  try {
-                    event.target.setVolume(80);
-                    event.target.setPlaybackQuality('hd1080');
-                  } catch (e) {
-                    console.log('Player configuration error:', e);
-                  }
+          const player = new YT.Player(iframe.id, {
+            events: {
+              'onReady': (event) => {
+                ytPlayers[iframe.id] = event.target;
+                try {
+                  event.target.mute();
+                  event.target.setPlaybackQuality('hd1080');
+                } catch (e) {
+                  console.log('Player configuration error:', e);
                 }
               }
-            });
-          } catch (err) {
-            console.log('YT init error:', err);
-          }
+            }
+          });
         }
       });
+    }
+
+    function playShortHover(playerContainer) {
+      const iframe = playerContainer.querySelector('iframe');
+      if (iframe && ytPlayers[iframe.id]) {
+        try {
+          ytPlayers[iframe.id].mute();
+          ytPlayers[iframe.id].playVideo();
+        } catch (e) {
+          console.log('Hover play error:', e);
+        }
+      }
+    }
+
+    function pauseShortHover(playerContainer) {
+      const iframe = playerContainer.querySelector('iframe');
+      if (iframe && ytPlayers[iframe.id]) {
+        try {
+          ytPlayers[iframe.id].pauseVideo();
+        } catch (e) {
+          console.log('Hover pause error:', e);
+        }
+      }
     }
 
     function switchSection(sectionId, btnElement) {
@@ -808,10 +829,6 @@
       return (match && match[2] && match[2].length >= 10) ? match[2].split('?')[0].split('&')[0] : null;
     }
 
-    function isYouTubeShort(url) {
-      return url && url.includes('/shorts/');
-    }
-
     function getLinkedInEmbedURL(url) {
       if (!url) return null;
       if (url.includes('linkedin.com')) {
@@ -832,7 +849,7 @@
       if (item.VideoURL && item.VideoURL.trim() !== '') {
         const ytId = extractYouTubeID(item.VideoURL);
         if (ytId) {
-          return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+          return `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
         }
         const urls = getMediaURLs(item.VideoURL);
         if (urls.length > 0) return urls[0];
@@ -950,7 +967,7 @@
         if (sectionItems.length === 0) {
           contentDiv.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No items in ${sec.title} yet.</div>`;
         } else {
-          sectionItems.forEach(item => {
+          sectionItems.forEach((item, index) => {
             const isLandscape = (item.Layout || '').trim().toLowerCase() === 'landscape';
             const isCertificate = sec.key === 'certificates';
             const isExtra = sec.key === 'extracurricular';
@@ -959,43 +976,27 @@
             const card = document.createElement('div');
 
             if (isExperiment) {
+              // Exact YouTube Shorts UI with Hover Auto-Play & Click Fullscreen
+              card.className = `card shorts-card`;
               const ytId = extractYouTubeID(item.VideoURL);
-              const isShort = isYouTubeShort(item.VideoURL);
-              const isLandscapeExp = isLandscape || !isShort;
-              const sizeClass = isShort ? 'portrait' : 'landscape';
-              
-              card.className = `card experiment-card ${sizeClass}`;
-              card.onclick = () => openModal(item);
-
+              const playerUniqueId = `yt-shorts-player-${sec.key.replace(/\s+/g, '-')}-${index}`;
               const thumb = getThumbnail(item);
 
+              card.onmouseenter = () => playShortHover(card);
+              card.onmouseleave = () => pauseShortHover(card);
+              card.onclick = () => openModal(item);
+
               card.innerHTML = `
-                <div class="experiment-thumb-wrapper">
+                <div class="shorts-media-container">
+                  <span class="shorts-badge">⚡ SHORT</span>
                   <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
-                  <div class="experiment-iframe-container" id="preview-wrap-${Math.random().toString(36.substring(2,9))}"></div>
+                  ${ytId ? `<iframe id="${playerUniqueId}" src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&controls=0&mute=1&loop=1&playlist=${ytId}&vq=hd1080&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>` : ''}
                 </div>
-                <div class="experiment-overlay-info">
-                  <div class="category-tag" style="margin-bottom:3px;">${item.Category || 'Experiment'}</div>
-                  <div class="experiment-overlay-title">${item.Title}</div>
+                <div class="card-info">
+                  <div class="card-title">${item.Title}</div>
+                  <div class="card-desc">${item.Description || ''}</div>
                 </div>
               `;
-
-              // Hover preview listeners (Muted autoplay on hover)
-              const thumbWrapper = card.querySelector('.experiment-thumb-wrapper');
-              const iframeContainer = card.querySelector('.experiment-iframe-container');
-
-              card.addEventListener('mouseenter', () => {
-                if (ytId && !iframeContainer.innerHTML) {
-                  iframeContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&enablejsapi=1&vq=hd1080" allow="autoplay"></iframe>`;
-                }
-                iframeContainer.style.display = 'block';
-              });
-
-              card.addEventListener('mouseleave', () => {
-                iframeContainer.style.display = 'none';
-                iframeContainer.innerHTML = ''; // Stop playback and release resources
-              });
-
             } else {
               card.className = `card ${isLandscape ? 'landscape-card' : ''} ${isCertificate ? 'certificate-card' : ''} ${isExtra ? 'extracurricular-card' : ''}`;
               card.onclick = () => openModal(item);
@@ -1020,7 +1021,6 @@
         wrapper.appendChild(contentDiv);
         container.appendChild(wrapper);
 
-        // Update scroll arrow visibility dynamically
         if (sec.type === 'scroll-row') {
           setTimeout(() => {
             updateScrollArrows(rowId);
@@ -1033,7 +1033,7 @@
         container.innerHTML = `<div class="status-msg">No items found for category "${selectedCategory}".</div>`;
       }
 
-      setTimeout(initAllYouTubePlayers, 100);
+      setTimeout(initAllYouTubePlayers, 150);
     }
 
     /* --- MOMENTS VIEW --- */
@@ -1083,14 +1083,14 @@
         const card = document.createElement('div');
         card.className = `card ${isLandscape ? 'landscape-card' : ''}`;
         card.onclick = () => openModal(item);
-        const thumb = getThumbnail(item);
 
+        const thumb = getThumbnail(item);
         card.innerHTML = `
           <div class="collage-thumbnail-wrapper">
             <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
           </div>
           <div class="card-info">
-            <span class="category-tag">${item.Category || 'Moment'}</span>
+            <span class="category-tag">${item.Category || 'Moments'}</span>
             <div class="card-title">${item.Title}</div>
             <div class="card-desc">${item.Description || ''}</div>
           </div>
@@ -1106,7 +1106,7 @@
     function renderDiariesView(selectedCategory = 'All') {
       const diaryItems = allItems.filter(item => {
         const cat = (item.Category || '').trim().toLowerCase();
-        return cat.includes('diary') || cat.includes('journal') || cat.includes('note') || cat.includes('reflection');
+        return cat.includes('diary') || cat.includes('note') || cat.includes('journal') || cat.includes('letter') || cat.includes('reflection');
       });
 
       const categories = ['All', ...new Set(diaryItems.map(i => i.Category || 'Diaries'))];
@@ -1129,7 +1129,7 @@
         : diaryItems.filter(i => (i.Category || '').trim().toLowerCase() === selectedCategory.toLowerCase());
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="status-msg">No diary entries found. Add items tagged with "Diaries" or "Journal" in your sheet.</div>`;
+        container.innerHTML = `<div class="status-msg">No diaries or notes found. Add items tagged with "Diaries" or "Notes" in your sheet.</div>`;
         return;
       }
 
@@ -1137,7 +1137,7 @@
       wrapper.className = 'achievement-category-wrapper';
       wrapper.innerHTML = `
         <div class="section-header-row">
-          <h3 class="section-title">Journal & Notes</h3>
+          <h3 class="section-title">Personal Reflections & Notes</h3>
         </div>
       `;
 
@@ -1149,16 +1149,18 @@
         const card = document.createElement('div');
         card.className = `card diary-card ${isLandscape ? 'landscape-card' : ''}`;
         card.onclick = () => openModal(item);
+
         const thumb = getThumbnail(item);
+        const hasThumb = thumb && thumb !== FALLBACK_SVG && item.ThumbnailURL;
 
         card.innerHTML = `
-          ${thumb !== FALLBACK_SVG ? `
+          ${hasThumb ? `
             <div class="collage-thumbnail-wrapper">
-              <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+              <img src="${thumb}" alt="${item.Title}" loading="lazy" onerror="this.src='${FALLBACK_SVG}'">
             </div>
           ` : ''}
           <div class="card-info">
-            <span class="category-tag">${item.Category || 'Diary'}</span>
+            <span class="category-tag">${item.Category || 'Diaries'}</span>
             <div class="card-title">${item.Title}</div>
             <div class="card-desc">${item.Notes || item.Description || ''}</div>
           </div>
@@ -1170,30 +1172,35 @@
       container.appendChild(wrapper);
     }
 
-    function scrollRow(rowId, distance) {
+    function scrollRow(rowId, offset) {
       const row = document.getElementById(rowId);
       if (row) {
-        row.scrollBy({ left: distance, behavior: 'smooth' });
+        row.scrollBy({ left: offset, behavior: 'smooth' });
       }
     }
 
     function updateScrollArrows(rowId) {
       const row = document.getElementById(rowId);
+      if (!row) return;
       const leftBtn = document.getElementById(`${rowId}-left-btn`);
       const rightBtn = document.getElementById(`${rowId}-right-btn`);
 
-      if (!row || !leftBtn || !rightBtn) return;
+      if (!leftBtn || !rightBtn) return;
 
-      const scrollLeft = row.scrollLeft;
-      const maxScrollLeft = row.scrollWidth - row.clientWidth;
+      const hasOverflow = row.scrollWidth > row.clientWidth + 5;
+      if (!hasOverflow) {
+        leftBtn.classList.add('hidden');
+        rightBtn.classList.add('hidden');
+        return;
+      }
 
-      if (scrollLeft > 5) {
+      if (row.scrollLeft > 10) {
         leftBtn.classList.remove('hidden');
       } else {
         leftBtn.classList.add('hidden');
       }
 
-      if (maxScrollLeft - scrollLeft > 5) {
+      if (row.scrollLeft < row.scrollWidth - row.clientWidth - 10) {
         rightBtn.classList.remove('hidden');
       } else {
         rightBtn.classList.add('hidden');
@@ -1201,58 +1208,65 @@
     }
 
     function openModal(item) {
-      const modal = document.getElementById('modal-overlay');
+      const overlay = document.getElementById('modal-overlay');
       const body = document.getElementById('modal-body');
-
-      const mediaURLs = getMediaURLs(item.VideoURL);
-      const category = (item.Category || '').trim().toLowerCase();
-      const isTwoColumnGrid = category.includes('work ex') || category.includes('work experience') || category.includes('education');
       
-      let mediaHTML = '';
+      let mediaHtml = '';
+      const catLower = (item.Category || '').toLowerCase();
+      const isWorkOrEdu = catLower.includes('work') || catLower.includes('education');
+      const isExperiment = catLower.includes('experiment');
 
-      if (mediaURLs.length > 0) {
-        if (isTwoColumnGrid) {
-          mediaHTML = `<div class="modal-two-col-grid">`;
-          mediaURLs.forEach(url => {
-            const ytId = extractYouTubeID(url);
-            if (ytId) {
-              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else {
-              mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
-            }
-          });
-          mediaHTML += `</div>`;
-        } else {
-          mediaURLs.forEach(url => {
-            const ytId = extractYouTubeID(url);
-            const liEmbed = getLinkedInEmbedURL(url);
-            if (ytId) {
-              const isShort = isYouTubeShort(url);
-              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else if (liEmbed && liEmbed.includes('iframe')) {
-              mediaHTML += `<div style="width:100%;max-width:1100px;">${liEmbed}</div>`;
-            } else if (liEmbed && !liEmbed.includes('<')) {
-              mediaHTML += `<iframe src="${liEmbed}" style="width:100%;height:500px;border:0;border-radius:8px;" allowfullscreen></iframe>`;
-            } else {
-              mediaHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onerror="this.style.display='none'">`;
-            }
-          });
-        }
-      } else {
+      if (isExperiment) {
         const ytId = extractYouTubeID(item.VideoURL);
         if (ytId) {
-          const isShort = isYouTubeShort(item.VideoURL);
-          const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+          mediaHtml = `
+            <div class="full-screen-shorts-container">
+              <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&vq=hd1080&rel=0" width="100%" height="100%" style="border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          `;
+        }
+      } else {
+        if (item.VideoURL && item.VideoURL.trim() !== '') {
+          const ytId = extractYouTubeID(item.VideoURL);
+          const liEmbed = getLinkedInEmbedURL(item.VideoURL);
+          if (ytId) {
+            mediaHtml = `
+              <div style="width:100%; aspect-ratio:16/9; max-width:1100px; background:#000; border-radius:8px; overflow:hidden;">
+                <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1&vq=hd1080" width="100%" height="100%" style="border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+            `;
+          } else if (liEmbed) {
+            mediaHtml = `
+              <div style="width:100%; max-width:800px; min-height:450px; background:#000; border-radius:8px; overflow:hidden;">
+                <iframe src="${liEmbed}" height="500" width="100%" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
+              </div>
+            `;
+          }
+        }
+
+        const urls = getMediaURLs(item.ThumbnailURL || item.VideoURL);
+        if (urls.length > 0) {
+          if (isWorkOrEdu && urls.length >= 2) {
+            mediaHtml += `
+              <div class="modal-two-col-grid">
+                <img src="${urls[0]}" class="modal-two-col-item" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+                <img src="${urls[1]}" class="modal-two-col-item" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">
+              </div>
+            `;
+          } else {
+            urls.forEach(url => {
+              if (!url.includes('youtube.com') && !url.includes('youtu.be') && url !== FALLBACK_SVG) {
+                mediaHtml += `<img src="${url}" class="modal-media-item" alt="${item.Title}" loading="lazy" onerror="this.style.display='none'">`;
+              }
+            });
+          }
         }
       }
 
-      let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
-        textHTML = `<div class="modal-text-view">${item.Notes}</div>`;
-      } else if (item.Description && item.Description.trim() !== '' && mediaURLs.length === 0) {
-        textHTML = `<div class="modal-text-view">${item.Description}</div>`;
+        mediaHtml += `<div class="modal-text-view">${item.Notes}</div>`;
+      } else if (!mediaHtml) {
+        mediaHtml = `<div class="modal-text-view">${item.Description || 'No additional details provided.'}</div>`;
       }
 
       body.innerHTML = `
@@ -1262,35 +1276,26 @@
           <div class="modal-header-desc">${item.Description || ''}</div>
         </div>
         <div class="modal-media-container">
-          ${mediaHTML}
-          ${textHTML}
+          ${mediaHtml}
         </div>
       `;
 
-      modal.classList.add('active');
+      overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
-
-      setTimeout(initAllYouTubePlayers, 100);
     }
 
     function closeModal(event) {
       if (!event || event.target.id === 'modal-overlay' || event.target.classList.contains('close-modal-btn')) {
-        const modal = document.getElementById('modal-overlay');
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
         document.getElementById('modal-body').innerHTML = '';
       }
     }
 
-    // Recheck arrows if window is resized
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('.horizontal-scroll-row').forEach(row => {
-        updateScrollArrows(row.id);
-      });
+    window.addEventListener('DOMContentLoaded', () => {
+      loadContent();
     });
-
-    // Initialize on load
-    window.addEventListener('DOMContentLoaded', loadContent);
   </script>
 </body>
 </html>
