@@ -1389,6 +1389,7 @@
 
     function openModal(item) {
       const modal = document.getElementById('modal-overlay');
+      const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
       // Reset scroll position of modal content and body back to top
@@ -1465,13 +1466,13 @@
           ${textHTML}
         </div>
       `;
-      
+
       // Reset media container scroll position as well
       const mediaContainer = body.querySelector('.modal-media-container');
       if (mediaContainer) {
         mediaContainer.scrollTop = 0;
       }
-      
+
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
