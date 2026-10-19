@@ -251,18 +251,13 @@
 
     /* ========================================================
        EXPERIMENTS SECTION STYLING & SIZING CUSTOMIZATION
-       ========================================================
-       - CARD WIDTH: Set to calc(50% - 10px) so that EXACTLY TWO 
-         cards occupy the screen per row. (Change width here if needed).
-       - CARD HEIGHT: Adjust the height value of .experiment-media-container 
-         below to change the vertical size of the experiment video cards.
-    ======================================================== */
-    .collage-grid .card.experiment-card {
-      width: calc(50% - 10px);
+       ======================================================== */
+    .horizontal-scroll-row .card.experiment-card {
+      min-width: calc(50% - 10px);
       flex: 0 0 calc(50% - 10px);
       cursor: default;
     }
-    .collage-grid .card.experiment-card:hover {
+    .horizontal-scroll-row .card.experiment-card:hover {
       transform: translateY(-4px);
     }
 
@@ -277,11 +272,22 @@
       overflow: hidden;
     }
 
-    .experiment-yt-iframe {
+    .experiment-video-iframe {
       width: 100%;
       height: 100%;
       border: 0;
       pointer-events: none; /* Prevents interference with hover and custom buttons */
+    }
+
+    /* Forces all embedded video iframes (YouTube & Vimeo) to fill container and center perfectly */
+    .experiment-media-container iframe {
+      width: 100% !important;
+      height: 100% !important;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: 0;
+      pointer-events: none;
     }
 
     /* Top-Right Mute Button */
@@ -351,9 +357,9 @@
     }
 
     @media (max-width: 768px) {
-      .collage-grid .card.experiment-card {
-        width: 100%;
-        flex: 0 0 100%;
+      .horizontal-scroll-row .card.experiment-card {
+        min-width: 85%;
+        flex: 0 0 85%;
       }
     }
 
@@ -655,7 +661,7 @@
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4PJ4JdrGEdXtLeoghYJBSeScn9pH9V1l2FFCRSy8w8D4oKA1IJYZIAXT2E1_94MTG4yEUKRFdFZ-f/pub?output=csv';
 
     let allItems = [];
-    let ytPlayers = {}; // Stores YouTube player instances for experiment cards
+    let videoPlayers = {}; // Stores YouTube and Vimeo player instances for experiment cards
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
 
     // Load YouTube IFrame API
@@ -664,77 +670,115 @@
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+    // Load Vimeo Player API script
+    const vimeoScript = document.createElement('script');
+    vimeoScript.src = "https://player.vimeo.com/api/player.js";
+    document.head.appendChild(vimeoScript);
+
     window.onYouTubeIframeAPIReady = function() {
-      initAllYouTubePlayers();
+      initAllVideoPlayers();
     };
 
-    function initAllYouTubePlayers() {
-      document.querySelectorAll('.experiment-yt-iframe').forEach((el) => {
+    function initAllVideoPlayers() {
+      document.querySelectorAll('.experiment-video-iframe').forEach((el) => {
         const playerId = el.id;
-        if (!playerId || ytPlayers[playerId]) return;
+        if (!playerId || videoPlayers[playerId]) return;
         
         const videoUrl = el.dataset.videoUrl;
-        const ytId = extractYouTubeID(videoUrl);
-        if (!ytId) return;
+        const videoType = el.dataset.videoType;
 
-        try {
-          ytPlayers[playerId] = new YT.Player(playerId, {
-            videoId: ytId,
-            playerVars: {
-              'autoplay': 0,
-              'controls': 0,
-              'disablekb': 1,
-              'fs': 0,
-              'modestbranding': 1,
-              'playsinline': 1,
-              'rel': 0,
-              'vq': 'hd1080'
-            },
-            events: {
-              'onReady': (event) => {
-                try {
-                  event.target.mute(); // Start muted for hover playback
-                  event.target.setPlaybackQuality('hd1080');
-                } catch (e) {
-                  console.log('Player ready error:', e);
+        if (videoType === 'youtube') {
+          const ytId = extractYouTubeID(videoUrl);
+          if (!ytId) return;
+
+          try {
+            videoPlayers[playerId] = new YT.Player(playerId, {
+              videoId: ytId,
+              playerVars: {
+                'autoplay': 0,
+                'controls': 0,
+                'disablekb': 1,
+                'fs': 0,
+                'playsinline': 1,
+                'rel': 0,
+                'vq': 'hd1080'
+              },
+              events: {
+                'onReady': (event) => {
+                  try {
+                    event.target.mute(); // Start muted for hover playback
+                    event.target.setPlaybackQuality('hd1080');
+                  } catch (e) {
+                    console.log('Player ready error:', e);
+                  }
                 }
               }
+            });
+          } catch (err) {
+            console.log('YT init error:', err);
+          }
+        } else if (videoType === 'vimeo') {
+          const vimeoId = extractVimeoID(videoUrl);
+          if (!vimeoId) return;
+
+          try {
+            if (typeof Vimeo !== 'undefined' && Vimeo.Player) {
+              const vimeoPlayer = new Vimeo.Player(playerId, {
+                id: parseInt(vimeoId, 10),
+                autoplay: false,
+                controls: false,
+                muted: true,
+                loop: true,
+                transparent: false
+              });
+              videoPlayers[playerId] = vimeoPlayer;
+              vimeoPlayer.setMuted(true);
+            } else {
+              // Retry shortly if Vimeo script is still loading
+              setTimeout(initAllVideoPlayers, 200);
             }
-          });
-        } catch (err) {
-          console.log('YT init error:', err);
+          } catch (err) {
+            console.log('Vimeo init error:', err);
+          }
         }
       });
     }
 
     // Hover playback controls for experiments
-    function playExpVideo(playerId) {
-      const player = ytPlayers[playerId];
-      if (player && typeof player.playVideo === 'function') {
-        try {
+    function playExpVideo(playerId, videoType) {
+      const player = videoPlayers[playerId];
+      if (!player) return;
+      try {
+        if (videoType === 'youtube' && typeof player.playVideo === 'function') {
           player.playVideo();
-        } catch (e) {
-          console.log('Play error:', e);
+        } else if (videoType === 'vimeo' && typeof player.play === 'function') {
+          player.play();
         }
+      } catch (e) {
+        console.log('Play error:', e);
       }
     }
 
-    function pauseExpVideo(playerId) {
-      const player = ytPlayers[playerId];
-      if (player && typeof player.pauseVideo === 'function') {
-        try {
+    function pauseExpVideo(playerId, videoType) {
+      const player = videoPlayers[playerId];
+      if (!player) return;
+      try {
+        if (videoType === 'youtube' && typeof player.pauseVideo === 'function') {
           player.pauseVideo();
-        } catch (e) {
-          console.log('Pause error:', e);
+        } else if (videoType === 'vimeo' && typeof player.pause === 'function') {
+          player.pause();
         }
+      } catch (e) {
+        console.log('Pause error:', e);
       }
     }
 
     // Mute / Unmute toggle for experiment top-right button
-    function toggleExpMute(playerId, btnElement) {
-      const player = ytPlayers[playerId];
-      if (player && typeof player.isMuted === 'function') {
-        try {
+    function toggleExpMute(playerId, videoType, btnElement) {
+      const player = videoPlayers[playerId];
+      if (!player) return;
+      try {
+        if (videoType === 'youtube' && typeof player.isMuted === 'function') {
           if (player.isMuted()) {
             player.unMute();
             player.setVolume(100);
@@ -745,9 +789,22 @@
             btnElement.textContent = '🔇';
             btnElement.title = 'Unmute';
           }
-        } catch (e) {
-          console.log('Mute toggle error:', e);
+        } else if (videoType === 'vimeo' && typeof player.getMuted === 'function') {
+          player.getMuted().then(muted => {
+            if (muted) {
+              player.setMuted(false);
+              player.setVolume(1);
+              btnElement.textContent = '🔊';
+              btnElement.title = 'Mute';
+            } else {
+              player.setMuted(true);
+              btnElement.textContent = '🔇';
+              btnElement.title = 'Unmute';
+            }
+          });
         }
+      } catch (e) {
+        console.log('Mute toggle error:', e);
       }
     }
 
@@ -920,6 +977,12 @@
       return (match && match[2] && match[2].length >= 10) ? match[2].split('?')[0].split('&')[0] : null;
     }
 
+    function extractVimeoID(url) {
+      if (!url) return null;
+      const match = url.match(/vimeo\.com\/(?:video\/|channels\/[\w^\/]+\/|groups\/[\w^\/]+\/videos\/|)(\d+)/) || url.match(/^(\d+)$/);
+      return match ? match[1] : null;
+    }
+
     function getThumbnail(item) {
       if (item.ThumbnailURL && item.ThumbnailURL.trim() !== '') {
         const urls = getMediaURLs(item.ThumbnailURL);
@@ -985,7 +1048,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'experiments', title: 'Experiments', type: 'collage' }, // Using collage layout for 2-card per row grid
+        { key: 'experiments', title: 'Experiments', type: 'scroll-row' }, // Arranged in single row with right sliding arrows
         { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
         { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
@@ -1055,18 +1118,20 @@
             const card = document.createElement('div');
 
             if (isExperiment) {
-              // Direct Inline Video Player Card for Experiments with Hover Play, Mute, & Fullscreen
               card.className = `card experiment-card`;
-              const playerId = 'exp-yt-' + Math.random().toString(36).substring(2, 9);
+              const playerId = 'exp-vid-' + Math.random().toString(36).substring(2, 9);
+              const videoUrl = item.VideoURL;
+              const isVimeo = extractVimeoID(videoUrl);
+              const videoType = isVimeo ? 'vimeo' : 'youtube';
 
               card.innerHTML = `
                 <div class="experiment-media-container" id="container-${playerId}" 
-                     onmouseenter="playExpVideo('${playerId}')" 
-                     onmouseleave="pauseExpVideo('${playerId}')">
-                  <div id="${playerId}" class="experiment-yt-iframe" data-video-url="${item.VideoURL}"></div>
+                     onmouseenter="playExpVideo('${playerId}', '${videoType}')" 
+                     onmouseleave="pauseExpVideo('${playerId}', '${videoType}')">
+                  <div id="${playerId}" class="experiment-video-iframe" data-video-url="${videoUrl}" data-video-type="${videoType}"></div>
                   
                   <!-- Top Right Mute Button -->
-                  <button class="exp-mute-btn" onclick="toggleExpMute('${playerId}', this)" title="Unmute">
+                  <button class="exp-mute-btn" onclick="toggleExpMute('${playerId}', '${videoType}', this)" title="Unmute">
                     🔇
                   </button>
                   
@@ -1117,7 +1182,7 @@
         container.innerHTML = `<div class="status-msg">No items found for category "${selectedCategory}".</div>`;
       }
 
-      setTimeout(initAllYouTubePlayers, 100);
+      setTimeout(initAllVideoPlayers, 150);
     }
 
     /* --- MOMENTS VIEW --- */
@@ -1299,8 +1364,11 @@
           mediaHTML = `<div class="modal-two-col-grid">`;
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
+            const vimeoId = extractVimeoID(url);
             if (ytId) {
               mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+            } else if (vimeoId) {
+              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else {
               mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
             }
@@ -1309,10 +1377,14 @@
         } else {
           mediaURLs.forEach(url => {
             const ytId = extractYouTubeID(url);
+            const vimeoId = extractVimeoID(url);
             if (ytId) {
               const isShort = url.includes('/shorts/');
               const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
               mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+            } else if (vimeoId) {
+              const wrapStyle = 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
             } else {
               mediaHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onerror="this.style.display='none'">`;
             }
@@ -1320,10 +1392,14 @@
         }
       } else {
         const ytId = extractYouTubeID(item.VideoURL);
+        const vimeoId = extractVimeoID(item.VideoURL);
         if (ytId) {
           const isShort = item.VideoURL.includes('/shorts/');
           const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
           mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+        } else if (vimeoId) {
+          const wrapStyle = 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
         }
       }
 
@@ -1349,7 +1425,7 @@
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      setTimeout(initAllYouTubePlayers, 100);
+      setTimeout(initAllVideoPlayers, 150);
     }
 
     function closeModal(event) {
