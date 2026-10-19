@@ -13,7 +13,7 @@
       --card-bg: #141322;
       --card-hover: #1f1d36;
       --accent-cyan: #00f3ff;
-      --accent-glow: rgba(0, 243, 255, 0.35);
+      --accent-glow: rgba(0, 243, 255, 0.45);
       --text-white: #ffffff;
       --text-muted: #a0a0c0;
       --border-color: #272545;
@@ -176,15 +176,16 @@
 
     .scroll-controls {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
+    /* Enhanced, larger, bolder, glowing scroll arrows */
     .scroll-arrow-btn {
       background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-white);
-      width: 36px;
-      height: 36px;
+      border: 2px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -193,6 +194,9 @@
       transition: all 0.3s ease;
       opacity: 1;
       visibility: visible;
+      font-size: 1.25rem;
+      font-weight: 800;
+      box-shadow: 0 0 15px var(--accent-glow), inset 0 0 10px rgba(0, 243, 255, 0.2);
     }
 
     .scroll-arrow-btn.hidden {
@@ -205,7 +209,8 @@
       background: var(--accent-cyan);
       color: #000;
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px var(--accent-glow);
+      box-shadow: 0 0 25px var(--accent-cyan), 0 0 40px var(--accent-glow);
+      transform: scale(1.08);
     }
 
     .collage-grid {
@@ -252,12 +257,12 @@
     /* ========================================================
        EXPERIMENTS SECTION STYLING & SIZING CUSTOMIZATION
        ======================================================== */
-    .collage-grid .card.experiment-card {
-      width: calc(50% - 10px);
+    .horizontal-scroll-row .card.experiment-card {
+      min-width: calc(50% - 10px);
       flex: 0 0 calc(50% - 10px);
       cursor: default;
     }
-    .collage-grid .card.experiment-card:hover {
+    .horizontal-scroll-row .card.experiment-card:hover {
       transform: translateY(-4px);
     }
 
@@ -357,9 +362,9 @@
     }
 
     @media (max-width: 768px) {
-      .collage-grid .card.experiment-card {
-        width: 100%;
-        flex: 0 0 100%;
+      .horizontal-scroll-row .card.experiment-card {
+        min-width: 85%;
+        flex: 0 0 85%;
       }
     }
 
@@ -808,12 +813,37 @@
       }
     }
 
-    // Fullscreen toggle for experiment bottom-right button
+    // Fullscreen toggle for experiment bottom-right button (automatically unmutes audio upon fullscreen)
     function toggleExpFullscreen(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
 
       if (!document.fullscreenElement) {
+        // Automatically turn on audio when entering fullscreen
+        const playerId = containerId.replace('container-', '');
+        const player = videoPlayers[playerId];
+        const iframeEl = container.querySelector('.experiment-video-iframe');
+        const videoType = iframeEl ? iframeEl.dataset.videoType : 'youtube';
+        const muteBtn = container.querySelector('.exp-mute-btn');
+
+        if (player) {
+          try {
+            if (videoType === 'youtube' && typeof player.unMute === 'function') {
+              player.unMute();
+              player.setVolume(100);
+            } else if (videoType === 'vimeo' && typeof player.setMuted === 'function') {
+              player.setMuted(false);
+              player.setVolume(1);
+            }
+            if (muteBtn) {
+              muteBtn.textContent = '🔊';
+              muteBtn.title = 'Mute';
+            }
+          } catch (e) {
+            console.log('Fullscreen audio auto-enable error:', e);
+          }
+        }
+
         if (container.requestFullscreen) {
           container.requestFullscreen();
         } else if (container.webkitRequestFullscreen) {
@@ -1048,7 +1078,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'experiments', title: 'Experiments', type: 'collage' },
+        { key: 'experiments', title: 'Experiments', type: 'scroll-row' }, // Single row with arrows
         { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
         { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
@@ -1091,8 +1121,8 @@
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
             <div class="scroll-controls">
-              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', -300)">&#10094;</button>
-              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', 300)">&#10095;</button>
+              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRowByCard('${rowId}', -1)">&#10094;</button>
+              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRowByCard('${rowId}', 1)">&#10095;</button>
             </div>
           `;
         }
@@ -1319,11 +1349,19 @@
       container.appendChild(wrapper);
     }
 
-    function scrollRow(rowId, distance) {
+    // Precise 1-click scroll by exactly one card width + gap to reach the next video/card
+    function scrollRowByCard(rowId, direction) {
       const row = document.getElementById(rowId);
-      if (row) {
-        row.scrollBy({ left: distance, behavior: 'smooth' });
+      if (!row) return;
+      const card = row.querySelector('.card');
+      if (!card) {
+        row.scrollBy({ left: direction * 350, behavior: 'smooth' });
+        return;
       }
+      const cardWidth = card.offsetWidth;
+      const gap = 20; // Matches CSS gap
+      const scrollDistance = (cardWidth + gap) * direction;
+      row.scrollBy({ left: scrollDistance, behavior: 'smooth' });
     }
 
     function updateScrollArrows(rowId) {
