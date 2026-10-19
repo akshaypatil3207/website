@@ -251,12 +251,7 @@
 
     /* ========================================================
        EXPERIMENTS SECTION STYLING & SIZING CUSTOMIZATION
-       ========================================================
-       - CARD WIDTH: Set to calc(50% - 10px) so that EXACTLY TWO 
-         cards occupy the screen per row. (Change width here if needed).
-       - CARD HEIGHT: Adjust the height value of .experiment-media-container 
-         below to change the vertical size of the experiment video cards.
-    ======================================================== */
+       ======================================================== */
     .collage-grid .card.experiment-card {
       width: calc(50% - 10px);
       flex: 0 0 calc(50% - 10px);
@@ -282,6 +277,17 @@
       height: 100%;
       border: 0;
       pointer-events: none; /* Prevents interference with hover and custom buttons */
+    }
+
+    /* Forces all embedded video iframes (YouTube & Vimeo) to fill container and center perfectly */
+    .experiment-media-container iframe {
+      width: 100% !important;
+      height: 100% !important;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: 0;
+      pointer-events: none;
     }
 
     /* Top-Right Mute Button */
@@ -1042,7 +1048,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'experiments', title: 'Experiments', type: 'collage' }, // Using collage layout for 2-card per row grid
+        { key: 'experiments', title: 'Experiments', type: 'collage' },
         { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
         { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
@@ -1112,7 +1118,6 @@
             const card = document.createElement('div');
 
             if (isExperiment) {
-              // Direct Inline Video Player Card for Experiments (supports YouTube & Vimeo) with Hover Play, Mute, & Fullscreen
               card.className = `card experiment-card`;
               const playerId = 'exp-vid-' + Math.random().toString(36).substring(2, 9);
               const videoUrl = item.VideoURL;
