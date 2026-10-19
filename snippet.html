@@ -254,7 +254,7 @@
        ==========================================================================
        - TO CHANGE CARD WIDTH: Adjust the width percentage below. 
          Currently set to `calc(50% - 10px)` so EXACTLY TWO cards occupy the screen.
-       - TO CHANGE CARD HEIGHT: Adjust the `height` value in `.experiment-media-container`.
+       - TO CHANGE CARD HEIGHT: Adjust the `height` value in `.experiment-media-container` below.
        ========================================================================== */
     .collage-grid .card.experiment-card {
       width: calc(50% - 10px); /* Exactly 2 cards per row */
@@ -267,7 +267,7 @@
 
     .experiment-media-container {
       width: 100%;
-      height: 420px; /* <-- CHANGE THIS VALUE TO RESIZE THE EXPERIMENT CARD HEIGHT */
+      height: 450px; /* <-- CHANGE THIS HEIGHT VALUE TO RESIZE CARD HEIGHT YOURSELF */
       background: #000;
       position: relative;
       display: flex;
@@ -276,10 +276,13 @@
       overflow: hidden;
     }
 
+    /* pointer-events: none stops YouTube from ever detecting mouse hover, 
+       preventing channel name, title, share buttons, and logo from popping up */
     .experiment-yt-iframe {
       width: 100%;
       height: 100%;
       border: 0;
+      pointer-events: none; 
     }
 
     /* Top-Right Mute Button */
@@ -1063,12 +1066,6 @@
                      onmouseleave="pauseExpVideo('${playerId}')">
                   <div id="${playerId}" class="experiment-yt-iframe" data-video-url="${item.VideoURL}"></div>
                   
-                  <!-- Top Hover Overlap Block: Prevents YouTube channel name / title from showing on hover -->
-                  <div style="position: absolute; top: 0; left: 0; width: 100%; height: 75px; z-index: 5; pointer-events: auto; background: transparent;"></div>
-                  
-                  <!-- Bottom Hover Overlap Block: Prevents YouTube share button / logo from showing on hover -->
-                  <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; z-index: 5; pointer-events: auto; background: transparent;"></div>
-
                   <!-- Top Right Mute Button -->
                   <button class="exp-mute-btn" onclick="toggleExpMute('${playerId}', this)" title="Unmute">
                     🔇
