@@ -13,7 +13,7 @@
       --card-bg: #141322;
       --card-hover: #1f1d36;
       --accent-cyan: #00f3ff;
-      --accent-glow: rgba(0, 243, 255, 0.35);
+      --accent-glow: rgba(0, 243, 255, 0.45);
       --text-white: #ffffff;
       --text-muted: #a0a0c0;
       --border-color: #272545;
@@ -176,15 +176,16 @@
 
     .scroll-controls {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
+    /* Enhanced, larger, bolder, glowing scroll arrows */
     .scroll-arrow-btn {
       background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-white);
-      width: 36px;
-      height: 36px;
+      border: 2px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -193,6 +194,9 @@
       transition: all 0.3s ease;
       opacity: 1;
       visibility: visible;
+      font-size: 1.25rem;
+      font-weight: 800;
+      box-shadow: 0 0 15px var(--accent-glow), inset 0 0 10px rgba(0, 243, 255, 0.2);
     }
 
     .scroll-arrow-btn.hidden {
@@ -205,7 +209,8 @@
       background: var(--accent-cyan);
       color: #000;
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 10px var(--accent-glow);
+      box-shadow: 0 0 25px var(--accent-cyan), 0 0 40px var(--accent-glow);
+      transform: scale(1.08);
     }
 
     .collage-grid {
@@ -565,30 +570,6 @@
       background: #000;
     }
 
-    .modal-two-col-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
-    }
-
-    .modal-two-col-item {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      object-fit: cover;
-      max-height: 480px;
-      background: #000;
-    }
-
-    @media (max-width: 768px) {
-      .modal-two-col-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     .modal-text-view {
       width: 100%;
       max-width: 1100px;
@@ -808,12 +789,37 @@
       }
     }
 
-    // Fullscreen toggle for experiment bottom-right button
+    // Fullscreen toggle for experiment bottom-right button (automatically unmutes audio upon fullscreen)
     function toggleExpFullscreen(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
 
       if (!document.fullscreenElement) {
+        // Automatically turn on audio when entering fullscreen
+        const playerId = containerId.replace('container-', '');
+        const player = videoPlayers[playerId];
+        const iframeEl = container.querySelector('.experiment-video-iframe');
+        const videoType = iframeEl ? iframeEl.dataset.videoType : 'youtube';
+        const muteBtn = container.querySelector('.exp-mute-btn');
+
+        if (player) {
+          try {
+            if (videoType === 'youtube' && typeof player.unMute === 'function') {
+              player.unMute();
+              player.setVolume(100);
+            } else if (videoType === 'vimeo' && typeof player.setMuted === 'function') {
+              player.setMuted(false);
+              player.setVolume(1);
+            }
+            if (muteBtn) {
+              muteBtn.textContent = '🔊';
+              muteBtn.title = 'Mute';
+            }
+          } catch (e) {
+            console.log('Fullscreen audio auto-enable error:', e);
+          }
+        }
+
         if (container.requestFullscreen) {
           container.requestFullscreen();
         } else if (container.webkitRequestFullscreen) {
@@ -1048,7 +1054,7 @@
         { key: 'education', title: 'Education', type: 'scroll-row' },
         { key: 'trophies', title: 'Trophies', type: 'scroll-row' },
         { key: 'projects', title: 'Projects', type: 'collage' },
-        { key: 'experiments', title: 'Experiments', type: 'scroll-row' }, // Arranged in single row with right sliding arrows
+        { key: 'experiments', title: 'Experiments', type: 'scroll-row' }, // Single row with arrows
         { key: 'certificates', title: 'Certificates', type: 'scroll-row' },
         { key: 'extracurricular', title: 'Extracurricular', type: 'scroll-row' }
       ];
@@ -1091,8 +1097,8 @@
         if (sec.type === 'scroll-row') {
           headerRow.innerHTML += `
             <div class="scroll-controls">
-              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', -300)">&#10094;</button>
-              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRow('${rowId}', 300)">&#10095;</button>
+              <button id="${rowId}-left-btn" class="scroll-arrow-btn hidden" onclick="scrollRowByCard('${rowId}', -1)">&#10094;</button>
+              <button id="${rowId}-right-btn" class="scroll-arrow-btn hidden" onclick="scrollRowByCard('${rowId}', 1)">&#10095;</button>
             </div>
           `;
         }
@@ -1319,11 +1325,19 @@
       container.appendChild(wrapper);
     }
 
-    function scrollRow(rowId, distance) {
+    // Precise 1-click scroll by exactly one card width + gap to reach the next video/card
+    function scrollRowByCard(rowId, direction) {
       const row = document.getElementById(rowId);
-      if (row) {
-        row.scrollBy({ left: distance, behavior: 'smooth' });
+      if (!row) return;
+      const card = row.querySelector('.card');
+      if (!card) {
+        row.scrollBy({ left: direction * 350, behavior: 'smooth' });
+        return;
       }
+      const cardWidth = card.offsetWidth;
+      const gap = 20; // Matches CSS gap
+      const scrollDistance = (cardWidth + gap) * direction;
+      row.scrollBy({ left: scrollDistance, behavior: 'smooth' });
     }
 
     function updateScrollArrows(rowId) {
@@ -1355,53 +1369,42 @@
 
       const mediaURLs = getMediaURLs(item.VideoURL);
       const category = (item.Category || '').trim().toLowerCase();
-      const isTwoColumnGrid = category.includes('work ex') || category.includes('work experience') || category.includes('education');
+      const isProject = category.includes('project');
       
-      let mediaHTML = '';
+      let imageHTML = '';
+      let videoHTML = '';
 
       if (mediaURLs.length > 0) {
-        if (isTwoColumnGrid) {
-          mediaHTML = `<div class="modal-two-col-grid">`;
-          mediaURLs.forEach(url => {
-            const ytId = extractYouTubeID(url);
-            const vimeoId = extractVimeoID(url);
-            if (ytId) {
-              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else if (vimeoId) {
-              mediaHTML += `<div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else {
-              mediaHTML += `<img src="${url}" class="modal-two-col-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
-            }
-          });
-          mediaHTML += `</div>`;
-        } else {
-          mediaURLs.forEach(url => {
-            const ytId = extractYouTubeID(url);
-            const vimeoId = extractVimeoID(url);
-            if (ytId) {
-              const isShort = url.includes('/shorts/');
-              const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else if (vimeoId) {
-              const wrapStyle = 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-              mediaHTML += `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
-            } else {
-              mediaHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onerror="this.style.display='none'">`;
-            }
-          });
-        }
-      } else {
-        const ytId = extractYouTubeID(item.VideoURL);
-        const vimeoId = extractVimeoID(item.VideoURL);
+        mediaURLs.forEach(url => {
+          const ytId = extractYouTubeID(url);
+          const vimeoId = extractVimeoID(url);
+          if (ytId) {
+            const isShort = !isProject && url.includes('/shorts/');
+            const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;margin:0 auto;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+            videoHTML += `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+          } else if (vimeoId) {
+            const wrapStyle = 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+            videoHTML += `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+          } else {
+            imageHTML += `<img src="${url}" class="modal-media-item" loading="lazy" onclick="window.open('${url}', '_blank')" onerror="this.style.display='none'">`;
+          }
+        });
+      } else if (item.VideoURL && item.VideoURL.trim() !== '') {
+        const url = item.VideoURL.trim();
+        const ytId = extractYouTubeID(url);
+        const vimeoId = extractVimeoID(url);
         if (ytId) {
-          const isShort = item.VideoURL.includes('/shorts/');
-          const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+          const isShort = !isProject && url.includes('/shorts/');
+          const wrapStyle = isShort ? 'position:relative;width:100%;max-width:340px;aspect-ratio:9/16;margin:0 auto;' : 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
+          videoHTML = `<div style="${wrapStyle}"><iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&vq=hd1080" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
         } else if (vimeoId) {
           const wrapStyle = 'position:relative;width:100%;max-width:1100px;aspect-ratio:16/9;';
-          mediaHTML = `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allowfullscreen></iframe></div>`;
+          videoHTML = `<div style="${wrapStyle}"><iframe src="https://player.vimeo.com/video/${vimeoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:8px;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
         }
       }
+
+      // Stack images first, then videos below them
+      let mediaHTML = imageHTML + videoHTML;
 
       let textHTML = '';
       if (item.Notes && item.Notes.trim() !== '') {
