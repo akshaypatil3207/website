@@ -1392,11 +1392,6 @@
       const modalContent = document.getElementById('modal-content');
       const body = document.getElementById('modal-body');
 
-      // Reset scroll position of modal content and body back to top
-      if (modalContent) {
-        modalContent.scrollTop = 0;
-      }
-
       const mediaURLs = getMediaURLs(item.VideoURL);
       const category = (item.Category || '').trim().toLowerCase();
       const isTwoColumnGrid = category.includes('work ex') || category.includes('work experience') || category.includes('education');
@@ -1467,18 +1462,19 @@
         </div>
       `;
 
-      // Reset media container scroll position as well
-      const mediaContainer = body.querySelector('.modal-media-container');
-      if (mediaContainer) {
-        mediaContainer.scrollTop = 0;
-      }
-
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
+      // Force scroll to top cleanly after content is rendered and modal is active
+      requestAnimationFrame(() => {
+        if (modalContent) modalContent.scrollTop = 0;
+        const mediaContainer = body.querySelector('.modal-media-container');
+        if (mediaContainer) mediaContainer.scrollTop = 0;
+      });
+
       setTimeout(initAllVideoPlayers, 150);
     }
-
+    
     function closeModal(event) {
       if (!event || event.target.id === 'modal-overlay' || event.target.classList.contains('close-modal-btn')) {
         const modal = document.getElementById('modal-overlay');
