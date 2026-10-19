@@ -27,7 +27,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Custom Consistent Scrollbars */
+    /* Custom Consistent Scrollbars[cite: 1] */
     *::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -252,12 +252,12 @@
     /* ==========================================================================
        EXPERIMENTS SECTION: CARD WIDTH & HEIGHT CONFIGURATION
        ==========================================================================
-       - TO CHANGE CARD WIDTH: Adjust the width percentage below. 
-         Currently set to `calc(50% - 10px)` so EXACTLY TWO cards occupy the screen.
-       - TO CHANGE CARD HEIGHT: Adjust the `height` value in `.experiment-media-container` below.
+       - TO CHANGE CARD WIDTH: Adjust the width percentage below[cite: 1]. 
+         Currently set to `calc(50% - 10px)` so EXACTLY TWO cards occupy the screen[cite: 1].
+       - TO CHANGE CARD HEIGHT: Adjust the `height` value in `.experiment-media-container` below[cite: 1].
        ========================================================================== */
     .collage-grid .card.experiment-card {
-      width: calc(50% - 10px); /* Exactly 2 cards per row */
+      width: calc(50% - 10px); /* Exactly 2 cards per row[cite: 1] */
       flex: 0 0 calc(50% - 10px);
       cursor: default;
     }
@@ -267,7 +267,7 @@
 
     .experiment-media-container {
       width: 100%;
-      height: 450px; /* <-- CHANGE THIS HEIGHT VALUE TO RESIZE CARD HEIGHT YOURSELF */
+      height: 420px; /* <-- CHANGE THIS HEIGHT VALUE TO RESIZE CARD HEIGHT YOURSELF[cite: 1] */
       background: #000;
       position: relative;
       display: flex;
@@ -276,16 +276,41 @@
       overflow: hidden;
     }
 
-    /* pointer-events: none stops YouTube from ever detecting mouse hover, 
-       preventing channel name, title, share buttons, and logo from popping up */
     .experiment-yt-iframe {
       width: 100%;
       height: 100%;
       border: 0;
-      pointer-events: none; 
+      pointer-events: none;
     }
 
-    /* Top-Right Mute Button */
+    .exp-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .exp-play-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      color: var(--accent-cyan);
+      background: rgba(0, 0, 0, 0.6);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 4px;
+      border: 1px solid var(--border-color);
+      pointer-events: none;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* Top-Right Mute Button[cite: 1] */
     .exp-mute-btn {
       position: absolute;
       top: 15px;
@@ -312,7 +337,7 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Bottom-Right Fullscreen Button */
+    /* Bottom-Right Fullscreen Button[cite: 1] */
     .exp-fs-btn {
       position: absolute;
       bottom: 15px;
@@ -659,7 +684,7 @@
     let ytPlayers = {};
     const FALLBACK_SVG = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225"><rect width="400" height="225" fill="#141322"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#00f3ff" font-family="sans-serif" font-size="16">No Preview Available</text></svg>');
 
-    // Load YouTube IFrame API
+    // Load YouTube IFrame API[cite: 1]
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -670,69 +695,72 @@
     };
 
     function initAllYouTubePlayers() {
-      document.querySelectorAll('.experiment-yt-iframe').forEach((el) => {
-        const playerId = el.id;
-        if (!playerId || ytPlayers[playerId]) return;
-        
-        const videoUrl = el.dataset.videoUrl;
-        const ytId = extractYouTubeID(videoUrl);
-        if (!ytId) return;
+      // Handled dynamically via hover events for experiment cards[cite: 1]
+    }
 
-        try {
-          ytPlayers[playerId] = new YT.Player(playerId, {
-            videoId: ytId,
-            playerVars: {
-              'autoplay': 0,
-              'controls': 0,
-              'disablekb': 1,
-              'fs': 0,
-              'modestbranding': 1,
-              'playsinline': 1,
-              'rel': 0,
-              'iv_load_policy': 3,
-              'vq': 'hd1080'
-            },
-            events: {
-              'onReady': (event) => {
-                try {
-                  event.target.mute();
-                  event.target.setPlaybackQuality('hd1080');
-                } catch (e) {
-                  console.log('Player ready error:', e);
-                }
+    // Dynamic Hover Playback for Experiment Cards
+    function startExpHover(container) {
+      const videoUrl = container.dataset.videoUrl;
+      const playerId = container.dataset.playerId;
+      const ytId = extractYouTubeID(videoUrl);
+      if (!ytId) return;
+
+      container.innerHTML = `
+        <div id="${playerId}" class="experiment-yt-iframe" data-video-url="${videoUrl}"></div>
+        <button class="exp-mute-btn" onclick="event.stopPropagation(); toggleExpMute('${playerId}', this)" title="Unmute">🔇</button>
+        <button class="exp-fs-btn" onclick="event.stopPropagation(); toggleExpFullscreen('${container.id}')" title="Full Screen">⛶</button>
+      `;
+
+      try {
+        ytPlayers[playerId] = new YT.Player(playerId, {
+          videoId: ytId,
+          playerVars: {
+            'autoplay': 1,
+            'controls': 0,
+            'disablekb': 1,
+            'fs': 0,
+            'modestbranding': 1,
+            'playsinline': 1,
+            'rel': 0,
+            'iv_load_policy': 3,
+            'vq': 'hd1080'
+          },
+          events: {
+            'onReady': (event) => {
+              try {
+                event.target.mute();
+                event.target.setPlaybackQuality('hd1080');
+                event.target.playVideo();
+              } catch (e) {
+                console.log('Player ready error:', e);
               }
             }
-          });
-        } catch (err) {
-          console.log('YT init error:', err);
-        }
-      });
-    }
-
-    // Hover playback controls for experiments
-    function playExpVideo(playerId) {
-      const player = ytPlayers[playerId];
-      if (player && typeof player.playVideo === 'function') {
-        try {
-          player.playVideo();
-        } catch (e) {
-          console.log('Play error:', e);
-        }
+          }
+        });
+      } catch (err) {
+        console.log('YT init error:', err);
       }
     }
 
-    function pauseExpVideo(playerId) {
-      const player = ytPlayers[playerId];
-      if (player && typeof player.pauseVideo === 'function') {
+    function stopExpHover(container) {
+      const playerId = container.dataset.playerId;
+      const thumb = container.dataset.thumb;
+      const title = container.dataset.title;
+
+      if (ytPlayers[playerId]) {
         try {
-          player.pauseVideo();
-        } catch (e) {
-          console.log('Pause error:', e);
-        }
+          ytPlayers[playerId].destroy();
+        } catch(e) {}
+        delete ytPlayers[playerId];
       }
+
+      container.innerHTML = `
+        <img src="${thumb}" class="exp-thumb" alt="${title}">
+        <div class="exp-play-badge">▶</div>
+      `;
     }
 
-    // Mute / Unmute toggle for experiment top-right button
+    // Mute / Unmute toggle for experiment top-right button[cite: 1]
     function toggleExpMute(playerId, btnElement) {
       const player = ytPlayers[playerId];
       if (player && typeof player.isMuted === 'function') {
@@ -753,7 +781,7 @@
       }
     }
 
-    // Fullscreen toggle for experiment bottom-right button
+    // Fullscreen toggle for experiment bottom-right button[cite: 1]
     function toggleExpFullscreen(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -1059,22 +1087,18 @@
             if (isExperiment) {
               card.className = `card experiment-card`;
               const playerId = 'exp-yt-' + Math.random().toString(36).substring(2, 9);
+              const thumb = getThumbnail(item);
 
               card.innerHTML = `
                 <div class="experiment-media-container" id="container-${playerId}" 
-                     onmouseenter="playExpVideo('${playerId}')" 
-                     onmouseleave="pauseExpVideo('${playerId}')">
-                  <div id="${playerId}" class="experiment-yt-iframe" data-video-url="${item.VideoURL}"></div>
-                  
-                  <!-- Top Right Mute Button -->
-                  <button class="exp-mute-btn" onclick="toggleExpMute('${playerId}', this)" title="Unmute">
-                    🔇
-                  </button>
-                  
-                  <!-- Bottom Right Fullscreen Button -->
-                  <button class="exp-fs-btn" onclick="toggleExpFullscreen('container-${playerId}')" title="Full Screen">
-                    ⛶
-                  </button>
+                     data-video-url="${item.VideoURL}"
+                     data-player-id="${playerId}"
+                     data-title="${(item.Title || '').replace(/"/g, '&quot;')}"
+                     data-thumb="${thumb}"
+                     onmouseenter="startExpHover(this)" 
+                     onmouseleave="stopExpHover(this)">
+                  <img src="${thumb}" class="exp-thumb" alt="${item.Title}">
+                  <div class="exp-play-badge">▶</div>
                 </div>
                 <div class="card-info">
                   <span class="category-tag">${item.Category || sec.title}</span>
@@ -1117,8 +1141,6 @@
       if (renderedCount === 0) {
         container.innerHTML = `<div class="status-msg">No items found for category "${selectedCategory}".</div>`;
       }
-
-      setTimeout(initAllYouTubePlayers, 100);
     }
 
     /* --- MOMENTS VIEW --- */
@@ -1349,8 +1371,6 @@
 
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
-
-      setTimeout(initAllYouTubePlayers, 100);
     }
 
     function closeModal(event) {
